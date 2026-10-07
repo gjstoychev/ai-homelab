@@ -1,0 +1,6 @@
+*.tar.gz
+rootfs/
+.env
+*.vault
+secrets*
+.claude/settings.local.json
