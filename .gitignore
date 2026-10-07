@@ -4,3 +4,6 @@ rootfs/
 *.vault
 secrets*
 .claude/settings.local.json
+
+# Disposable lab working files (rootfs, downloads, scratch); must be recreatable from scripts
+work/
