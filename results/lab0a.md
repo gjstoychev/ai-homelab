@@ -1,5 +1,7 @@
 # Lab 0a — Container from Scratch
 
+Write-up: [A container in 81 lines of Bash](https://gshell.dev/blog/container-from-scratch/)
+
 Date: 2026-10-07 – 2026-10-11 · Z790, Ubuntu 24.04, kernel 7.0.0-34-generic (HWE). Guide: `docs/guides/lab0a.md`. Script: `scripts/minicontainer.sh`.
 
 ## Goal
