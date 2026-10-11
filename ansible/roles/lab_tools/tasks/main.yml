@@ -1,0 +1,18 @@
+---
+- name: Copy unshare to a dedicated binary for Lab 0a
+  ansible.builtin.copy:
+    src: /usr/bin/unshare
+    dest: /usr/local/bin/lab0a-unshare
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install AppArmor profile that allows user namespaces for the copy
+  ansible.builtin.copy:
+    src: lab0a-unshare
+    dest: /etc/apparmor.d/lab0a-unshare
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload lab0a-unshare AppArmor profile

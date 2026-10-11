@@ -1,0 +1,4 @@
+---
+- name: Reload lab0a-unshare AppArmor profile
+  ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/lab0a-unshare
+  changed_when: true

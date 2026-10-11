@@ -1,0 +1,6 @@
+---
+- name: Lab 0a tools
+  hosts: z790
+  become: true
+  roles:
+    - lab_tools

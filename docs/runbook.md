@@ -45,3 +45,77 @@ Which package owns a config file:
 ```bash
 dpkg -S <path>
 ```
+
+## Lab 0a: namespaces, cgroups, containers
+
+Which namespaces a process is in:
+
+```bash
+sudo lsns -p <pid> -o NS,TYPE,PID,COMMAND
+```
+
+Namespace identifier of the current process:
+
+```bash
+readlink /proc/self/ns/<type>
+```
+
+Run a command with its own PID namespace and /proc:
+
+```bash
+sudo unshare --pid --fork --mount-proc <cmd>
+```
+
+Which cgroup a process is in:
+
+```bash
+cat /proc/<pid>/cgroup
+```
+
+Effective systemd limits of a unit:
+
+```bash
+systemctl show <unit> -p ControlGroup,MemoryMax,TasksMax
+```
+
+Write to a cgroup file as root:
+
+```bash
+echo <value> | sudo tee /sys/fs/cgroup/<cg>/<file>
+```
+
+OOM and limit counters:
+
+```bash
+cat /sys/fs/cgroup/<cg>/memory.events /sys/fs/cgroup/<cg>/pids.events
+```
+
+Kernel OOM messages:
+
+```bash
+sudo dmesg | grep -i "memory cgroup"
+```
+
+Processes in a named network namespace:
+
+```bash
+sudo ip netns pids <name>
+```
+
+AppArmor denials:
+
+```bash
+sudo dmesg | grep -i apparmor
+```
+
+Mount propagation of a mount:
+
+```bash
+findmnt -o TARGET,PROPAGATION <path>
+```
+
+Shared libraries a binary needs:
+
+```bash
+ldd <binary>
+```
