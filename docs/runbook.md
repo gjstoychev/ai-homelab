@@ -119,3 +119,33 @@ Shared libraries a binary needs:
 ```bash
 ldd <binary>
 ```
+
+Versions of the Docker stack (engine, containerd, runc):
+
+```bash
+docker version --format '{{range .Server.Components}}{{.Name}} {{.Version}}{{"\n"}}{{end}}'
+```
+
+Namespaces Docker requests for a running container (its OCI spec):
+
+```bash
+ID=$(sudo docker inspect -f '{{.Id}}' <container>); sudo jq -c '[.linux.namespaces[].type]' "$(sudo find /run/containerd -name config.json -path "*$ID*")"
+```
+
+Time namespace offsets of a process:
+
+```bash
+sudo cat /proc/<pid>/timens_offsets
+```
+
+GPU kernel modules that use the dmem cgroup controller:
+
+```bash
+K=/lib/modules/$(uname -r); for m in $(find $K/kernel/drivers/gpu $K/updates -name '*.ko*'); do zstdcat "$m" 2>/dev/null | grep -aqE 'drmm_cgroup_register_region|dmem_cgroup' && echo "${m#$K/}"; done
+```
+
+Qualys aa-exec bypass check (should fail when the restriction is complete):
+
+```bash
+sysctl kernel.apparmor_restrict_unprivileged_unconfined; aa-exec -p trinity -- unshare --user --map-root-user id -u
+```

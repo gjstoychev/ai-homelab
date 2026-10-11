@@ -43,19 +43,31 @@ Success criteria:
 
 Namespaces from the host (`lsns`): `minicontainer.sh` creates new uts, pid, mnt, ipc, cgroup, net; user and time are shared with the host. Docker creates new mnt, uts, ipc, pid, cgroup, net and time; only user is shared.
 
+Follow-up checks (2026-10-11):
+
+| Check | Result |
+|---|---|
+| Docker stack | Engine 29.8.0 (build 88096ef), containerd v2.3.5, runc 1.5.1 (OCI spec 1.3.0); no `/etc/docker/daemon.json`, so default configuration |
+| Namespaces in the OCI spec Docker generates (`config.json` under `/run/containerd`) | mount, network, time, uts, pid, ipc, cgroup |
+| Docker container time namespace | `time:[4026533223]` vs host `time:[4026531834]`; `timens_offsets` monotonic 0 0, boottime 0 0 |
+| Qualys `aa-exec` bypass | `kernel.apparmor_restrict_unprivileged_unconfined = 0`; plain `unshare --user --map-root-user` is blocked, but `aa-exec -p trinity -- unshare --user --map-root-user` as an unprivileged user gives uid 0 and `CapEff 000001ffffffffff` in the user namespace |
+| Permissive AppArmor profiles with `userns` | `trinity`, `chrome`, `flatpak` are loaded (none of the three programs is installed); no `busybox` or `nautilus` profile; `aa-exec` and `busybox` are installed |
+| GPU kernel modules using `dmem` (71 modules for 7.0.0-34-generic) | `xe` and `amdgpu` call `drmm_cgroup_register_region` (built into the kernel); `ttm` charges (`dmem_cgroup_try_charge`/`uncharge`); none of the 5 NVIDIA 580.173.02 open modules reference `dmem` |
+
 ## What surprised me
 
-- The `dmem` cgroup controller (device memory) exists on this kernel, but `dmem.capacity` is empty: NVIDIA 580 open modules do not register with it, so VRAM cannot be limited through cgroups.
+- The `dmem` cgroup controller (device memory) exists on this kernel, but `dmem.capacity` is empty: NVIDIA 580 open modules do not register with it, so VRAM cannot be limited through cgroups. On this kernel only `xe` (Intel) and `amdgpu` (AMD) register VRAM regions (checked 2026-10-11).
 - `chroot` hides host mounts from `/proc/mounts` (26 → 1 in the same namespace) but does not detach them; only `pivot_root` + `umount -l` does (28 → 2).
 - An interactive `sudo unshare --pid` without `--fork` was dead before the prompt appeared: `.bashrc` forks at startup, that child became PID 1 and exited.
 - `unshare()` moves the caller into new uts/mnt/net/ipc/cgroup namespaces immediately, but the PID namespace applies only to children (visible in `lsns`: the `unshare` parent is in five namespaces, only the shell in the new PID namespace).
 - A non-interactive dash aborts on the first failed fork.
 - Initial namespaces have fixed inode numbers (4026531832–4026531839); new ones are dynamic and recycled after a namespace dies.
-- Docker also creates a time namespace.
+- Docker also creates a time namespace: it is in the OCI spec Docker 29.8.0 generates with its default configuration, with zero offsets, so it changes nothing visible.
 - systemd silently applies a `TasksMax` limit to every service.
 - On Ubuntu 24.04 an unprivileged user can create a user namespace, but AppArmor moves it into the `unprivileged_userns` profile and denies `CAP_SYS_ADMIN` inside.
 - Root in a user namespace has all capabilities (`CapEff 000001ffffffffff`) but still cannot write to `/etc`: access is checked against the UID outside.
 - The container is not in a user namespace: root inside is root on the host, same as default Docker.
+- The userns restriction can be bypassed on this host with one command: `kernel.apparmor_restrict_unprivileged_unconfined` is 0, so `aa-exec -p trinity` switches into a permissive profile whose program is not even installed (checked 2026-10-11).
 
 ## Mistakes and dead ends
 
@@ -71,8 +83,8 @@ Namespaces from the host (`lsns`): `minicontainer.sh` creates new uts, pid, mnt,
 ## Open questions
 
 - Where do the ~124 ms of start-up go (CPU time is ~14 ms)? Profile in Lab 11.
-- Is a new time namespace a default of this Docker/runc version?
-- Is `kernel.apparmor_restrict_unprivileged_unconfined` enabled on this host, and are the busybox/Nautilus profiles permissive? (Qualys 2025 bypasses.)
+- ~~Is a new time namespace a default of this Docker/runc version?~~ Resolved 2026-10-11: yes. Docker 29.8.0 requests it in the OCI spec with the default configuration; runc 1.5.1 creates what the spec lists. Offsets are zero.
+- ~~Is `kernel.apparmor_restrict_unprivileged_unconfined` enabled on this host, and are the busybox/Nautilus profiles permissive? (Qualys 2025 bypasses.)~~ Resolved 2026-10-11: it is 0 and the `aa-exec` bypass works (see Measurements); there are no busybox or Nautilus profiles. Mitigated the same day: `kernel.apparmor_restrict_unprivileged_unconfined = 1` in `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` (applied by hand); after that the `aa-exec` bypass fails with `write failed /proc/self/uid_map: Operation not permitted`, and `lab0a-unshare` still gets uid 0 and full capabilities.
 - `/usr/local/bin/lab0a-unshare` is a copy: it does not receive util-linux security updates. The Ansible role must refresh it after upgrades, or it must be removed when not needed.
 - ufw rules tied to Docker bridge names (`br-<id>`) break silently if a network is recreated; possible stale rules.
 - NAT from the lab namespace to the internet (deferred to Lab 0c).
@@ -83,3 +95,4 @@ Namespaces from the host (`lsns`): `minicontainer.sh` creates new uts, pid, mnt,
 - Lab 0f: bubblewrap faces the same AppArmor userns restriction; same per-binary approach.
 - Lab 11 (hardened variant A): add `/dev` (null, zero, random, urandom, tty), `/tmp`, read-only `/sys`, capability dropping, seccomp, a user namespace; avoid leaving the `unshare` parent inside the namespaces.
 - Lab 1: decide on security updates vs pinned kernel/driver.
+- Lab 1 (Ansible): move the hand-applied `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` into a role, then re-check that the `aa-exec` bypass fails and `lab0a-unshare` still works.

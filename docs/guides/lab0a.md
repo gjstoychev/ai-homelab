@@ -251,7 +251,7 @@ cat /sys/fs/cgroup/cgroup.subtree_control; cat /proc/$(pgrep -o ollama)/cgroup; 
 - **`cgroup.subtree_control`** lists controllers *enabled* for children (vs `cgroup.controllers`: *available*). Controllers are enabled top-down, level by level; a child only gets `memory.max` etc. if its parent enables `memory`.
 - **`/proc/<pid>/cgroup`** in v2 is one line, `0::/path`; the `0` and empty field are leftovers of v1's one-line-per-hierarchy format.
 - **Actual:** root `subtree_control` has all controllers; Ollama is in `0::/system.slice/ollama.service`; `memory.current` 578744320 (≈552 MiB with no model loaded, including page cache charged to the cgroup); `memory.max` `max`; `pids.current` 18 (`pids` counts tasks, i.e. threads too).
-- **`dmem.capacity` is empty:** the file exists but no regions are registered. With NVIDIA 580 open modules, VRAM cannot be limited through cgroups.
+- **`dmem.capacity` is empty:** the file exists but no regions are registered. With NVIDIA 580 open modules, VRAM cannot be limited through cgroups. Drivers opt in by calling `drmm_cgroup_register_region`; on this kernel only `xe` and `amdgpu` do (how to check: `docs/runbook.md`).
 
 ### Step 15 — The unit versus the cgroup files
 
@@ -482,7 +482,7 @@ sudo docker run -d --rm --name lab0a-cmp alpine:3.24 sleep 120 >/dev/null && P=$
 
 - **Same core model as `minicontainer.sh`:** six new namespaces, and the user namespace shared. Root in a default Docker container is root on the host (`userns-remap` exists but is off by default).
 - **Cleaner process model:** every namespace starts at the container's own process. runc creates the process directly in all new namespaces (`clone()` with all flags) and the parent stays entirely outside; our script leaves the `unshare` parent inside five of them.
-- **Wrong prediction: Docker also created a new `time` namespace.** A time namespace gives per-container offsets for `CLOCK_MONOTONIC` and `CLOCK_BOOTTIME` (used e.g. by checkpoint/restore); it does not change wall-clock time. Whether this is a default of this Docker/runc version is an open question (check `docker version`).
+- **Wrong prediction: Docker also created a new `time` namespace.** A time namespace gives per-container offsets for `CLOCK_MONOTONIC` and `CLOCK_BOOTTIME` (used e.g. by checkpoint/restore); it does not change wall-clock time. Checked afterwards (see `results/lab0a.md`): Docker 29.8.0 with its default configuration lists `time` in the OCI spec it hands to runc, with zero offsets.
 - **Inode numbers are recycled:** Docker's `mnt` 4026533011 is the number our `net` namespace had in step 29, and its `time` 4026533223 was our `ipc`. A namespace inode identifies a namespace only while it is alive.
 - **Tag vs digest:** `alpine:3.24` is a mutable tag (it moves with each 3.24.x); the digest is the immutable identity. Pinning by digest (`alpine:3.24@sha256:…`) is the image equivalent of the pinned download path in step 3.
 
