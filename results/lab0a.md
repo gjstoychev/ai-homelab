@@ -97,4 +97,4 @@ Follow-up checks (2026-10-11):
 - Lab 0f: bubblewrap faces the same AppArmor userns restriction; same per-binary approach.
 - Lab 11 (hardened variant A): add `/dev` (null, zero, random, urandom, tty), `/tmp`, read-only `/sys`, capability dropping, seccomp, a user namespace; avoid leaving the `unshare` parent inside the namespaces.
 - Lab 1: decide on security updates vs pinned kernel/driver.
-- Lab 1 (Ansible): move the hand-applied `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` into a role, then re-check that the `aa-exec` bypass fails and `lab0a-unshare` still works.
+- Lab 0g (Ansible): move the hand-applied `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` into a role, then re-check that the `aa-exec` bypass fails and `lab0a-unshare` still works.

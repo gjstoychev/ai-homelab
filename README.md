@@ -4,7 +4,7 @@ A two-node AI infrastructure home lab covering hardware, Linux fundamentals, inf
 
 Write-ups of these labs are published at https://gshell.dev.
 
-Lab results live in `results/`; reusable commands live in `docs/runbook.md`.
+Lab order, scope and status: `docs/roadmap.md`. Lab results live in `results/`; reusable commands live in `docs/runbook.md`.
 
 ## Nodes
 
