@@ -1,0 +1,4 @@
+---
+# Ubuntu's system Python; distro modules such as python3-apt are built only for it.
+# Without this, discovery picks the newest python3.X found on the host.
+ansible_python_interpreter: /usr/bin/python3
