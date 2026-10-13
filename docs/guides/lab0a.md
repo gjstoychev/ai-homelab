@@ -92,7 +92,7 @@ cd ~/ai-homelab/work/lab0a && curl -fsSLO https://dl-cdn.alpinelinux.org/alpine/
 mkdir rootfs && tar -xzf alpine-minirootfs-3.24.2-x86_64.tar.gz -C rootfs && ls rootfs && du -sh rootfs && ls -l rootfs/bin | head -5 && ls -A rootfs/dev rootfs/proc
 ```
 
-- **No `sudo`.** Files belong to `llama`, which the rootless step needs. As a normal user `tar` cannot create device nodes or change owners; there were no warnings, so the archive has none.
+- **No `sudo`.** Files belong to your own user, which the rootless step needs. As a normal user `tar` cannot create device nodes or change owners; there were no warnings, so the archive has none.
 - **`ls rootfs`** shows the familiar layout. This is the whole "operating system" of the container, without a kernel: the kernel is the host's 7.0, shared. That is the core difference between a container and a VM.
 - **`du -sh`**: 8.7 MB, versus hundreds of MB for an Ubuntu rootfs.
 - **`ls -l rootfs/bin`**: almost everything is a symlink to `/bin/busybox`. One binary acts as `sh`, `ls`, `ps`, `mount` depending on the name it was called by.
@@ -374,7 +374,7 @@ sudo ip netns del lab0a && ip -br link show veth-host 2>&1; ls -A /run/netns/
 unshare --user --map-root-user sh -c 'id; cat /proc/self/uid_map'; echo "exit: $?"; sudo dmesg | grep -i apparmor | tail -3
 ```
 
-- **The idea:** inside, the process is root (UID 0); outside, it is `llama` (UID 1000). Root inside only applies to the namespace's own resources. This is how rootless Podman works, and how everything done so far with `sudo` could be done without it.
+- **The idea:** inside, the process is root (UID 0); outside, it is your own user (UID 1000 here). Root inside only applies to the namespace's own resources. This is how rootless Podman works, and how everything done so far with `sudo` could be done without it.
 - **`--map-root-user`** writes the mapping "0 inside = 1000 outside" into `/proc/self/uid_map`.
 
 **Actual:** `unshare: write failed /proc/self/uid_map: Operation not permitted`, `exit: 1`. Kernel audit log:
@@ -416,7 +416,7 @@ lab0a-unshare --user --map-root-user sh -c 'id; echo "uid_map: $(cat /proc/self/
 
 - Root inside, with **all** capabilities including `CAP_SYS_ADMIN` (denied in step 24).
 - Host groups with no mapping inside appear as `65534(nogroup)`.
-- **`touch /etc` fails anyway:** `/etc` belongs to the real root, and the kernel checks access against the UID *outside* (1000). Root in a user namespace grants nothing `llama` did not already have on host resources.
+- **`touch /etc` fails anyway:** `/etc` belongs to the real root, and the kernel checks access against the UID *outside* (1000). Root in a user namespace grants nothing your own user did not already have on host resources.
 
 ## Step 27/32 — Assemble `scripts/minicontainer.sh`
 
