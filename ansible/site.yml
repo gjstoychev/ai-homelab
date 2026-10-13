@@ -1,0 +1,6 @@
+---
+- name: Common baseline
+  ansible.builtin.import_playbook: common.yml
+
+- name: Lab 0a tools
+  ansible.builtin.import_playbook: lab0a.yml

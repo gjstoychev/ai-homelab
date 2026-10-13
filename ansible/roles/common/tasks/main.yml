@@ -1,0 +1,21 @@
+---
+- name: Install sysctl drop-in that restricts unprivileged unconfined profiles
+  ansible.builtin.copy:
+    src: 60-apparmor-restrict-unconfined.conf
+    dest: /etc/sysctl.d/60-apparmor-restrict-unconfined.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Read the running value of kernel.apparmor_restrict_unprivileged_unconfined
+  ansible.builtin.command: sysctl -n kernel.apparmor_restrict_unprivileged_unconfined
+  register: common_restrict_unconfined
+  changed_when: false
+  check_mode: false
+
+- name: Apply the drop-in when the running value differs
+  ansible.builtin.command:
+    cmd: sysctl -p /etc/sysctl.d/60-apparmor-restrict-unconfined.conf
+    # With removes, check mode reports "would run" as changed instead of skipping.
+    removes: /etc/sysctl.d/60-apparmor-restrict-unconfined.conf
+  when: common_restrict_unconfined.stdout != "1"
