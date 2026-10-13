@@ -5,5 +5,8 @@ rootfs/
 secrets*
 .claude/settings.local.json
 
+# ansible-lint cache, created at the project root
+.ansible/
+
 # Disposable lab working files (rootfs, downloads, scratch); must be recreatable from scripts
 work/
