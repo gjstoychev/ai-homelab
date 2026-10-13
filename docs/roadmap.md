@@ -51,22 +51,23 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - **Deviations from the plan:** compared with Docker (already installed), not Podman; NAT to the internet deferred to Lab 0c; user namespace through a dedicated `lab0a-unshare` copy with its own AppArmor profile (not globally); `kernel.apparmor_restrict_unprivileged_unconfined = 1` enabled on the host (closes the Qualys `aa-exec` bypass).
 - **Key findings:** 124 ms vs 518 ms (Docker) start-up; the `dmem` controller is empty for NVIDIA 580, so VRAM cannot be limited through cgroups; Docker also creates a time namespace; root in the container (and in default Docker) is root on the host.
 
-### [ ] Lab 0g — Ansible fundamentals (next; before 0f)
+### [x] Lab 0g — Ansible fundamentals
 
+- **Status (2026-10-12 – 10-13):** all criteria met; control node = laptop over SSH, `ansible/site.yml` (roles `common` and `lab_tools`), ansible-lint clean at profile `production`. `results/lab0g.md`, `docs/guides/lab0g.md`, runbook.
 - **Why:** every later configuration change becomes an Ansible role, and Lab 0f's `claude_code` role needs a working Ansible that is understood, not copied. Ansible gets its own lab with a full tutorial instead of being a tail of Lab 0a.
 - **Bootstrap (cannot be a role):** pipx from apt + `ansible-core==2.21.5` from PyPI. Checked 2026-10-12: apt ships ansible-core 2.16.3 and ansible 9.2.0; the latest on PyPI is 2.21.5 and requires Python >= 3.12; the host has 3.12.3. Only `ansible-core`, not the `ansible` bundle: the roles use only `ansible.builtin`. The exact dependency versions (`pipx runpip ansible-core freeze`) go into results.
 - **Concepts (tutorial in the guide):** desired state vs scripts, idempotency, agentless execution (control node vs managed node, interpreter discovery), inventory, playbooks, roles and their directory layout, modules and FQCNs, handlers and `notify`, facts, check mode and `--diff` and their limits.
-- **Configuration:** how to reach z790 locally (`-c local`, `host_vars` with `ansible_connection: local`, or `ansible.cfg`), with the trade-offs; `ansible-config dump --only-changed`.
+- **Control node and connection:** the laptop (macOS) is the control node and reaches z790 over SSH; the inventory holds only host names, connection details live in the control node's `~/.ssh/config`. Ansible also stays on z790 for connection-free checks (syntax, inventory, config, lint). `ansible-config dump --only-changed`.
 - **First workload, `lab_tools` from Lab 0a:**
   - `--check --diff` shows the natural drift: the hand-written AppArmor profile differs from the repo in the indentation before `userns,`. The repo is the source of truth; Ansible enforces it.
   - A real run fixes the profile and reloads it; a second run gives `changed=0`.
   - Deliberate drift (the mode of `/usr/local/bin/lab0a-unshare`) is detected by `--check --diff` and corrected.
-- **Persistent sysctl:** `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` (applied by hand in Lab 0a) moves into a role, as a task in `lab_tools` or a separate role (decided in the lab), byte-for-byte equal to the file on the host, and applied immediately, not only written. Afterwards the `aa-exec` bypass fails and `lab0a-unshare` still works.
+- **Persistent sysctl:** `/etc/sysctl.d/60-apparmor-restrict-unconfined.conf` (applied by hand in Lab 0a) moves into a separate role, `common` (decided in the lab), byte-for-byte equal to the file on the host, and applied immediately, not only written. Afterwards the `aa-exec` bypass fails and `lab0a-unshare` still works.
 - Explicit `mode` on every file that runs or is read as root (git does not keep group-write).
-- **Decided in the lab:** `ansible-lint` here or in Lab 1; a `site.yml` convention now or in Lab 1. Molecule belongs to Lab 1.
-- **Criterion:** from the repo on z790, `--check --diff` shows the natural drift → a real run fixes it → a second run gives `changed=0`; deliberate drift is detected and corrected; the sysctl is in a role; the guide explains every concept used.
+- **Decided in the lab:** ansible-lint 26.9.0 now; `site.yml` as the entry point now (imports `common.yml` and `lab0a.yml`). Molecule belongs to Lab 1.
+- **Criterion:** from the laptop over SSH, `--check --diff` shows the natural drift → a real run fixes it → a second run gives `changed=0`; deliberate drift is detected and corrected; the sysctl is in a role; the guide explains every concept used.
 
-### [ ] Lab 0f — Claude Code on a Linux server (right after 0g)
+### [ ] Lab 0f — Claude Code on a Linux server (next)
 
 - The built-in sandbox: `bubblewrap` + `socat`, an AppArmor profile for `bwrap` only (Ubuntu 24.04 restricts unprivileged user namespaces). With `lsns` during a session, recognize the namespaces from Lab 0a.
 - Modes (auto-allow / regular), `strictAllowlist`, `allowUnsandboxedCommands: false`, `failIfUnavailable: true` (otherwise commands run unsandboxed when a dependency is missing).

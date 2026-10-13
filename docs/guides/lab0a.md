@@ -509,7 +509,7 @@ sudo -v && time (for i in 1 2 3 4 5; do sudo ./minicontainer.sh true; done) && t
 
 - `results/lab0a.md`: goal, what was done, measurements, surprises, mistakes and dead ends, open questions, follow-ups.
 - `docs/runbook.md`: section "Lab 0a: namespaces, cgroups, containers" with the commands worth keeping.
-- `ansible/roles/lab_tools` + `ansible/lab0a.yml`: the dedicated `lab0a-unshare` copy and its AppArmor profile as code. Not yet applied: Ansible is installed and the role applied in Lab 0g. The copy does not receive util-linux security updates, so the role must be re-run after upgrades, or removed when no longer needed.
+- `ansible/roles/lab_tools` + `ansible/lab0a.yml`: the dedicated `lab0a-unshare` copy and its AppArmor profile as code. Applied with Ansible in Lab 0g (`ansible/site.yml`). The copy does not receive util-linux security updates, so the role must be re-run after upgrades, or removed when no longer needed.
 - `scripts/minicontainer.sh`, `chmod 755` (not group-writable: it runs as root).
 - This guide as `docs/guides/lab0a.md`.
 

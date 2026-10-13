@@ -149,3 +149,67 @@ Qualys aa-exec bypass check (should fail when the restriction is complete):
 ```bash
 sysctl kernel.apparmor_restrict_unprivileged_unconfined; aa-exec -p trinity -- unshare --user --map-root-user id -u
 ```
+
+## Lab 0g: Ansible
+
+All Ansible commands run from `<repo>/ansible` (that is where `ansible.cfg` is read).
+
+Effective SSH settings for a host, without connecting:
+
+```bash
+ssh -G <host> | grep -E '^(hostname|user|port|identityfile|identitiesonly) '
+```
+
+Non-interactive SSH test, the way Ansible connects:
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=5 <host> 'hostname; python3 --version'
+```
+
+Settings that differ from the defaults, with their source:
+
+```bash
+ANSIBLE_PAGER=cat ansible-config dump --only-changed
+```
+
+Inventory as Ansible sees it; variables of one host:
+
+```bash
+ansible-inventory --graph; ansible-inventory --host <host>
+```
+
+Transport check (SSH, module copy, Python) and become check:
+
+```bash
+ansible <host> -m ansible.builtin.ping; ansible <host> -m ansible.builtin.command -a id --become
+```
+
+Dry run, then the real run, of everything for one host:
+
+```bash
+ansible-playbook site.yml --limit <host> --check --diff; ansible-playbook site.yml --limit <host> --diff
+```
+
+Exact package versions in the Ansible venv:
+
+```bash
+pipx runpip ansible-core freeze
+```
+
+Add a tool to the Ansible venv (uses the same ansible-core):
+
+```bash
+pipx inject ansible-core '<package>==<version>' --include-apps
+```
+
+Lint, showing what was checked:
+
+```bash
+ansible-lint -v
+```
+
+Running value of a sysctl (not the file):
+
+```bash
+sysctl <key>
+```

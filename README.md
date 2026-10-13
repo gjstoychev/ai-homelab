@@ -16,3 +16,4 @@ One RTX 5060 Ti will later move to `b760` to compare single-node multi-GPU (scal
 ## Labs
 
 - Lab 0a — Container from Scratch: `results/lab0a.md`. Write-up: [A container in 81 lines of Bash](https://gshell.dev/blog/container-from-scratch/)
+- Lab 0g — Ansible Fundamentals: `results/lab0g.md`.
