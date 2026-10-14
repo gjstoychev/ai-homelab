@@ -1,0 +1,48 @@
+{
+  "requiredMinimumVersion": "2.1.285",
+  "env": {
+    "DISABLE_UPDATES": "1"
+  },
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/**/.env)",
+      "Read(~/.claude/.credentials.json)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "autoAllowBashIfSandboxed": true,
+    "bwrapPath": "/usr/local/bin/claude-bwrap",
+    "network": {
+      "allowManagedDomainsOnly": true,
+      "strictAllowlist": true,
+      "allowedDomains": [
+        "pypi.org",
+        "registry.npmjs.org",
+        "downloads.claude.ai",
+        "api.github.com"
+      ]
+    },
+    "filesystem": {
+      "allowManagedReadPathsOnly": true,
+      "denyRead": [
+        "~/**/.env"
+      ]
+    },
+    "credentials": {
+      "files": [
+        { "path": "~/.ssh", "mode": "deny" },
+        { "path": "~/.aws", "mode": "deny" },
+        { "path": "~/.claude/.credentials.json", "mode": "deny" }
+      ],
+      "envVars": [
+        { "name": "CLAUDE_CODE_MESSAGING_TOKEN", "mode": "deny" }
+      ]
+    }
+  }
+}

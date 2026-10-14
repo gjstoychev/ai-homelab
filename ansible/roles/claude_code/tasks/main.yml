@@ -66,3 +66,20 @@
     group: root
     mode: "0644"
   notify: Reload claude-bwrap AppArmor profile
+
+- name: Create the managed settings directory
+  ansible.builtin.file:
+    path: /etc/claude-code
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# Must stay world-readable: Claude Code silently starts without a managed file it cannot read.
+- name: Install Claude Code managed settings
+  ansible.builtin.copy:
+    src: managed-settings.json
+    dest: /etc/claude-code/managed-settings.json
+    owner: root
+    group: root
+    mode: "0644"
