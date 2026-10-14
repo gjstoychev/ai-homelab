@@ -2,3 +2,7 @@
 - name: Refresh the apt cache
   ansible.builtin.apt:
     update_cache: true
+
+- name: Reload claude-bwrap AppArmor profile
+  ansible.builtin.command: apparmor_parser -r /etc/apparmor.d/claude-bwrap
+  changed_when: true

@@ -48,3 +48,21 @@
   ansible.builtin.apt:
     name: "claude-code={{ claude_code_version }}"
     state: present
+
+- name: Copy bwrap to a dedicated binary for Claude Code
+  ansible.builtin.copy:
+    src: /usr/bin/bwrap
+    dest: /usr/local/bin/claude-bwrap
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install AppArmor profile that allows user namespaces for the copy
+  ansible.builtin.copy:
+    src: claude-bwrap
+    dest: /etc/apparmor.d/claude-bwrap
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload claude-bwrap AppArmor profile
