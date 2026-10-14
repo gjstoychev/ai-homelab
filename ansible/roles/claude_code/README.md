@@ -9,12 +9,17 @@ Claude Code with its Bash sandbox on a Linux host. Lab 0f.
 - Installs `claude-code` at the exact version `claude_code_version` (`defaults/main.yml`) and pins it with `/etc/apt/preferences.d/claude-code` (`Pin-Priority: 1001`), so `apt upgrade` does not move it.
 - Copies `/usr/bin/bwrap` to `/usr/local/bin/claude-bwrap` and installs the AppArmor profile `/etc/apparmor.d/claude-bwrap`, which runs that copy unconfined with the `userns` permission; reloads it with `apparmor_parser -r` when it changes.
 - Installs `/etc/claude-code/managed-settings.json` (root:root `0644`): the sandbox policy that user and repository settings cannot loosen. See "Managed settings" below.
+- Installs `jq` (the user's status line script uses it).
 
 Package installations of Claude Code do not update themselves; the version changes only through this role.
 
 ## Why a bwrap copy
 
 Ubuntu 24.04 restricts unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns = 1`): without an exception, bwrap fails with `loopback: Failed RTM_NEWADDR: Operation not permitted`. A profile for `/usr/bin/bwrap` would lift the restriction for every program that runs the system bwrap. The copy keeps the exception to the one path that managed settings point Claude Code at (`sandbox.bwrapPath`, honoured only from managed settings, so a repository cannot redirect it). Same model as `lab0a-unshare` in `lab_tools`.
+
+Known gap: commands started by bwrap inherit the `claude-bwrap` profile, so a sandboxed command can create a nested user namespace and use full capabilities inside it (the kernel attack surface the userns restriction closes; the filesystem and network boundaries still hold). Ubuntu's stacked `bwrap-userns-restrict` model would close it, but breaks Claude Code's sandbox: its `apply-seccomp` helper needs `CAP_SYS_ADMIN` in a nested user namespace and runs from a file descriptor, so it cannot be given a path-based exception (Lab 0f, step 17).
+
+The role also reads the profiles loaded in the kernel (`/sys/kernel/security/apparmor/profiles`) and loads `claude-bwrap` when it is missing: a profile removed with `apparmor_parser -R` leaves the file unchanged, so a file-only check reports `ok` while every sandboxed command fails (`bwrap: loopback: Failed RTM_NEWADDR`). Claude Code's start-up check does not catch it either: it checks that the binary exists and is executable.
 
 Caveat: the copy does **not** receive bubblewrap security updates by itself. Run the role after every bubblewrap upgrade; the `copy` task compares checksums and refreshes the copy.
 
@@ -26,8 +31,12 @@ Caveat: the copy does **not** receive bubblewrap security updates by itself. Run
 |---|---|
 | `requiredMinimumVersion: "2.1.285"` | Claude Code refuses to start below it; from 2.1.285 a repository cannot loosen an admin-required sandbox |
 | `env.DISABLE_UPDATES: "1"` | Blocks `claude update` and `claude install` (after switching from the native installer, `claude doctor` advises `claude install`, which would bring the self-updating build back) |
+| `permissions.defaultMode: "default"` | Sessions start in manual mode (sandboxed commands still run without a prompt through `autoAllowBashIfSandboxed`); auto mode stays available with Shift+Tab. Without it a resumed session kept auto mode |
 | `permissions.disableBypassPermissionsMode: "disable"` | No `--dangerously-skip-permissions` |
-| `permissions.deny` `Read(...)` | Claude's file tools run outside the sandbox; these rules keep them away from the same secrets |
+| `permissions.deny` `Read(...)` | Claude's file tools run outside the sandbox; these rules keep them away from the same secrets. No globs over large trees (such as `/proc`): deny rules are merged into the sandbox and expanded at every command, and bwrap accepts at most 9000 arguments |
+| `permissions.deny` `Bash(sudo *)`, `Bash(git push *)` | Commands the user runs, not Claude. Text rules, so a script can still call the program; inside the sandbox `sudo` is powerless (`no_new_privs`) and there is no SSH key for a push |
+| `allowManagedHooksOnly: true` | Hooks run **outside** the sandbox with the user's full access. Only managed hooks may run, and there are none: a cloned repository cannot bring its own. It also restricts `statusLine` to managed settings |
+| `statusLine` | Points at the user's own script (`bash ~/.claude/statusline-command.sh`); the script is not part of this repository |
 | `sandbox.enabled`, `failIfUnavailable`, `allowUnsandboxedCommands: false` | Sandbox on; refuse to start without it; no unsandboxed retry. `false` in managed settings makes the sandbox admin-required: repository settings that would loosen it are ignored |
 | `sandbox.autoAllowBashIfSandboxed: true` | Sandboxed commands run without a prompt; the boundary is the sandbox |
 | `sandbox.bwrapPath` | The bwrap copy with the AppArmor exception (managed-only key) |

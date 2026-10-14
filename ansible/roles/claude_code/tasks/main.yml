@@ -1,9 +1,10 @@
 ---
-- name: Install the sandbox dependencies from Ubuntu
+- name: Install the sandbox dependencies and jq from Ubuntu
   ansible.builtin.apt:
     name:
       - bubblewrap
       - socat
+      - jq # used by the user's status line script
     state: present
 
 - name: Create the apt keyring directory
@@ -66,6 +67,21 @@
     group: root
     mode: "0644"
   notify: Reload claude-bwrap AppArmor profile
+
+# The file alone proves nothing: a profile removed from the kernel (apparmor_parser -R)
+# leaves the file unchanged, and every sandboxed command then fails.
+- name: Read the AppArmor profiles loaded in the kernel
+  ansible.builtin.command: cat /sys/kernel/security/apparmor/profiles
+  register: claude_code_loaded_profiles
+  changed_when: false
+  check_mode: false
+
+- name: Load the claude-bwrap profile when it is missing from the kernel
+  ansible.builtin.command:
+    cmd: apparmor_parser -r /etc/apparmor.d/claude-bwrap
+    # With removes, check mode reports "would run" as changed instead of skipping.
+    removes: /etc/apparmor.d/claude-bwrap
+  when: "'claude-bwrap' not in (claude_code_loaded_profiles.stdout_lines | map('regex_replace', ' \\(.*\\)$', '') | list)"
 
 - name: Create the managed settings directory
   ansible.builtin.file:
