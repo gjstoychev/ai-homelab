@@ -213,3 +213,81 @@ Running value of a sysctl (not the file):
 ```bash
 sysctl <key>
 ```
+
+## Lab 0f: Claude Code sandbox
+
+Versions offered by Claude Code's apt repository (stable channel), and release date of one version:
+
+```bash
+curl -fsS https://downloads.claude.ai/claude-code/apt/stable/dists/stable/main/binary-amd64/Packages | grep '^Version:'
+curl -fsS https://registry.npmjs.org/@anthropic-ai/claude-code | python3 -I -c 'import json,sys; t=json.load(sys.stdin)["time"]; print(t["<x.y.z>"])'
+```
+
+Fingerprint of a downloaded signing key, without touching your keyring:
+
+```bash
+d=$(mktemp -d); curl -fsSL https://downloads.claude.ai/keys/claude-code.asc -o "$d/k.asc"; gpg --homedir "$d" --show-keys --with-fingerprint "$d/k.asc"
+```
+
+Installed version and apt pin:
+
+```bash
+apt-cache policy claude-code | head -8
+```
+
+Installation and update diagnostics (no session started):
+
+```bash
+claude doctor
+```
+
+Is a command running inside the sandbox? (AppArmor label of the bwrap copy, proxy variables):
+
+```bash
+cat /proc/self/attr/current; echo; env | grep -iE '^(https?|all)_proxy=' || echo "(no proxy vars)"
+```
+
+Privileges of a process (capabilities, no_new_privs, seccomp):
+
+```bash
+grep -E '^(NoNewPrivs|Seccomp|CapEff|CapBnd)' /proc/self/status
+```
+
+Does bwrap work under the userns restriction? (copy vs system binary):
+
+```bash
+claude-bwrap --ro-bind / / --proc /proc --dev /dev --unshare-all --die-with-parent id; bwrap --ro-bind / / --unshare-all --die-with-parent id
+```
+
+Parse an AppArmor profile without loading it (no root):
+
+```bash
+apparmor_parser -Q -K -I /etc/apparmor.d <file>
+```
+
+Ansible inside Claude Code's sandbox (home is read-only):
+
+```bash
+export ANSIBLE_LOCAL_TEMP="$TMPDIR/ansible-tmp"
+```
+
+
+
+From another terminal: process tree, namespaces and bwrap arguments of a running sandboxed command (proxy URLs filtered out, they carry a password):
+
+```bash
+p=$(pgrep -n -f '<marker>'); ps -o pid,ppid,comm,args --forest -s $(ps -o sid= -p $p) | cut -c1-150; lsns -p $p
+tr '\0' '\n' < /proc/$(pgrep -n -x claude-bwrap)/cmdline | grep -E '^--' | sort | uniq -c | sort -rn
+```
+
+AppArmor profiles loaded in the kernel (root):
+
+```bash
+sudo grep claude-bwrap /sys/kernel/security/apparmor/profiles
+```
+
+Headless check that the sandbox works (refuses to start without it):
+
+```bash
+claude -p 'Run: echo sandbox-ok'; echo "exit=$?"
+```

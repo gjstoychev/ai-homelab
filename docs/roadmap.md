@@ -1,6 +1,6 @@
 # Lab Roadmap
 
-Version 1.4 · 2026-10-12. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
+Version 1.5 · 2026-10-14. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
 
 Progress: mark `[x]` in a lab's heading when it is complete.
 
@@ -67,8 +67,12 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - **Decided in the lab:** ansible-lint 26.9.0 now; `site.yml` as the entry point now (imports `common.yml` and `lab0a.yml`). Molecule belongs to Lab 1.
 - **Criterion:** from the laptop over SSH, `--check --diff` shows the natural drift → a real run fixes it → a second run gives `changed=0`; deliberate drift is detected and corrected; the sysctl is in a role; the guide explains every concept used.
 
-### [ ] Lab 0f — Claude Code on a Linux server (next)
+### [x] Lab 0f — Claude Code on a Linux server
 
+- **Status (2026-10-14):** all criteria met. Role `claude_code` in `site.yml`: Claude Code 2.1.287 from Anthropic's apt repository (pinned), bubblewrap + socat, a bwrap copy with its own AppArmor profile (loaded state checked), managed settings (sandbox enforced and fail-closed, admin-required, manual mode, secrets denied to commands and file tools, four allowed domains), `allowManagedHooksOnly` with no managed hooks. `results/lab0f.md`, `docs/guides/lab0f.md`, runbook, `CLAUDE.md`.
+- **Deviations from the plan:** Claude Code itself moved from the self-updating native installer to the apt package (pinned in the role); a permission allowlist step was added; no custom PreToolUse hook (declarative deny rules and `allowManagedHooksOnly` instead; transcripts serve as the audit trail); the probe matrix also covers GPU, Ollama, SSH and the repository's own settings.
+- **Key findings:** commands inside bwrap inherit its AppArmor exception and can create a nested user namespace with full capabilities; Ubuntu's stacked `bwrap-userns-restrict` fix breaks Claude Code's sandbox (its `apply-seccomp` helper needs `CAP_SYS_ADMIN` in a nested namespace; anthropics/sandbox-runtime#428, claude-code#87680) → Lab 11. `failIfUnavailable` checks the bwrap binary, not a working sandbox. Hooks and file tools run outside the sandbox. The sandbox shares ipc/uts/cgroup with the host.
+- **Decided in the lab:** no Ollama (until the Lab 8 gateway), no SSH/Ansible runs, no GPU from the sandbox (metrics via Prometheus in Lab 2); the SSH keys on the node are per-repository deploy keys.
 - The built-in sandbox: `bubblewrap` + `socat`, an AppArmor profile for `bwrap` only (Ubuntu 24.04 restricts unprivileged user namespaces). With `lsns` during a session, recognize the namespaces from Lab 0a.
 - Modes (auto-allow / regular), `strictAllowlist`, `allowUnsandboxedCommands: false`, `failIfUnavailable: true` (otherwise commands run unsandboxed when a dependency is missing).
 - `sandbox.credentials` deny for `~/.ssh`, `.env` and tokens: by default the sandbox can read almost the whole machine.
@@ -82,7 +86,7 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - Check the SSH key in `~/.ssh`: a deploy key for ai-homelab only, or a personal key for the whole GitHub account. The setting for the Co-Authored-By line in commits.
 - Check that `bwrap` works with `apparmor_restrict_unprivileged_unconfined = 1` enabled.
 
-### [ ] Lab 0b — systemd as a platform
+### [ ] Lab 0b — systemd as a platform (next)
 
 - Ollama and Ghostwheel as systemd services: `MemoryMax`, `CPUQuota`, `Restart=on-failure`, `ProtectSystem=strict`, `PrivateTmp`, `NoNewPrivileges`.
 - `systemd-analyze security <unit>`: raise the score.
