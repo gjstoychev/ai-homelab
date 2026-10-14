@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//etc/**)",
+      "Read(//usr/share/**)",
+      "Read(//sys/**)"
+    ]
+  },
+  "env": {
+    "ANSIBLE_LOCAL_TEMP": "/tmp/claude-1000/ansible-tmp"
+  }
+}
