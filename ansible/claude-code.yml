@@ -1,0 +1,6 @@
+---
+- name: Claude Code
+  hosts: z790
+  become: true
+  roles:
+    - claude_code

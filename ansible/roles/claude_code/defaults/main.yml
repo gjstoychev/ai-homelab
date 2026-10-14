@@ -1,0 +1,4 @@
+---
+# Exact Debian version of the claude-code package (Anthropic's apt repository, stable channel).
+# Upgrade procedure: roles/claude_code/README.md.
+claude_code_version: "2.1.287-1"

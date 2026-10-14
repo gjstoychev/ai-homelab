@@ -4,3 +4,6 @@
 
 - name: Lab 0a tools
   ansible.builtin.import_playbook: lab0a.yml
+
+- name: Claude Code
+  ansible.builtin.import_playbook: claude-code.yml

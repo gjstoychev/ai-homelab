@@ -1,0 +1,50 @@
+---
+- name: Install the sandbox dependencies from Ubuntu
+  ansible.builtin.apt:
+    name:
+      - bubblewrap
+      - socat
+    state: present
+
+- name: Create the apt keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the Claude Code repository signing key
+  ansible.builtin.copy:
+    src: claude-code.asc
+    dest: /etc/apt/keyrings/claude-code.asc
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Refresh the apt cache
+
+- name: Add the Claude Code apt repository (stable channel)
+  ansible.builtin.copy:
+    src: claude-code.sources
+    dest: /etc/apt/sources.list.d/claude-code.sources
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Refresh the apt cache
+
+- name: Pin claude-code to the chosen version
+  ansible.builtin.template:
+    src: claude-code.pref.j2
+    dest: /etc/apt/preferences.d/claude-code
+    owner: root
+    group: root
+    mode: "0644"
+
+# The package must be visible before the install task, not at the end of the play.
+- name: Refresh the apt cache now if the repository changed
+  ansible.builtin.meta: flush_handlers
+
+- name: Install Claude Code
+  ansible.builtin.apt:
+    name: "claude-code={{ claude_code_version }}"
+    state: present
