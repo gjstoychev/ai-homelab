@@ -545,3 +545,184 @@ NAME           ID              SIZE      PROCESSOR    CONTEXT    UNTIL
 llama3.1:8b    46e0c10c039e    9.2 GB    100% GPU     32768      59 seconds from now
 (no errors)
 ```
+
+## Step 11/18 — GPU access under device restrictions
+
+**Why:** device access is where hardening can break Ollama silently: without its devices it does not fail, it starts after the 60-second GPU wait and runs on the CPU.
+
+**Documentation** (systemd 255):
+
+- `PrivateDevices=yes` (`man systemd.exec`): a new `/dev` with only pseudo devices (`null`, `zero`, `random`, TTYs), no physical devices; it also sets `DevicePolicy=closed`, removes `CAP_SYS_RAWIO` and `CAP_MKNOD` and blocks the `@raw-io` system calls. `/dev/nvidia*` would disappear for Ollama.
+- `DevicePolicy=` (`man systemd.resource-control`): `strict` allows only what `DeviceAllow=` lists, `closed` also the standard pseudo devices, `auto` (default) everything when no `DeviceAllow=` is set. It applies to the whole control group and **cannot be bypassed with the `+` prefix**: it covers the GPU wait in `ExecStartPre=+` too.
+- `DeviceAllow=`: a device path, or a device group from `/proc/devices` as `char-<name>` (all current and future devices of that group), with `r`, `w`, `m`. Enforced with eBPF. A group that does not exist when the unit starts is silently dropped; the page suggests `Wants=`/`After=modprobe@<module>.service`.
+
+**What the host has and what Ollama opens** (node; the last command needs root: the runner runs as `ollama`). With `llama3.1:8b` loaded:
+
+```bash
+ls -l /dev/nvidia* /dev/dri/ /dev/nvidia-caps/
+grep -iE 'nvidia|drm' /proc/devices
+cg=/sys/fs/cgroup/system.slice/ollama.service
+sudo sh -c "for p in \$(cat $cg/cgroup.procs); do
+  echo \"== \$p \$(cat /proc/\$p/comm)\"
+  ls -l /proc/\$p/fd | grep -o '/dev/.*' | sort | uniq -c; done"
+```
+
+**Result:** the host has `/dev/nvidia0`, `nvidia1`, `nvidiactl`, `nvidia-modeset` (group `nvidia`, major 195), `nvidia-uvm`, `nvidia-uvm-tools` (group `nvidia-uvm`, 510), `nvidia-caps/nvidia-cap1`, `cap2` (235) and `/dev/dri/card0`, `card1`, `renderD128`, `renderD129` (`drm`, 226; groups `video` and `render`, of which `ollama` is a member). Open file descriptors:
+
+```
+== … ollama
+      1 /dev/null
+== … llama-server
+      1 /dev/null
+     18 /dev/nvidia0
+      1 /dev/nvidiactl
+      2 /dev/nvidia-uvm
+```
+
+The model fits on GPU0, so only `nvidia0` is open; a model spread over both cards opens `nvidia1` too, and so does device discovery at start. Nothing under `/dev/dri`, no `nvidia-caps`, no `nvidia-modeset`.
+
+**When `nvidia_uvm` is loaded** (node, read-only):
+
+```bash
+grep -E '^nvidia' /proc/modules | cut -d' ' -f1
+cat /usr/lib/udev/rules.d/71-nvidia.rules
+```
+
+udev loads `nvidia-modeset`, `nvidia-drm` and `nvidia-uvm` when the `nvidia` driver binds at boot, and creates the device nodes. `nvidia-modprobe` (setuid, which `NoNewPrivileges=` would block) is not installed. `DeviceAllow=` groups are resolved when the unit starts, **before** `ExecStartPre=`, so the GPU wait does not help; `modprobe@nvidia_uvm.service` (`modprobe -abq nvidia_uvm`, which also loads `nvidia`) does.
+
+**Decision:**
+
+| Option | Directives | For | Against |
+|---|---|---|---|
+| **A (chosen):** device groups | `DevicePolicy=closed`, `DeviceAllow=char-nvidia rw`, `DeviceAllow=char-nvidia-uvm rw`, `Wants=`/`After=modprobe@nvidia_uvm.service` | Independent of the number of cards (one card is planned to move to another node); covers future devices of the driver | Group `nvidia` (major 195) also includes `nvidia-modeset`, which Ollama does not use |
+| B: exact paths | `/dev/nvidia0`, `/dev/nvidia1`, `/dev/nvidiactl`, `/dev/nvidia-uvm` | Exactly what was seen open | Breaks when the number of cards changes |
+| C: `PrivateDevices=yes` + `BindPaths=` of `/dev/nvidia*` | Passes the `PrivateDevices=` check of the score | The private `/dev` is `noexec` and CUDA maps these devices; complex and fragile |
+
+**Added to `roles/ollama/files/hardening.conf`:**
+
+```ini
+[Unit]
+Wants=modprobe@nvidia_uvm.service
+After=modprobe@nvidia_uvm.service
+
+[Service]
+DevicePolicy=closed
+DeviceAllow=char-nvidia rw
+DeviceAllow=char-nvidia-uvm rw
+```
+
+**Command** (control node): `--check --diff`, then the real run. **Result:** `hardening.conf` `changed`, recap `ok=23 changed=2 skipped=2 failed=0`.
+
+**Verify immediately** (node, no root): Ollama must find both cards through CUDA, and within seconds of the start (a 60-second gap means the GPU wait failed).
+
+```bash
+systemctl show ollama -p ActiveState,ExecMainStartTimestamp
+systemctl show ollama -p DevicePolicy,DeviceAllow
+journalctl -u ollama -n 40 --no-pager | grep 'inference compute'
+```
+
+**Result:** active since 12:17:12, `DevicePolicy=closed`, both `DeviceAllow=` entries; `inference compute` for `CUDA0` and `CUDA1` at 12:17:15.
+
+**Test with a model on both cards** (node, no root):
+
+```bash
+ollama run qwen3.8:27b 'Say OK.' --keepalive 2m
+ollama ps
+nvidia-smi --query-gpu=index,memory.used --format=csv
+journalctl -u ollama --since '-3min' --no-pager \
+  | grep -iE 'permission denied|not permitted|error' || echo "(no errors)"
+```
+
+**Result:** `OK.`; `qwen3.8:27b  19 GB  100% GPU  32768`; 10554 / 11016 MiB; `(no errors)`.
+
+**Negative test:** "it works" could also mean "nothing is restricted". The same rules in a transient service as user `ollama`, then without them as a control (node, root; both services disappear when they end). `ollama` is in the `render` group and `nvidia-cap2` is world-readable, so file permissions allow both; only the device rules can refuse them. Each attempt runs in a subshell: a failed redirection on the special built-in `:` would end a non-interactive `sh`.
+
+```bash
+t='for d in /dev/nvidiactl /dev/nvidia-uvm /dev/dri/renderD128 /dev/nvidia-caps/nvidia-cap2; do ( : < $d ) && echo "$d: opened"; done'
+sudo systemd-run --wait --pipe --quiet --expand-environment=no \
+  -p User=ollama -p DevicePolicy=closed \
+  -p DeviceAllow='char-nvidia rw' -p DeviceAllow='char-nvidia-uvm rw' \
+  sh -c "$t"
+sudo systemd-run --wait --pipe --quiet --expand-environment=no \
+  -p User=ollama sh -c "$t"
+```
+
+**Result:**
+
+```
+/dev/nvidiactl: opened
+/dev/nvidia-uvm: opened
+/usr/bin/sh: 1: cannot open /dev/dri/renderD128: Operation not permitted
+/usr/bin/sh: 1: cannot open /dev/nvidia-caps/nvidia-cap2: Operation not permitted
+```
+
+and without the rules all four `opened`.
+
+**Score** (node, no root):
+
+```bash
+systemd-analyze security ollama.service --no-pager \
+  | grep -E 'PrivateDevices=|DeviceAllow=|Overall'
+```
+
+```
+✗ PrivateDevices=   Service potentially has access to hardware devices                                     0.2
+✗ DeviceAllow=      Service has a device ACL with some special devices: char-nvidia-uvm:rw char-nvidia:rw  0.1
+→ Overall exposure level for ollama.service: 8.2 EXPOSED 🙁
+```
+
+A device list with real hardware in it earns half of the check (0.1 of 0.2); `PrivateDevices=` stays failed on purpose. 8.3 → 8.2.
+
+## Step 12/18 — Resource limits: memory, CPU, tasks
+
+**Why:** the memory limit was decided from measurements in step 7; CPU and task limits need the same: what does Ollama use at its worst?
+
+**Documentation** (`man systemd.resource-control`, systemd 255): `CPUQuota=` is a percentage of **one** CPU (`cpu.max`); values above 100% allow more than one CPU. `TasksMax=` caps processes and threads in the unit (`pids.max`); the default comes from `DefaultTasksMax=` (here 70833, Lab 0a).
+
+**Measure the worst case for CPU and tasks** (node, no root): a model entirely on the CPU. Ollama's API takes `num_gpu` (layers on the GPU) as a request option (`docs/api.md`); `0` keeps everything on the CPU. CPU time comes from the cgroup's `cpu.stat`, the task peak from `pids.peak`.
+
+```bash
+cg=/sys/fs/cgroup/system.slice/ollama.service
+o='"options":{"num_gpu":0}'
+curl -s localhost:11434/api/generate \
+  -d "{\"model\":\"llama3.1:8b\",\"keep_alive\":\"5m\",$o}" >/dev/null
+ollama ps
+u0=$(awk '/usage_usec/{print $2}' $cg/cpu.stat); t0=$(date +%s%N)
+curl -s localhost:11434/api/generate \
+  -d "{\"model\":\"llama3.1:8b\",\"prompt\":\"Write 150 words about systemd.\",\"stream\":false,\"options\":{\"num_gpu\":0,\"num_predict\":150}}" \
+  | python3 -c 'import json,sys; d=json.load(sys.stdin); print("tokens", d["eval_count"], "tok/s", round(d["eval_count"]/d["eval_duration"]*1e9,1))'
+u1=$(awk '/usage_usec/{print $2}' $cg/cpu.stat); t1=$(date +%s%N)
+echo "cpu% = $(( (u1-u0)*1000*100 / (t1-t0) ))"
+echo "pids.current=$(cat $cg/pids.current) pids.peak=$(cat $cg/pids.peak)"
+journalctl -u ollama -n 400 --no-pager | grep -oE 'n_threads[ =]+[0-9]+' | sort | uniq -c
+```
+
+**Result (2026-10-15):**
+
+```
+NAME           ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+llama3.1:8b    46e0c10c039e    9.5 GB    100% CPU     32768      4 minutes from now
+tokens 150 tok/s 13.6
+cpu% = 789
+pids.current=58 pids.peak=76
+      3 n_threads = 8
+```
+
+One runner on the CPU uses 8 threads (llama.cpp's `n_threads = 8`, about 790% of one CPU out of 28) and generates 13.6 tokens/s. The service has 21 tasks idle and peaks at 76 with one runner.
+
+**Decisions:**
+
+| Setting | Options | Chosen | Why |
+|---|---|---|---|
+| `CPUQuota=` | none; `1600%`; `800%`; `CPUWeight=` (priority only) | `1600%` | Two runners on the CPU run unthrottled; at least 12 CPUs always stay for the host. `800%` would throttle every burst above one runner; `CPUWeight=` sets no ceiling |
+| `TasksMax=` | 70833 (default); `512`; `128` | `512` | About nine runners at once; `128` would leave room for about two, and a third model could fail to start with an unclear error |
+| Memory | step 7 | `MemoryHigh=16G`, `MemoryMax=32G` | |
+
+**Added to `roles/ollama/files/hardening.conf`:**
+
+```ini
+MemoryHigh=16G
+MemoryMax=32G
+CPUQuota=1600%
+TasksMax=512
+```

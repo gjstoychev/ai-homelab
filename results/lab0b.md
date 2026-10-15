@@ -21,6 +21,8 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 8. Design: Ollama keeps its installer-written unit (rewritten on every upgrade) and gets drop-ins from a role `ollama`; the demo service's secret is an `EnvironmentFile` (root, `0600`) created by hand; the demo lives in its own role `lab0b_demo` (step 8).
 9. Role `ollama` (drop-ins `override.conf` and `hardening.conf`): `Restart=on-failure`, `OOMPolicy=continue`, start limit 5 in 5 minutes (the default 5 in 10 s never triggers with `RestartSec=3`), `NoNewPrivileges`, `PrivateTmp`; lint clean (20 of 34 files), check and real run `ok=23 changed=2 skipped=2`; running state verified with `systemctl show`; score 9.2 → 8.7 (step 9).
 10. `ProtectSystem=strict` with `ReadWritePaths=` for `~/.ollama` and `~/.nv` (Ollama's home is `/usr/share/ollama`, under `/usr`), `ProtectHome=yes`; copy/delete of a model and a generation on the GPU work, no write errors; score 8.7 → 8.3 (step 10).
+11. Devices: `DevicePolicy=closed` with `DeviceAllow=char-nvidia rw` and `char-nvidia-uvm rw` (Ollama opens only `nvidiactl`, `nvidia<N>`, `nvidia-uvm`), `modprobe@nvidia_uvm` before Ollama; both cards found through CUDA within 3 s of the start, a two-card model 100% on the GPU; negative test: `/dev/dri/renderD128` and `nvidia-cap2` refused with the rules, opened without; score 8.3 → 8.2 (step 11).
+12. Worst case for CPU and tasks: `llama3.1:8b` entirely on the CPU (`num_gpu: 0`) uses 8 threads (≈ 790%), 13.6 tokens/s, task peak 76 (21 idle). Decision: `MemoryHigh=16G`, `MemoryMax=32G`, `CPUQuota=1600%`, `TasksMax=512` (step 12).
 
 ## Measurements
 
@@ -34,7 +36,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
-| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`) |
+| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
 
@@ -69,6 +71,7 @@ Ollama's cgroup with a model loaded (2026-10-15, default context 32768):
 
 - systemd's default `OOMPolicy=stop`: one process killed by the OOM killer stops the whole unit, not just that process.
 - systemd's default start limit (5 starts in 10 s) never triggers for a service with `RestartSec=3`: a permanently broken service restarts forever.
+- `DevicePolicy=`/`DeviceAllow=` apply to the whole cgroup: the `+` prefix of `ExecStartPre=` does not bypass them, and a `DeviceAllow=` group missing at start is silently dropped.
 - Unloading a model frees VRAM, not the page cache of its file: Ollama's `memory.current` grows with every model read and is mostly cache, not need.
 - Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
 - Ollama's default context depends on total VRAM (below 24 GiB 4k, 24–48 GiB 32k): one card gives 4096 tokens, two give 32768.
