@@ -869,3 +869,95 @@ Result: `OK.`; `qwen3.8:27b  19 GB  100% GPU  32768`; 10554 / 11016 MiB; `Red`; 
 **4. Speed.** The CPU measurement from step 12 (`llama3.1:8b` with `num_gpu: 0`, 150 tokens): `tok/s 13.4`, `cpu% = 784`, `nr_throttled 0`. Before this step: 13.2 tokens/s with the quota, 13.6 without.
 
 **5. Boot.** A reboot tests the order `modprobe@nvidia_uvm` → device rules → GPU wait → discovery; it runs once at the end of the lab (step 19), after all changes.
+
+## Step 15/20 — The risky directives, one at a time
+
+**Why:** five directives can break a GPU service in ways that are not obvious (a process killed by a system call filter, CUDA without its devices or its executable memory, Ollama without system information). Each is tried on its own before it goes into the role.
+
+**Method:** a temporary runtime drop-in under `/run/systemd/system/ollama.service.d/` (gone after a reboot, nothing in `/etc` changes). Each directive is added to the same file, so the last test covers the whole combination; then `daemon-reload`, a restart, and a test.
+
+```bash
+d=/run/systemd/system/ollama.service.d
+sudo mkdir -p $d
+printf '[Service]\nRestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK\n' \
+  | sudo tee $d/lab0b-trial.conf
+printf 'SystemCallFilter=@system-service\n' | sudo tee -a $d/lab0b-trial.conf   # next directive, and so on
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+```
+
+**Test after each directive** (node, no root): both cards found, a two-card model 100% on the GPU, an image, a model entirely on the CPU (other code paths: thread placement, system memory), a pull, a client in a container, and the journal (the three `no usable GPU found` lines are llama.cpp's normal note for a CPU-only runner and are filtered out):
+
+```bash
+journalctl -u ollama --since '-20s' --no-pager | grep -c 'inference compute'
+ollama run qwen3.8:27b 'Say OK.' --keepalive 1m
+ollama ps
+nvidia-smi --query-gpu=index,memory.used --format=csv
+python3 <repo>/work/lab0b/vision-test.py
+curl -s localhost:11434/api/generate \
+  -d '{"model":"llama3.1:8b","prompt":"Say OK.","stream":false,"options":{"num_gpu":0,"num_predict":20}}' \
+  | python3 -c 'import json,sys; d=json.load(sys.stdin); print("cpu run:", d["response"].strip()[:40])'
+ollama pull all-minilm && ollama rm all-minilm
+docker run --rm --network <network> \
+  --add-host=host.docker.internal:host-gateway \
+  alpine:3.24 wget -qO- -T 5 http://host.docker.internal:11434/api/version
+journalctl -u ollama --since '-5min' --no-pager \
+  | grep -iE 'denied|not permitted|operation not|error|warn|SIGSYS' \
+  | grep -vE 'usable GPU|without GPU support|docs/build.md'
+```
+
+**1. `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK`.** `man systemd.exec`: restricts `socket(2)` only (which sockets the process can create; accepted connections and `socketpair()` are not affected), should be combined with `SystemCallArchitectures=native`, does not apply to `+` commands. `AF_NETLINK` is for Go's network interface listing. **Result:** passes; pull (outgoing) and a container client (incoming) work.
+
+**2. `SystemCallFilter=@system-service`, `SystemCallErrorNumber=EPERM`.** `man systemd.exec`: by default a system call outside the list **kills the process with `SIGSYS`**; `SystemCallErrorNumber=` makes it fail with an error instead. `systemd-analyze syscall-filter @system-service` lists the set: `@basic-io`, `@file-system`, `@network-io`, `@process`, `@ipc`, `@resources`, `@memlock` and 45 single calls including `ioctl` (how CUDA talks to the driver); `@privileged`, `@mount`, `@module`, `@raw-io`, `@reboot`, `@swap`, `@clock`, `@debug`, `@obsolete` are not in it.
+
+| Option | On a missing system call | Against |
+|---|---|---|
+| A: `SystemCallFilter=` only | `SIGSYS`, the process dies | "killed by signal SYS" without the call's name; a restart loop up to the start limit |
+| **B (chosen):** plus `SystemCallErrorNumber=EPERM` | the call returns `EPERM`, the program decides | A program may carry on with a feature missing; the journal check above looks for it |
+
+**Result:** passes, `SystemCallErrorNumber=1` (EPERM).
+
+**3. `PrivateUsers=yes`.** `man systemd.exec`: an own user namespace in which only `root` and the unit's user and group map to themselves, everyone else to `nobody`; no capabilities in the host's namespace. `ollama`'s supplementary groups `render` and `video` become `nobody` inside, but `/dev/nvidia*` are world-accessible (`crw-rw-rw-`) and `/dev/dri` is denied anyway. The namespace is created by systemd (root), so Ubuntu's restriction on unprivileged user namespaces (Lab 0f) does not apply. **Result:** passes; a pulled manifest is owned by `ollama` (`999:987`, not `65534`) with mode `-rw-r-----` (`UMask=0027`, step 13).
+
+**4. `MemoryDenyWriteExecute=yes`.** No memory that is writable and executable, no memory turned executable later: no JIT. The risk is silent: if CUDA cannot load its kernels, Ollama may fall back to the CPU. **Result:** passes; `qwen3.8:27b` `100% GPU`, 10554 / 11016 MiB as before. CUDA in this Ollama version loads ready-made kernels for these cards; re-test after an upgrade.
+
+**5. `ProcSubset=pid`.** Everything in `/proc` that is not a process disappears; the page calls it "not suitable for most non-trivial programs". **Result:** both cards are found and every test passes, but the journal shows:
+
+```
+level=WARN source=gpu.go:30 msg="error looking up system memory" error="open /proc/meminfo: no such file or directory"
+```
+
+Ollama no longer knows the system memory it uses to decide whether a model fits. **Not used.**
+
+**A finding along the way: models entirely on the CPU.** The journal of every load (`journalctl -u ollama --since today | grep -E 'disabling mmap|load_mode ='`) shows `load_mode = mmap` for every model on the GPU, fully or partly, and `disabling mmap for llama-server load by default` with `load_mode = none` for every load with `num_gpu: 0`, before and during this step. With `llama3.1:8b` entirely on the CPU (node; the last command needs root):
+
+```bash
+cg=/sys/fs/cgroup/system.slice/ollama.service
+grep -E '^(anon|file|file_mapped) ' $cg/memory.stat
+sudo sh -c "for p in \$(cat $cg/cgroup.procs); do
+  echo \"== \$(cat /proc/\$p/comm)\"
+  grep -E '^(Rss|Pss_Anon|Pss_File)' /proc/\$p/smaps_rollup; done"
+```
+
+```
+anon 9326080000
+file 4096
+file_mapped 0
+== llama-server
+Rss:             9080504 kB
+Pss_Anon:        9066332 kB
+Pss_File:          10417 kB
+```
+
+8.65 GiB of anonymous memory: ≈ 4.6 GiB of weights and the 4 GiB KV cache (32768 tokens × 128 KiB). The conclusion of step 7 holds for models partly on the GPU only; a model entirely on the CPU is memory the kernel cannot reclaim. Two of them exceed `MemoryHigh=16G` and would be throttled hard with nothing to reclaim. The limits stay (this is a GPU server); the role's README records the caveat.
+
+**Clean-up:** `sudo rm $d/lab0b-trial.conf && sudo systemctl daemon-reload` (the running process keeps the trial settings until the next restart, which the role run makes).
+
+**Added to `roles/ollama/files/hardening.conf`:**
+
+```ini
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+PrivateUsers=yes
+MemoryDenyWriteExecute=yes
+```

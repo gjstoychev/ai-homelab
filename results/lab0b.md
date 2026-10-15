@@ -26,6 +26,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
     Tests: loading two models (≈ 22 GiB of files read) keeps the cgroup 3.2 MiB below `MemoryHigh` (page cache reclaimed 916 times, no OOM), the model works on the GPUs; a runner on the CPU is not throttled by `CPUQuota=1600%` (13.2 tokens/s, 783%, `nr_throttled 0`).
 13. Kernel, process and privilege restrictions (16 directives: `ProtectKernel*`, `ProtectControlGroups`, `ProtectClock`, `ProtectHostname`, `ProtectProc=invisible`, `PrivateMounts`, empty `CapabilityBoundingSet`, `Restrict*`, `LockPersonality`, `SystemCallArchitectures=native`, `RemoveIPC`, `UMask=0027`); score 8.2 → 3.4 (step 13).
 14. Regression tests: copy/delete/pull, embeddings, a client in a Docker container, a two-card model, an image through the vision encoder, CPU speed (13.4 tokens/s, unchanged); all pass, no errors in the journal (step 14).
+15. The risky directives one at a time, with a temporary runtime drop-in: `RestrictAddressFamilies`, `SystemCallFilter=@system-service` with `SystemCallErrorNumber=EPERM`, `PrivateUsers=yes` and `MemoryDenyWriteExecute=yes` pass; `ProcSubset=pid` hides `/proc/meminfo` (`error looking up system memory`) and is not used. Along the way: a model entirely on the CPU is loaded without mmap, all anonymous memory (step 15).
 
 ## Measurements
 
@@ -92,6 +93,9 @@ CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
 - `DevicePolicy=`/`DeviceAllow=` apply to the whole cgroup: the `+` prefix of `ExecStartPre=` does not bypass them, and a `DeviceAllow=` group missing at start is silently dropped.
 - Unloading a model frees VRAM, not the page cache of its file: Ollama's `memory.current` grows with every model read and is mostly cache, not need.
 - Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
+- A model entirely on the CPU is loaded without mmap (`load_mode = none`): weights and KV cache are anonymous memory (8.65 GiB for `llama3.1:8b` at 32768 tokens), unlike the CPU layers of a model partly on the GPU.
+- `MemoryDenyWriteExecute=yes` does not break CUDA here: no JIT for these cards.
+- `ProcSubset=pid` does not break the GPU, as expected, but `/proc/meminfo`: Ollama keeps running without knowing the system memory, only a warning in the journal.
 - Ollama's default context depends on total VRAM (below 24 GiB 4k, 24–48 GiB 32k): one card gives 4096 tokens, two give 32768.
 - The only part of a model on the CPU that is anonymous memory is its KV cache; it grows with the context.
 
