@@ -15,7 +15,7 @@ The second service is a small demo service created for this lab, to practise a u
 
 ---
 
-## Step 1/18 — The sandbox is active
+## Step 1/20 — The sandbox is active
 
 **Why:** Claude's commands in this lab run in Claude Code's sandbox (read-only home, no D-Bus, no `systemctl`). Everything that touches systemd is run by the user.
 
@@ -27,7 +27,7 @@ cat /proc/self/attr/current
 
 **Expected / Result:** `claude-bwrap (unconfined)`, the AppArmor label of the bwrap copy (Lab 0f, step 12).
 
-## Step 2/18 — Versions and documentation
+## Step 2/20 — Versions and documentation
 
 **Why:** directive names and behaviour differ between systemd versions, so they are checked in the manual pages of the installed version (`man systemd.exec`, `systemd.resource-control`, `systemd.service`) and with `systemctl show`, not from memory. Software versions are pinned, preferably to a release at least a few weeks old.
 
@@ -55,7 +55,7 @@ man -w systemd.exec systemd.resource-control systemd.service systemd-analyze
 
 The lab changes no Ollama version: installed 0.32.14 stays.
 
-## Step 3/18 — Ollama today: unit, drop-in and cgroup
+## Step 3/20 — Ollama today: unit, drop-in and cgroup
 
 **Why:** know exactly what runs before changing it: who started it, with which user and options, and in which cgroup.
 
@@ -95,7 +95,7 @@ Running state:
 | `TasksCurrent` / `TasksMax` | 21 / 70833 (the systemd default, as in Lab 0a) |
 | `MemoryMax`, `CPUQuotaPerSecUSec` | `infinity`, `infinity` |
 
-## Step 4/18 — Baseline exposure score
+## Step 4/20 — Baseline exposure score
 
 **Why:** `systemd-analyze security` scores a unit from 0 (best) to 10 by the directives it sets; it reads the loaded unit, so it works for a stopped service too. The number before any change is the yardstick of the lab.
 
@@ -125,7 +125,7 @@ Grouping of the failed checks, as hypotheses to test (each directive is read in 
 | Touch Go and CUDA | `MemoryDenyWriteExecute`, `SystemCallFilter`, `RestrictNamespaces`, `RestrictAddressFamilies` | `MemoryDenyWriteExecute` probably breaks CUDA; the address families must keep INET, INET6 and UNIX |
 | Not applicable | `PrivateNetwork` (it serves clients), `PrivateUsers`, `IPAddressDeny` (it downloads models) | Stay failed, so the final score is not 0 |
 
-## Step 5/18 — The second service: a demo
+## Step 5/20 — The second service: a demo
 
 **Why:** a self-written service shows what the packaged Ollama unit cannot: our own unit file, a file with secrets, and a data directory that `ProtectSystem=strict` needs a `ReadWritePaths` entry for. It must be public, neutral and small, with no scripts in the repository.
 
@@ -139,7 +139,7 @@ Grouping of the failed checks, as hypotheses to test (each directive is read in 
 
 `LoadCredential=` stays as a comparison in the secrets decision (step 8).
 
-## Step 6/18 — Ad-hoc limits with `systemd-run --scope`
+## Step 6/20 — Ad-hoc limits with `systemd-run --scope`
 
 **Why:** systemd can put any command into a cgroup with limits, without a unit file: the same `memory.max` that Lab 0a wrote by hand under `/sys/fs/cgroup`, now set by the service manager.
 
@@ -185,7 +185,7 @@ systemd[1]: run-<id>.scope: Failed with result 'oom-kill'.
 
 The kernel killed Python; then systemd stopped the whole unit and sent SIGTERM to the shell. The same applies to services: with a `MemoryMax=` and the default policy, one OOM-killed process stops the whole service, and only a `Restart=` setting brings it back.
 
-## Step 7/18 — Ollama's memory with a model loaded (VRAM vs RAM)
+## Step 7/20 — Ollama's memory with a model loaded (VRAM vs RAM)
 
 **Why:** before a `MemoryMax=` goes on Ollama, measure what its cgroup counts while a model is loaded. The weights live in VRAM, but they are read from disk first, and the page cache of a file read by a process is charged to that process's cgroup. Too low a limit could force reclaim, or (for memory that cannot be reclaimed) an OOM kill; with the default `OOMPolicy=stop` (step 6) that stops the whole service.
 
@@ -348,7 +348,7 @@ The growth of `anon` is the **KV cache of the layers on the CPU**: 640 MiB. The 
 - `MemoryMax=32G` keeps at least half of the host's 64 GB for everything else. It can only be reached by memory that cannot be dropped, such as the KV cache of CPU layers with a very large context; then restarting Ollama is better than the kernel killing something else on the host.
 - What happens when a limit is reached (`OOMPolicy=`, `Restart=`) is decided in step 9; the limits are tested in step 12.
 
-## Step 8/18 — Design decisions
+## Step 8/20 — Design decisions
 
 **Why:** settle where the configuration lives before writing a role.
 
@@ -378,13 +378,13 @@ The existing `override.conf` (listen address, GPU wait) moves into the role with
 | **A (chosen):** role `ollama` (permanent, playbook `ollama.yml`) and role `lab0b_demo` (lab only, playbook `lab0b.yml`), both imported by `site.yml` | Different lifecycles: Ollama stays, the demo can be removed; the same split as `claude_code` vs `lab_tools` | Two roles for one lab |
 | B: one role `systemd_services` | Fewer files | Mixes permanent and temporary configuration |
 
-## Step 9/18 — Role `ollama`: restart policy, start limit, OOM policy, base sandboxing
+## Step 9/20 — Role `ollama`: restart policy, start limit, OOM policy, base sandboxing
 
 **Why:** put Ollama's systemd configuration into git, and add the first, cheapest directives.
 
 **Documentation** (systemd 255):
 
-- `Restart=` (`man systemd.service`): `on-failure` restarts after a non-zero exit code, a signal other than the four "clean" ones (SIGHUP, SIGINT, SIGTERM, SIGPIPE), a timeout or a watchdog; `always` also after a clean exit. A stop by systemd itself (`systemctl stop`, `restart`) never triggers a restart. The table of exit causes does not list an OOM kill; how `OOMPolicy=` and `Restart=` interact is tested in step 16.
+- `Restart=` (`man systemd.service`): `on-failure` restarts after a non-zero exit code, a signal other than the four "clean" ones (SIGHUP, SIGINT, SIGTERM, SIGPIPE), a timeout or a watchdog; `always` also after a clean exit. A stop by systemd itself (`systemctl stop`, `restart`) never triggers a restart. The table of exit causes does not list an OOM kill; how `OOMPolicy=` and `Restart=` interact is tested in step 18.
 - `StartLimitIntervalSec=`, `StartLimitBurst=` (`man systemd.unit`, section `[Unit]`): more than *burst* starts within *interval* and the unit is not started again; `Restart=` stops trying, the unit stays `failed` until it is started by hand after the interval or `systemctl reset-failed` clears the counter. All starts count, manual ones too. The defaults (`man systemd-system.conf`) are 5 starts in 10 s; with `RestartSec=3` Ollama starts at most 4 times in 10 s, so the default never triggers and a permanently broken Ollama would restart forever.
 - `RestartSteps=`, `RestartMaxDelaySec=` (since 254): a growing delay between restarts instead of a limit.
 - `NoNewPrivileges=` (`man systemd.exec`): the process and its children can never gain privileges through `execve()` (setuid/setgid bits, file capabilities).
@@ -396,7 +396,7 @@ The existing `override.conf` (listen address, GPU wait) moves into the role with
 | Setting | Options | Chosen | Why |
 |---|---|---|---|
 | `Restart=` | `always` (installer), `on-failure` | `on-failure` | A clean exit is deliberate; a crash is not |
-| `OOMPolicy=` | `stop` (default), `continue`, `kill` | `continue` | The OOM victim is normally the model runner (`llama-server`, which holds the memory); the server stays up and can start a new runner (tested in step 16). With `stop` every client loses the service |
+| `OOMPolicy=` | `stop` (default), `continue`, `kill` | `continue` | The OOM victim is normally the model runner (`llama-server`, which holds the memory); the server stays up and can start a new runner (tested in step 18). With `stop` every client loses the service |
 | Restart loop | start limit; growing delay (`RestartSteps=`); both | start limit: 5 starts in 5 minutes | A finite number of attempts and a clear `failed` state. Both together are hard to reason about: growing delays move the attempts out of the window. Nothing alerts on `failed` yet (Lab 2) |
 
 **Files** (`<repo>/ansible`):
@@ -465,7 +465,7 @@ msg="inference compute" id=1 … library=CUDA … name=CUDA1 … pci_id=0000:02:
 
 Both cards are found after the restart (the GPU wait works), and the score drops from 9.2 UNSAFE to 8.7 EXPOSED.
 
-## Step 10/18 — `ProtectSystem=strict` and the paths Ollama writes
+## Step 10/20 — `ProtectSystem=strict` and the paths Ollama writes
 
 **Why:** with `ProtectSystem=strict` the whole file system is read-only for the service; every path it must write has to be listed. Finding those paths is the work.
 
@@ -546,7 +546,7 @@ llama3.1:8b    46e0c10c039e    9.2 GB    100% GPU     32768      59 seconds from
 (no errors)
 ```
 
-## Step 11/18 — GPU access under device restrictions
+## Step 11/20 — GPU access under device restrictions
 
 **Why:** device access is where hardening can break Ollama silently: without its devices it does not fail, it starts after the 60-second GPU wait and runs on the CPU.
 
@@ -673,7 +673,7 @@ systemd-analyze security ollama.service --no-pager \
 
 A device list with real hardware in it earns half of the check (0.1 of 0.2); `PrivateDevices=` stays failed on purpose. 8.3 → 8.2.
 
-## Step 12/18 — Resource limits: memory, CPU, tasks
+## Step 12/20 — Resource limits: memory, CPU, tasks
 
 **Why:** the memory limit was decided from measurements in step 7; CPU and task limits need the same: what does Ollama use at its worst?
 
@@ -785,3 +785,87 @@ grep -E '^(nr_throttled|throttled_usec)' $cg/cpu.stat
 ```
 
 **Result:** `tokens 150 tok/s 13.2`, `cpu% = 783`, `nr_throttled 0`, `throttled_usec 0`: the same as without the quota (13.6 tokens/s, 789%), never throttled.
+
+## Step 13/20 — Kernel, process and privilege restrictions
+
+**Why:** the remaining failed checks of `systemd-analyze security` (step 4). Most of them are cheap for a service that runs as a plain user and needs no kernel access; a few can break a GPU service and are tried one by one in step 15.
+
+**Documentation** (`man systemd.exec`, systemd 255), with the side effects that matter here:
+
+- `ProtectKernelTunables=`: `/proc/sys`, `/sys`, `/proc/sysrq-trigger`, `/proc/acpi`, `/proc/fs`, `/proc/irq` and a few more become read-only. Reading stays possible.
+- `ProtectKernelModules=`: no module loading (removes `CAP_SYS_MODULE`, filters the module system calls). `nvidia_uvm` is loaded before Ollama by `modprobe@` (step 11).
+- `ProtectKernelLogs=`: no access to the kernel log ring buffer. `ProtectControlGroups=`: `/sys/fs/cgroup` read-only.
+- `ProtectClock=`: no clock changes; it also implies `DeviceAllow=char-rtc r`, the only side effect on device access in this group.
+- `ProtectHostname=`: own UTS namespace, host name cannot change.
+- `ProtectProc=invisible`: processes of other users disappear from `/proc`; the page recommends it for most services. `ProcSubset=pid` hides everything in `/proc` that is not a process and is "not suitable for most non-trivial programs": the NVIDIA driver uses `/proc/driver/nvidia` (step 15).
+- `PrivateMounts=`: own mount namespace. `CapabilityBoundingSet=` empty: no capabilities at all (`ExecStartPre=+` is not affected, step 9).
+- `RestrictSUIDSGID=`, `RestrictRealtime=` (no `SCHED_FIFO`/`SCHED_RR`/`SCHED_DEADLINE`), `RestrictNamespaces=yes`, `LockPersonality=`, `SystemCallArchitectures=native`.
+- `RemoveIPC=`: System V and POSIX IPC objects of the service user are removed when it stops. `UMask=`: the file mode creation mask (default `0022`).
+- `MemoryDenyWriteExecute=` is incompatible with code generated at run time (JIT); whether CUDA compiles kernels for these cards at load time is a question for a test (step 15).
+
+**Decision:** two groups. Group 1, expected to be safe, goes straight into the role and is tested afterwards (step 14): `ProtectKernelTunables`, `ProtectKernelModules`, `ProtectKernelLogs`, `ProtectControlGroups`, `ProtectClock`, `ProtectHostname`, `ProtectProc=invisible`, `PrivateMounts`, `CapabilityBoundingSet=` (empty), `RestrictSUIDSGID`, `RestrictRealtime`, `RestrictNamespaces=yes`, `LockPersonality`, `SystemCallArchitectures=native`, `RemoveIPC`, `UMask=0027` (files Ollama creates stay readable for the group `ollama`, not for everyone). Group 2, with a real risk for the GPU or CUDA, is tried one directive at a time with a temporary runtime drop-in before anything goes into the role (step 15): `RestrictAddressFamilies=`, `SystemCallFilter=`, `MemoryDenyWriteExecute=`, `PrivateUsers=`, `ProcSubset=pid`. Failed on purpose: `PrivateNetwork=` (Ollama serves clients), `IPAddressDeny=` (it downloads models), `PrivateDevices=` (step 11).
+
+**Command** (control node): `--check --diff`, then the real run. **Result:** `hardening.conf` `changed` with group 1, recap `ok=23 changed=2 skipped=2 failed=0`.
+
+**Verify** (node, no root):
+
+```bash
+systemctl show ollama -p ActiveState,ExecMainStartTimestamp
+systemctl show ollama -p ProtectProc,CapabilityBoundingSet,RestrictNamespaces
+journalctl -u ollama --since '<start time>' --no-pager \
+  | grep -iE 'inference compute|no compatible|discover' | cut -c1-200
+systemd-analyze security ollama.service --no-pager | tail -n 1
+```
+
+**Result:** active; `ProtectProc=invisible`, `CapabilityBoundingSet=` (empty), `RestrictNamespaces=yes`; `discovering available GPUs...`, then `inference compute` for `CUDA0` and `CUDA1`; **3.4 OK** 🙂 (from 8.2). Device discovery took 6 seconds after the start (3 seconds after step 11).
+
+## Step 14/20 — Regression tests after hardening
+
+**Why:** the checks so far cover the main path (both cards found, a model loaded, a reply generated). Ollama does more than that, and each part could be broken by a restriction without an error in the obvious places. The same tests run again after step 15.
+
+All commands on the node, no root (Docker access for test 2). Each test ends with a look at the journal:
+
+```bash
+journalctl -u ollama --since '-3min' --no-pager \
+  | grep -iE 'denied|not permitted|error|warn' | cut -c1-200
+```
+
+**1. Write path: copy, delete, pull; embeddings.** `pull` uses the network, writes large files and temporary files; `all-minilm` is a 45 MB embedding model.
+
+```bash
+ollama cp llama3.1:8b lab0b-rw-test
+ollama rm lab0b-rw-test
+ollama pull all-minilm
+curl -s localhost:11434/api/embed \
+  -d '{"model":"all-minilm","input":"systemd hardening"}' \
+  | python3 -c 'import json,sys; e=json.load(sys.stdin)["embeddings"][0]; print("dims", len(e), "first", round(e[0],4))'
+ollama ps
+ollama rm all-minilm
+```
+
+Result: `copied`, `deleted`; `pull` ends with `verifying sha256 digest`, `writing manifest`, `success`; `dims 384`; `all-minilm` `100% GPU`; `deleted`; nothing in the journal.
+
+**2. A client in a container.** Other clients on the server reach Ollama from Docker. A throwaway container on a user-defined Docker network (`host-gateway` resolves to the host):
+
+```bash
+docker run --rm --network <network> \
+  --add-host=host.docker.internal:host-gateway \
+  alpine:3.24 wget -qO- -T 5 http://host.docker.internal:11434/api/version
+```
+
+Result: `{"version":"0.32.14"}`. None of the directives restricts incoming connections; what reaches the port is the firewall's business (Lab 0c).
+
+**3. Generation on both cards, and images.** `qwen3.8:27b` spans both cards and has a vision encoder. A small Python script (`work/lab0b/vision-test.py`, not in the repository: it builds a 64×64 red PNG in memory and sends it base64-encoded to `/api/generate` with the question "What colour is this image? Answer with one word.") checks the image path:
+
+```bash
+ollama run qwen3.8:27b 'Say OK.' --keepalive 2m
+ollama ps
+nvidia-smi --query-gpu=index,memory.used --format=csv
+python3 <repo>/work/lab0b/vision-test.py
+```
+
+Result: `OK.`; `qwen3.8:27b  19 GB  100% GPU  32768`; 10554 / 11016 MiB; `Red`; the journal shows `clip_model_loader: … has vision encoder` and `CLIP using CUDA0 backend`, no errors.
+
+**4. Speed.** The CPU measurement from step 12 (`llama3.1:8b` with `num_gpu: 0`, 150 tokens): `tok/s 13.4`, `cpu% = 784`, `nr_throttled 0`. Before this step: 13.2 tokens/s with the quota, 13.6 without.
+
+**5. Boot.** A reboot tests the order `modprobe@nvidia_uvm` → device rules → GPU wait → discovery; it runs once at the end of the lab (step 19), after all changes.

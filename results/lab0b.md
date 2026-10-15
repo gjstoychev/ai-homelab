@@ -24,6 +24,8 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 11. Devices: `DevicePolicy=closed` with `DeviceAllow=char-nvidia rw` and `char-nvidia-uvm rw` (Ollama opens only `nvidiactl`, `nvidia<N>`, `nvidia-uvm`), `modprobe@nvidia_uvm` before Ollama; both cards found through CUDA within 3 s of the start, a two-card model 100% on the GPU; negative test: `/dev/dri/renderD128` and `nvidia-cap2` refused with the rules, opened without; score 8.3 → 8.2 (step 11).
 12. Worst case for CPU and tasks: `llama3.1:8b` entirely on the CPU (`num_gpu: 0`) uses 8 threads (≈ 790%), 13.6 tokens/s, task peak 76 (21 idle). Decision: `MemoryHigh=16G`, `MemoryMax=32G`, `CPUQuota=1600%`, `TasksMax=512` (step 12).
     Tests: loading two models (≈ 22 GiB of files read) keeps the cgroup 3.2 MiB below `MemoryHigh` (page cache reclaimed 916 times, no OOM), the model works on the GPUs; a runner on the CPU is not throttled by `CPUQuota=1600%` (13.2 tokens/s, 783%, `nr_throttled 0`).
+13. Kernel, process and privilege restrictions (16 directives: `ProtectKernel*`, `ProtectControlGroups`, `ProtectClock`, `ProtectHostname`, `ProtectProc=invisible`, `PrivateMounts`, empty `CapabilityBoundingSet`, `Restrict*`, `LockPersonality`, `SystemCallArchitectures=native`, `RemoveIPC`, `UMask=0027`); score 8.2 → 3.4 (step 13).
+14. Regression tests: copy/delete/pull, embeddings, a client in a Docker container, a two-card model, an image through the vision encoder, CPU speed (13.4 tokens/s, unchanged); all pass, no errors in the journal (step 14).
 
 ## Measurements
 
@@ -37,7 +39,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
-| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`) |
+| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`); 3.4 OK (step 13: kernel, process and privilege restrictions) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
 
@@ -96,6 +98,8 @@ CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
 ## Mistakes and dead ends
 
 ## Open questions
+
+- Device discovery at start took 6 s after step 13, 3 s after step 11; not investigated.
 
 ## Follow-ups for later labs
 
