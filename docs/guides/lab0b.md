@@ -961,3 +961,32 @@ SystemCallErrorNumber=EPERM
 PrivateUsers=yes
 MemoryDenyWriteExecute=yes
 ```
+
+**Into the role:** the four directives above, then the control-node runs (`--check --diff`, real run; `hardening.conf` `changed`, recap `ok=23 changed=2 skipped=2 failed=0`). Running state: `PrivateUsers=yes`, `MemoryDenyWriteExecute=yes`, `SystemCallErrorNumber=1`, `RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX`, only the two drop-ins in `/etc`. Score **1.5 OK**.
+
+**What is still failed, and why** (`systemd-analyze security ollama.service --no-pager | grep '✗'`):
+
+| Check | Value | Why it stays |
+|---|---|---|
+| `PrivateNetwork=` | 0.5 | Ollama serves clients over the network |
+| `RestrictAddressFamilies=~AF_(INET\|INET6)`, `~AF_UNIX`, `~AF_NETLINK` | 0.3, 0.1, 0.1 | Allowed because they are needed |
+| `IPAddressDeny=` | 0.2 | Ollama downloads models |
+| `PrivateDevices=` | 0.2 | Would hide `/dev/nvidia*` (step 11) |
+| `DeviceAllow=` | 0.1 | The list contains real hardware (the cards; `char-rtc` from `ProtectClock=`) |
+| `ProcSubset=` | 0.1 | Hides `/proc/meminfo` (above) |
+| `RootDirectory=`/`RootImage=` | 0.1 | Ollama runs in the host's root; an own image is out of scope |
+| `SystemCallFilter=~@resources` | 0.2 | `@system-service` includes it; it holds thread affinity and memory policy, which llama.cpp uses to place its threads |
+| `SystemCallFilter=~@privileged` | 0.2 | `@system-service` still contains privileged calls (`@chown`, `setuid`, `setgroups`, `chroot`, `bpf`, …) |
+| `UMask=` | 0.1 | `0027` keeps files readable for the group `ollama`; the check wants `0077` |
+
+The last one in the list of decisions: `@privileged` can be removed. `man systemd.exec`: when allow and deny lists are combined, the first assignment sets the default, and a later `~` assignment removes the listed calls from the allowed set. `systemd-analyze syscall-filter @privileged` lists what goes: `@chown`, `@clock`, `@module`, `@raw-io`, `@reboot`, `@swap`, `bpf`, `capset`, `chroot`, `pivot_root`, `setuid`, `setgroups`, `sethostname` and similar; nothing a single-user service that only writes files needs. Added after the allow line:
+
+```ini
+SystemCallFilter=~@privileged
+```
+
+`@resources` stays (llama.cpp's thread placement), and so does `UMask=0027`.
+
+**Result:** `✓ SystemCallFilter=~@privileged … @privileged is not included`; both cards found within 4 seconds of the start; **1.4 OK** 🙂.
+
+**Regression tests on the final configuration** (step 14, all of them): copy and delete, pull, `dims 384`, the container client (`{"version":"0.32.14"}`), `qwen3.8:27b` `100% GPU` on both cards (10554 / 11016 MiB), `Red`, CPU speed 13.5 tokens/s at 790% with `nr_throttled 0`; nothing in the journal.

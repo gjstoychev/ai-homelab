@@ -27,6 +27,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 13. Kernel, process and privilege restrictions (16 directives: `ProtectKernel*`, `ProtectControlGroups`, `ProtectClock`, `ProtectHostname`, `ProtectProc=invisible`, `PrivateMounts`, empty `CapabilityBoundingSet`, `Restrict*`, `LockPersonality`, `SystemCallArchitectures=native`, `RemoveIPC`, `UMask=0027`); score 8.2 → 3.4 (step 13).
 14. Regression tests: copy/delete/pull, embeddings, a client in a Docker container, a two-card model, an image through the vision encoder, CPU speed (13.4 tokens/s, unchanged); all pass, no errors in the journal (step 14).
 15. The risky directives one at a time, with a temporary runtime drop-in: `RestrictAddressFamilies`, `SystemCallFilter=@system-service` with `SystemCallErrorNumber=EPERM`, `PrivateUsers=yes` and `MemoryDenyWriteExecute=yes` pass; `ProcSubset=pid` hides `/proc/meminfo` (`error looking up system memory`) and is not used. Along the way: a model entirely on the CPU is loaded without mmap, all anonymous memory (step 15).
+    Final: `SystemCallFilter=~@privileged` added (the `@system-service` set still contains privileged calls); score 1.4 OK; the regression tests pass on the final configuration (CPU 13.5 tokens/s).
 
 ## Measurements
 
@@ -40,7 +41,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
-| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`); 3.4 OK (step 13: kernel, process and privilege restrictions) |
+| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`); 3.4 OK (step 13: kernel, process and privilege restrictions); 1.5 OK (step 15: address families, system call filter, `PrivateUsers`, `MemoryDenyWriteExecute`); **1.4 OK** (`SystemCallFilter=~@privileged`) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
 
@@ -95,6 +96,7 @@ CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
 - Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
 - A model entirely on the CPU is loaded without mmap (`load_mode = none`): weights and KV cache are anonymous memory (8.65 GiB for `llama3.1:8b` at 32768 tokens), unlike the CPU layers of a model partly on the GPU.
 - `MemoryDenyWriteExecute=yes` does not break CUDA here: no JIT for these cards.
+- `SystemCallFilter=@system-service`, systemd's own set for services, still contains privileged system calls (`chown`, `setuid`, `chroot`, `bpf`) and `@resources`; `systemd-analyze security` marks both.
 - `ProcSubset=pid` does not break the GPU, as expected, but `/proc/meminfo`: Ollama keeps running without knowing the system memory, only a warning in the journal.
 - Ollama's default context depends on total VRAM (below 24 GiB 4k, 24–48 GiB 32k): one card gives 4096 tokens, two give 32768.
 - The only part of a model on the CPU that is anonymous memory is its KV cache; it grows with the context.
