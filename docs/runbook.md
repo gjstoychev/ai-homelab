@@ -317,3 +317,96 @@ A unit and its drop-ins without D-Bus (e.g. from a sandbox):
 ```bash
 cat /etc/systemd/system/<unit> /etc/systemd/system/<unit>.d/*.conf
 ```
+
+Which settings systemd actually loaded (the running state, not the file):
+
+```bash
+systemctl show <unit> --no-pager -p ActiveState,NRestarts,DropInPaths,MemoryMax,MemorySwapMax,CPUQuotaPerSecUSec,TasksMax
+```
+
+Exposure score, only what is still failed:
+
+```bash
+systemd-analyze security <unit> --no-pager | grep '✗'
+```
+
+What a system call group contains:
+
+```bash
+systemd-analyze syscall-filter @system-service
+```
+
+A service's memory: total, kinds, events, swap (cgroup files are world-readable):
+
+```bash
+cg=/sys/fs/cgroup/system.slice/<unit>
+cat $cg/memory.current $cg/memory.swap.current
+grep -E '^(anon|file|file_mapped|shmem) ' $cg/memory.stat
+cat $cg/memory.events
+```
+
+Anonymous vs mapped-file memory of each process in a service (root):
+
+```bash
+cg=/sys/fs/cgroup/system.slice/<unit>
+sudo sh -c "for p in \$(cat $cg/cgroup.procs); do echo \"== \$(cat /proc/\$p/comm)\"; grep -E '^(Rss|Pss_Anon|Pss_File)' /proc/\$p/smaps_rollup; done"
+```
+
+Device nodes a service's processes have open (root):
+
+```bash
+sudo sh -c "for p in \$(cat /sys/fs/cgroup/system.slice/<unit>/cgroup.procs); do ls -l /proc/\$p/fd | grep -o '/dev/.*'; done" | sort | uniq -c
+```
+
+Test a cgroup-level limit (memory, IP filter) with a process moved into a service's cgroup (root; it gets the cgroup's limits, not the service's seccomp filter or namespaces):
+
+```bash
+sudo sh -c "echo \$\$ > /sys/fs/cgroup/system.slice/<unit>/cgroup.procs; exec <cmd>"
+```
+
+Test device rules in a transient service:
+
+```bash
+sudo systemd-run --wait --pipe --quiet -p User=<user> -p DevicePolicy=closed -p DeviceAllow='char-nvidia rw' sh -c '( : < /dev/<node> ) && echo opened'
+```
+
+Temporary property change, and its undo (never `systemctl revert`: it removes every drop-in of the unit):
+
+```bash
+sudo systemctl set-property --runtime <unit> MemoryMax=4G
+sudo systemctl set-property --runtime <unit> MemoryMax=<original>
+sudo rm /run/systemd/system.control/<unit>.d/50-MemoryMax.conf && sudo systemctl daemon-reload
+```
+
+A temporary drop-in for trying a directive (gone after a reboot):
+
+```bash
+sudo mkdir -p /run/systemd/system/<unit>.d
+printf '[Service]\n<Directive>=<value>\n' | sudo tee /run/systemd/system/<unit>.d/trial.conf
+sudo systemctl daemon-reload && sudo systemctl restart <unit>
+```
+
+A unit stopped by its start limit:
+
+```bash
+journalctl -u <unit> -n 40 --no-pager | grep -E 'Scheduled restart|repeated too quickly'
+sudo systemctl reset-failed <unit> && sudo systemctl start <unit>
+```
+
+Order of events at boot, with sub-second timestamps:
+
+```bash
+journalctl -b -o short-precise --no-pager | grep -E '<pattern>'
+```
+
+Ollama: which cards it found, how it loaded a model, and the buffer sizes llama.cpp chose:
+
+```bash
+journalctl -u ollama -n 300 --no-pager | grep -E 'inference compute|load_mode =|disabling mmap|KV buffer size|model buffer size|n_threads'
+```
+
+Ollama: load a model without generating, and with request options:
+
+```bash
+curl -s localhost:11434/api/generate -d '{"model":"<model>","keep_alive":"10m","options":{"num_ctx":32768,"num_gpu":0}}'
+```

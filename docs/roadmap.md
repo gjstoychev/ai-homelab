@@ -1,6 +1,6 @@
 # Lab Roadmap
 
-Version 1.5 · 2026-10-14. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
+Version 1.6 · 2026-10-15. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
 
 Progress: mark `[x]` in a lab's heading when it is complete.
 
@@ -86,14 +86,16 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - Check the SSH key in `~/.ssh`: a deploy key for ai-homelab only, or a personal key for the whole GitHub account. The setting for the Co-Authored-By line in commits.
 - Check that `bwrap` works with `apparmor_restrict_unprivileged_unconfined = 1` enabled.
 
-### [ ] Lab 0b — systemd as a platform (in progress)
+### [x] Lab 0b — systemd as a platform
 
-- **Status (2026-10-15):** started. Scope change: the second service is a small demo service created for the lab (own unit, secrets in an `EnvironmentFile`).
+- **Status (2026-10-15):** all criteria met. Roles `ollama` (drop-ins for the installer's unit) and `lab0b_demo` (a demo service with `DynamicUser` and a root-only `EnvironmentFile`) in `site.yml`; `systemd-analyze security` Ollama 9.2 UNSAFE → 1.4 OK, demo 8.2 → 0.9 SAFE; regression tests after each hardening round; deliberate failures (kill, crash loop, OOM); a reboot. `results/lab0b.md`, `docs/guides/lab0b.md`, runbook.
+- **Deviations from the plan:** the second service is a small demo service created for the lab; hardening went far beyond the six listed directives (system call filter, private user namespace, device rules, IP filter); `MemorySwapMax=0` added; regression tests and deliberate failures added; Ollama's version (0.32.14) not changed.
+- **Key findings:** `MemoryMax=` limits RAM only (a service above it goes to swap until `MemorySwapMax=0`); Ollama's cgroup memory is mostly page cache of model files, CPU layers are mapped from the file when a model is partly on the GPU and anonymous when it is entirely on the CPU; the default start limit never triggers with `RestartSec=3`; `OOMPolicy=stop` counts as a failure for `Restart=`; `DevicePolicy=` applies to `ExecStartPre=+` too and a missing `DeviceAllow=` group is silently dropped; `ProcSubset=pid` hides `/proc/meminfo` from Ollama; `IPAddressDeny=` drops packets silently.
 - Ollama and a demo service as systemd services: `MemoryMax`, `CPUQuota`, `Restart=on-failure`, `ProtectSystem=strict`, `PrivateTmp`, `NoNewPrivileges`.
 - `systemd-analyze security <unit>`: raise the score.
 - Ad-hoc limits: `systemd-run --scope -p MemoryMax=2G <cmd>`.
 
-### [ ] Lab 0c — iptables → nftables
+### [ ] Lab 0c — iptables → nftables (next)
 
 - Translate old rules with `iptables-translate`, then rewrite by hand with nftables sets.
 - **Criterion:** default-deny egress for a specific UID with an allowlist. Foundation for Lab 11.
