@@ -726,3 +726,62 @@ MemoryMax=32G
 CPUQuota=1600%
 TasksMax=512
 ```
+
+**Command** (control node): `--check --diff`, then the real run. **Result:** `hardening.conf` `changed` with the four limits, recap `ok=23 changed=2 skipped=2 failed=0`.
+
+**Verify the running state** (node, no root):
+
+```bash
+systemctl show ollama -p ActiveState,ExecMainStartTimestamp
+systemctl show ollama -p MemoryHigh,MemoryMax,CPUQuotaPerSecUSec,TasksMax
+journalctl -u ollama -n 40 --no-pager | grep -c 'inference compute'
+```
+
+**Result:** active, restarted by the handler; `MemoryHigh=17179869184` (16 GiB), `MemoryMax=34359738368` (32 GiB), `CPUQuotaPerSecUSec=16s` (16 CPU-seconds per second = 1600%), `TasksMax=512`; both cards found.
+
+**Test: `MemoryHigh` reclaims the page cache.** Loading two models in a row reads about 22 GiB of model files (step 7), more than `MemoryHigh`. The restart created a new cgroup, and model files already in the page cache would not be charged to it (step 7), so the cache is dropped first (node; `drop_caches` needs root):
+
+```bash
+cg=/sys/fs/cgroup/system.slice/ollama.service
+sync; echo 1 | sudo tee /proc/sys/vm/drop_caches >/dev/null
+curl -s localhost:11434/api/generate \
+  -d '{"model":"llama3.1:8b","keep_alive":"10m"}' >/dev/null
+echo "after llama: $(cat $cg/memory.current)"
+curl -s localhost:11434/api/generate \
+  -d '{"model":"qwen3.8:27b","keep_alive":"10m"}' >/dev/null
+echo "after qwen:  $(cat $cg/memory.current)"
+grep -E '^(anon|file) ' $cg/memory.stat
+cat $cg/memory.events
+ollama run qwen3.8:27b 'Say OK.' --keepalive 10m
+ollama ps
+```
+
+**Result:**
+
+```
+after llama: 5593628672
+after qwen:  17176473600
+anon 528203776
+file 16626864128
+low 0
+high 916
+max 0
+oom 0
+oom_kill 0
+oom_group_kill 0
+sock_throttled 8
+OK.
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL
+qwen3.8:27b    aaee06c39dcf    19 GB    100% GPU     32768      9 minutes from now
+```
+
+- The cgroup stays 3.2 MiB below `MemoryHigh` (17179869184) instead of growing to 23 GiB: the kernel reclaimed page cache 916 times (`high`). `MemoryMax` was never reached (`max 0`), nothing was killed (`oom_kill 0`).
+- The model works, entirely on the GPUs. Ollama unloaded `llama3.1:8b` to make room for it.
+
+**Test: `CPUQuota` does not slow a runner on the CPU.** The measurement from above, with the quota in force, plus the cgroup's throttling counters:
+
+```bash
+grep -E '^(nr_throttled|throttled_usec)' $cg/cpu.stat
+```
+
+**Result:** `tokens 150 tok/s 13.2`, `cpu% = 783`, `nr_throttled 0`, `throttled_usec 0`: the same as without the quota (13.6 tokens/s, 789%), never throttled.

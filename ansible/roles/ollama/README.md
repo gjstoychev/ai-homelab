@@ -31,4 +31,12 @@ Ollama's installer (`scripts/install.sh`) rewrites `/etc/systemd/system/ollama.s
 | `MemoryHigh=16G`, `MemoryMax=32G` | Most of what Ollama's cgroup counts is page cache of model files, including models already unloaded; above `MemoryHigh` the kernel reclaims it (and throttles). What cannot be reclaimed is 0.6–1.6 GiB with models on the GPU, plus the KV cache of layers on the CPU when a model does not fit into VRAM. `MemoryMax` keeps at least half of the host's 64 GB for everything else; reaching it means an OOM kill (`OOMPolicy=continue`). |
 | `CPUQuota=1600%` | One model runner on the CPU uses 8 threads (about 800%); two can run unthrottled, and at least 12 of the 28 CPUs stay for the host. |
 | `TasksMax=512` | 21 tasks idle, about 55 more per loaded model runner (peak 76 with one); the default (70833) is no limit. |
+| `ProtectKernelTunables`, `ProtectKernelModules`, `ProtectKernelLogs`, `ProtectControlGroups` | `/proc/sys`, `/sys` and the cgroup tree read-only, no module loading, no kernel log. `nvidia_uvm` is loaded before Ollama by `modprobe@`. |
+| `ProtectClock`, `ProtectHostname` | No changes to the clock or the host name. `ProtectClock` also allows `char-rtc` read-only. |
+| `ProtectProc=invisible` | Processes of other users are hidden in `/proc`. |
+| `PrivateMounts=yes` | Mounts made by the service stay private. |
+| `CapabilityBoundingSet=` (empty) | No capabilities at all; Ollama runs as `ollama` and needs none. `ExecStartPre=+` is not affected. |
+| `RestrictSUIDSGID`, `RestrictRealtime`, `RestrictNamespaces`, `LockPersonality`, `SystemCallArchitectures=native` | No SUID/SGID files, no realtime scheduling, no new namespaces, no personality changes, native system calls only. |
+| `RemoveIPC=yes` | IPC objects of `ollama` are removed when the service stops. |
+| `UMask=0027` | Files Ollama creates are not world-readable (group `ollama` keeps read access). |
 | `Wants=`/`After=modprobe@nvidia_uvm.service` | A `DeviceAllow=` group that does not exist when the unit starts is silently dropped. udev loads `nvidia_uvm` at boot; this guarantees it is loaded before Ollama starts. |

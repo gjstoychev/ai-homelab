@@ -23,6 +23,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 10. `ProtectSystem=strict` with `ReadWritePaths=` for `~/.ollama` and `~/.nv` (Ollama's home is `/usr/share/ollama`, under `/usr`), `ProtectHome=yes`; copy/delete of a model and a generation on the GPU work, no write errors; score 8.7 → 8.3 (step 10).
 11. Devices: `DevicePolicy=closed` with `DeviceAllow=char-nvidia rw` and `char-nvidia-uvm rw` (Ollama opens only `nvidiactl`, `nvidia<N>`, `nvidia-uvm`), `modprobe@nvidia_uvm` before Ollama; both cards found through CUDA within 3 s of the start, a two-card model 100% on the GPU; negative test: `/dev/dri/renderD128` and `nvidia-cap2` refused with the rules, opened without; score 8.3 → 8.2 (step 11).
 12. Worst case for CPU and tasks: `llama3.1:8b` entirely on the CPU (`num_gpu: 0`) uses 8 threads (≈ 790%), 13.6 tokens/s, task peak 76 (21 idle). Decision: `MemoryHigh=16G`, `MemoryMax=32G`, `CPUQuota=1600%`, `TasksMax=512` (step 12).
+    Tests: loading two models (≈ 22 GiB of files read) keeps the cgroup 3.2 MiB below `MemoryHigh` (page cache reclaimed 916 times, no OOM), the model works on the GPUs; a runner on the CPU is not throttled by `CPUQuota=1600%` (13.2 tokens/s, 783%, `nr_throttled 0`).
 
 ## Measurements
 
@@ -66,6 +67,21 @@ Ollama's cgroup with a model loaded (2026-10-15, default context 32768):
 | same, `num_ctx` 32768 | 18 GB, 35%/65% CPU/GPU, context 32768 | 18.30 GiB | 1.30 GiB | 16.98 GiB | 5.53 GiB | 210 MiB | 14390 / 2 MiB |
 
 `llama-server` (the runner) in the one-card case: `Rss` 4.91 GiB = `Pss_File` 4.13 GiB (CPU layers, mapped from the model file) + `Pss_Anon` 639 MiB; with context 32768: `Rss` 6.85 GiB = `Pss_File` 5.38 GiB + `Pss_Anon` 1.26 GiB. llama.cpp's log for the 32768 load: CPU KV buffer 640 MiB, CUDA0 KV buffer 1408 MiB, CUDA0 model buffer 10665.58 MiB; the growth of `anon` (0.63 GiB) is the CPU part of the KV cache.
+
+Ollama's cgroup under `MemoryHigh=16G` (2026-10-15, cache dropped first, `llama3.1:8b` then `qwen3.8:27b`):
+
+| Reading | Value |
+|---|---|
+| `memory.current` after `llama3.1:8b` / after `qwen3.8:27b` | 5.21 GiB / 15.997 GiB (limit 16 GiB) |
+| `anon` / `file` | 504 MiB / 15.49 GiB |
+| `memory.events` | `high 916`, `max 0`, `oom 0`, `oom_kill 0`, `sock_throttled 8` |
+
+CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
+
+| | tokens/s | CPU | `nr_throttled` |
+|---|---|---|---|
+| no quota | 13.6 | 789% | — |
+| `CPUQuota=1600%` | 13.2 | 783% | 0 |
 
 ## What surprised me
 
