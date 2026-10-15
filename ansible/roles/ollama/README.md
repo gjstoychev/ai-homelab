@@ -50,7 +50,7 @@ Ollama's installer (`scripts/install.sh`) rewrites `/etc/systemd/system/ollama.s
 | `RemoveIPC=yes` | IPC objects of `ollama` are removed when the service stops. |
 | `UMask=0027` | Files Ollama creates are not world-readable (group `ollama` keeps read access). |
 | `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK` | Only local, IP and netlink sockets can be created. Incoming connections are not affected. |
-| `SystemCallFilter=@system-service`, `SystemCallErrorNumber=EPERM` | systemd's set for ordinary services (`ioctl`, which CUDA uses, is in it). A system call outside it fails with `EPERM` instead of killing the process with `SIGSYS`. |
+| `SystemCallFilter=@system-service`, `SystemCallFilter=~@privileged`, `SystemCallErrorNumber=EPERM` | systemd's set for ordinary services (`ioctl`, which CUDA uses, is in it), minus the privileged calls it still contains (`@chown`, `setuid`/`setgroups`, `chroot`, `bpf`, …). A system call outside it fails with `EPERM` instead of killing the process with `SIGSYS`. `@resources` (thread affinity, memory policy) stays allowed: llama.cpp places its threads. |
 | `PrivateUsers=yes` | Own user namespace: only `root` and `ollama` map to themselves, everyone else is `nobody`; no capabilities on the host. The GPU device nodes are world-accessible, so the `render`/`video` groups are not needed. |
 | `MemoryDenyWriteExecute=yes` | No writable and executable memory (no JIT). CUDA in this Ollama version loads ready-made kernels for these cards; re-test after upgrades. |
 | `Wants=`/`After=modprobe@nvidia_uvm.service` | A `DeviceAllow=` group that does not exist when the unit starts is silently dropped. udev loads `nvidia_uvm` at boot; this guarantees it is loaded before Ollama starts. |
