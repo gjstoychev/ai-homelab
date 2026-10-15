@@ -1,0 +1,28 @@
+---
+# Ollama's installer rewrites ollama.service on every run but never touches
+# ollama.service.d/, so everything of ours lives in drop-ins.
+- name: Create the Ollama drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/ollama.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the Ollama drop-ins
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/ollama.service.d/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - override.conf
+    - hardening.conf
+  notify: Restart Ollama
+
+- name: Keep Ollama enabled and running
+  ansible.builtin.systemd_service:
+    name: ollama
+    enabled: true
+    state: started

@@ -1,0 +1,6 @@
+---
+- name: Ollama
+  hosts: z790
+  become: true
+  roles:
+    - ollama

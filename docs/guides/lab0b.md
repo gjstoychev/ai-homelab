@@ -347,3 +347,33 @@ The growth of `anon` is the **KV cache of the layers on the CPU**: 640 MiB. The 
 - `MemoryHigh=16G` is about ten times what Ollama cannot give back (up to 1.6 GiB measured), and below the page cache it accumulates when models are switched (22 GiB measured): the cache is reclaimed above it.
 - `MemoryMax=32G` keeps at least half of the host's 64 GB for everything else. It can only be reached by memory that cannot be dropped, such as the KV cache of CPU layers with a very large context; then restarting Ollama is better than the kernel killing something else on the host.
 - What happens when a limit is reached (`OOMPolicy=`, `Restart=`) is decided in step 9; the limits are tested in step 12.
+
+## Step 8/18 — Design decisions
+
+**Why:** settle where the configuration lives before writing a role.
+
+**How Ollama's installer treats the unit** (`scripts/install.sh`, tag `v0.32.14`, read through the GitHub API): on every run it rewrites `/etc/systemd/system/ollama.service` unconditionally (`tee`), runs `daemon-reload`, `enable` and `restart`; it never touches `ollama.service.d/`. It also creates the system user `ollama` with home `/usr/share/ollama` (where the models live) and adds it to the groups `render` and `video`.
+
+**8a. Ollama: drop-in or own unit.**
+
+| Option | For | Against |
+|---|---|---|
+| **A (chosen):** drop-ins in `ollama.service.d/`, deployed by the role | Survive upgrades (the installer does not touch `.d/`); a clear line between Ollama's unit and ours | Depend on the base unit; a new `ExecStart` from an upgrade is not seen by the drop-in |
+| B: own `ollama.service` from the role | The whole unit in git | Every upgrade overwrites it; until the role runs again Ollama runs without restrictions |
+
+The existing `override.conf` (listen address, GPU wait) moves into the role with the same settings (its comments rewritten); hardening and limits go into a separate drop-in.
+
+**8b. The demo service's secret.** The secret never enters git.
+
+| Option | For | Against |
+|---|---|---|
+| **A (chosen):** `EnvironmentFile=`, root:root `0600`, created by hand; the role only checks that it exists with the right mode | No new tool; exactly the roadmap's topic | A manual step on a new host; the secret is in the process environment (readable by root and the same user through `/proc/<pid>/environ`) |
+| B: the same, content from Ansible Vault | Fully automated | Vault is planned for Lab 1; a vault password on two control points, and `--diff` prints the secret unless the task has `no_log`/`diff: false` |
+| C: `LoadCredential=` | The secret is a file only the service can read, not an environment variable | Not the roadmap's topic; shown as a comparison only |
+
+**8c. Roles and playbooks.**
+
+| Option | For | Against |
+|---|---|---|
+| **A (chosen):** role `ollama` (permanent, playbook `ollama.yml`) and role `lab0b_demo` (lab only, playbook `lab0b.yml`), both imported by `site.yml` | Different lifecycles: Ollama stays, the demo can be removed; the same split as `claude_code` vs `lab_tools` | Two roles for one lab |
+| B: one role `systemd_services` | Fewer files | Mixes permanent and temporary configuration |

@@ -7,3 +7,6 @@
 
 - name: Claude Code
   ansible.builtin.import_playbook: claude-code.yml
+
+- name: Ollama
+  ansible.builtin.import_playbook: ollama.yml

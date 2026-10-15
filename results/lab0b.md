@@ -18,6 +18,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
    `qwen3.8:27b` is split over both cards; the cgroup counts ≈ 23.1 GiB, because the page cache of the unloaded first model stays charged to it; `anon` + `shmem` is ≈ 1.4 GiB.
    With one of the two cards temporarily disabled for Ollama (restored afterwards), after dropping the page cache: `qwen3.8:27b` runs 25%/75% CPU/GPU in a separate `llama-server` process; the CPU layers are mapped from the model file (`file_mapped` ≈ 4.2 GiB), not anonymous memory; with a 32768-token context the KV cache of the CPU layers adds 640 MiB of anonymous memory.
    Decision: `MemoryHigh=16G` + `MemoryMax=32G` for Ollama.
+8. Design: Ollama keeps its installer-written unit (rewritten on every upgrade) and gets drop-ins from a role `ollama`; the demo service's secret is an `EnvironmentFile` (root, `0600`) created by hand; the demo lives in its own role `lab0b_demo` (step 8).
 
 ## Measurements
 
