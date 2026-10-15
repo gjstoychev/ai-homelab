@@ -86,9 +86,10 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - Check the SSH key in `~/.ssh`: a deploy key for ai-homelab only, or a personal key for the whole GitHub account. The setting for the Co-Authored-By line in commits.
 - Check that `bwrap` works with `apparmor_restrict_unprivileged_unconfined = 1` enabled.
 
-### [ ] Lab 0b — systemd as a platform (next)
+### [ ] Lab 0b — systemd as a platform (in progress)
 
-- Ollama and Ghostwheel as systemd services: `MemoryMax`, `CPUQuota`, `Restart=on-failure`, `ProtectSystem=strict`, `PrivateTmp`, `NoNewPrivileges`.
+- **Status (2026-10-15):** started. Scope change: the second service is a small demo service created for the lab (own unit, secrets in an `EnvironmentFile`).
+- Ollama and a demo service as systemd services: `MemoryMax`, `CPUQuota`, `Restart=on-failure`, `ProtectSystem=strict`, `PrivateTmp`, `NoNewPrivileges`.
 - `systemd-analyze security <unit>`: raise the score.
 - Ad-hoc limits: `systemd-run --scope -p MemoryMax=2G <cmd>`.
 

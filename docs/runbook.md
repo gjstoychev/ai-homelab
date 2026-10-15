@@ -291,3 +291,29 @@ Headless check that the sandbox works (refuses to start without it):
 ```bash
 claude -p 'Run: echo sandbox-ok'; echo "exit=$?"
 ```
+
+## Lab 0b: systemd
+
+Ad-hoc memory limit on any command (transient scope; `--expand-environment=no` passes `$` to the shell verbatim):
+
+```bash
+sudo systemd-run --scope --expand-environment=no -p MemoryMax=100M -p MemorySwapMax=0 -p OOMPolicy=continue sh -c '<cmd>; cat /sys/fs/cgroup$(cut -d: -f3 /proc/self/cgroup)/memory.events'
+```
+
+What systemd logged about a unit (including transient scopes):
+
+```bash
+journalctl -b --no-pager -u <unit>
+```
+
+Exposure score of a unit, summary and full report:
+
+```bash
+systemd-analyze security <unit> --no-pager
+```
+
+A unit and its drop-ins without D-Bus (e.g. from a sandbox):
+
+```bash
+cat /etc/systemd/system/<unit> /etc/systemd/system/<unit>.d/*.conf
+```

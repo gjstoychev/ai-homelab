@@ -1,0 +1,81 @@
+# Lab 0b — systemd as a Platform
+
+Date: 2026-10-15 · Z790, Ubuntu 24.04, HWE kernel 7.0, cgroup v2. Guide: `docs/guides/lab0b.md` (step numbers below refer to it).
+
+## Goal
+
+Run Ollama and a small demo service under systemd with resource limits and sandboxing directives, measure the hardening with `systemd-analyze security` before and after, and use `systemd-run --scope` for ad-hoc limits.
+
+## What I did
+
+1. Checked that Claude Code's sandbox is active: `/proc/self/attr/current` reads `claude-bwrap (unconfined)` (step 1).
+2. Versions: systemd 255 (255.4-1ubuntu8.17); Ollama 0.32.14 stays, while GitHub's latest release is 0.40.4 (checked 2026-10-15); upgrading is not part of this lab (step 2).
+3. Ollama today: the install script's unit plus a drop-in with `OLLAMA_HOST=0.0.0.0:11434` (shared by other clients on the server) and a GPU-wait `ExecStartPre` (guard against a start-up race that leaves Ollama on the CPU); no limits, no sandboxing; cgroup `/system.slice/ollama.service` (step 3).
+4. Baseline `systemd-analyze security`: `ollama.service` 9.2 UNSAFE (step 4).
+5. Second service decided: a demo `python3 -m http.server` with a secret in an `EnvironmentFile` (step 5).
+6. Ad-hoc limit with `systemd-run --scope -p MemoryMax=100M`: OOM kill inside the scope; with the default `OOMPolicy=stop` systemd then stops the whole unit (step 6).
+7. Memory with a model loaded: `llama3.1:8b` fully on one GPU; the cgroup counts ≈ 5.8 GiB, ≈ 5.3 GiB of it page cache (step 7).
+   `qwen3.8:27b` is split over both cards; the cgroup counts ≈ 23.1 GiB, because the page cache of the unloaded first model stays charged to it; `anon` + `shmem` is ≈ 1.4 GiB.
+   With one of the two cards temporarily disabled for Ollama (restored afterwards), after dropping the page cache: `qwen3.8:27b` runs 25%/75% CPU/GPU in a separate `llama-server` process; the CPU layers are mapped from the model file (`file_mapped` ≈ 4.2 GiB), not anonymous memory; with a 32768-token context the KV cache of the CPU layers adds 640 MiB of anonymous memory.
+   Decision: `MemoryHigh=16G` + `MemoryMax=32G` for Ollama.
+
+## Measurements
+
+| Item | Value |
+|---|---|
+| systemd | 255 (255.4-1ubuntu8.17), Ubuntu 24.04 |
+| Ollama | 0.32.14, `/usr/local/bin/ollama` |
+| Ollama releases (GitHub, 2026-10-15) | 0.40.4 (2026-10-12), 0.40.1 (2026-10-07), 0.40.0 (2026-09-25), 0.35.x, 0.34.x |
+
+`systemd-analyze security` (2026-10-15):
+
+| Unit | Before | After |
+|---|---|---|
+| `ollama.service` | 9.2 UNSAFE | |
+
+Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
+
+Ollama before the lab (2026-10-15, idle, no model loaded):
+
+| Item | Value |
+|---|---|
+| Unit | `/etc/systemd/system/ollama.service` + drop-in `override.conf`; `User=ollama`, `Restart=always`, `RestartSec=3` |
+| `MemoryCurrent` / `TasksCurrent` | 576724992 B (≈ 550 MiB) / 21 |
+| `MemoryMax` / `CPUQuotaPerSecUSec` / `TasksMax` | `infinity` / `infinity` / 70833 |
+
+`systemd-run --scope -p MemoryMax=100M -p MemorySwapMax=0`, 300 MB allocation (2026-10-15):
+
+| `OOMPolicy` | Shell output | `memory.events` | Unit result |
+|---|---|---|---|
+| default (`stop`) | `Terminated` | not printed | `Failed with result 'oom-kill'` |
+| `continue` | `Killed`, `exit=137` | `max 36`, `oom 1`, `oom_kill 1`, `oom_group_kill 0` | — |
+
+Ollama's cgroup with a model loaded (2026-10-15, default context 32768):
+
+| Model (on disk) | `ollama ps` | `memory.current` | `anon` | `file` | `file_mapped` | `shmem` | VRAM GPU0 / GPU1 |
+|---|---|---|---|---|---|---|---|
+| none | — | ≈ 550 MiB | | | | | |
+| `llama3.1:8b` (4.9 GB) | 9.2 GB, 100% GPU | 5.81 GiB | 524 MiB | 5.28 GiB | 524 MiB | 108 MiB | 8936 / 2 MiB |
+| `qwen3.8:27b` (17 GB), after unloading `llama3.1:8b` | 19 GB, 100% GPU (both cards) | 23.11 GiB | 711 MiB | 22.39 GiB | 1.47 GiB | 678 MiB | 10542 / 11008 MiB |
+| `qwen3.8:27b`, one card, page cache dropped first | 18 GB, 25%/75% CPU/GPU, context 4096 | 17.60 GiB | 671 MiB | 16.92 GiB | 4.23 GiB | 154 MiB | 14324 / 2 MiB |
+| same, `num_ctx` 32768 | 18 GB, 35%/65% CPU/GPU, context 32768 | 18.30 GiB | 1.30 GiB | 16.98 GiB | 5.53 GiB | 210 MiB | 14390 / 2 MiB |
+
+`llama-server` (the runner) in the one-card case: `Rss` 4.91 GiB = `Pss_File` 4.13 GiB (CPU layers, mapped from the model file) + `Pss_Anon` 639 MiB; with context 32768: `Rss` 6.85 GiB = `Pss_File` 5.38 GiB + `Pss_Anon` 1.26 GiB. llama.cpp's log for the 32768 load: CPU KV buffer 640 MiB, CUDA0 KV buffer 1408 MiB, CUDA0 model buffer 10665.58 MiB; the growth of `anon` (0.63 GiB) is the CPU part of the KV cache.
+
+## What surprised me
+
+- systemd's default `OOMPolicy=stop`: one process killed by the OOM killer stops the whole unit, not just that process.
+- Unloading a model frees VRAM, not the page cache of its file: Ollama's `memory.current` grows with every model read and is mostly cache, not need.
+- Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
+- Ollama's default context depends on total VRAM (below 24 GiB 4k, 24–48 GiB 32k): one card gives 4096 tokens, two give 32768.
+- The only part of a model on the CPU that is anonymous memory is its KV cache; it grows with the context.
+
+## Mistakes and dead ends
+
+## Open questions
+
+## Follow-ups for later labs
+
+## Step-by-step guide
+
+[docs/guides/lab0b.md](../docs/guides/lab0b.md)
