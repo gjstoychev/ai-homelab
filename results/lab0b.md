@@ -20,6 +20,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
    Decision: `MemoryHigh=16G` + `MemoryMax=32G` for Ollama.
 8. Design: Ollama keeps its installer-written unit (rewritten on every upgrade) and gets drop-ins from a role `ollama`; the demo service's secret is an `EnvironmentFile` (root, `0600`) created by hand; the demo lives in its own role `lab0b_demo` (step 8).
 9. Role `ollama` (drop-ins `override.conf` and `hardening.conf`): `Restart=on-failure`, `OOMPolicy=continue`, start limit 5 in 5 minutes (the default 5 in 10 s never triggers with `RestartSec=3`), `NoNewPrivileges`, `PrivateTmp`; lint clean (20 of 34 files), check and real run `ok=23 changed=2 skipped=2`; running state verified with `systemctl show`; score 9.2 → 8.7 (step 9).
+10. `ProtectSystem=strict` with `ReadWritePaths=` for `~/.ollama` and `~/.nv` (Ollama's home is `/usr/share/ollama`, under `/usr`), `ProtectHome=yes`; copy/delete of a model and a generation on the GPU work, no write errors; score 8.7 → 8.3 (step 10).
 
 ## Measurements
 
@@ -33,7 +34,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
-| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`) |
+| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
 

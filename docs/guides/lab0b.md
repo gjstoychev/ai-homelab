@@ -464,3 +464,84 @@ msg="inference compute" id=1 … library=CUDA … name=CUDA1 … pci_id=0000:02:
 ```
 
 Both cards are found after the restart (the GPU wait works), and the score drops from 9.2 UNSAFE to 8.7 EXPOSED.
+
+## Step 10/18 — `ProtectSystem=strict` and the paths Ollama writes
+
+**Why:** with `ProtectSystem=strict` the whole file system is read-only for the service; every path it must write has to be listed. Finding those paths is the work.
+
+**Documentation** (`man systemd.exec`, systemd 255):
+
+- `ProtectSystem=`: `yes` makes `/usr` and the boot loader directories read-only, `full` adds `/etc`, `strict` the entire hierarchy except the API file systems `/dev`, `/proc` and `/sys` (protected by other directives).
+- `ReadWritePaths=`: paths that stay writable inside the read-only hierarchy (a read-only file system stays read-only). A `-` prefix skips a path that does not exist.
+- `ProtectHome=`: `yes` makes `/home`, `/root` and `/run/user` empty and inaccessible; `read-only` and `tmpfs` are milder.
+
+**Where Ollama writes** (node, read-only):
+
+```bash
+ls -la /usr/share/ollama /usr/share/ollama/.ollama; du -sh /usr/share/ollama/.ollama/models
+```
+
+Ollama's home is `/usr/share/ollama` (created by the installer, step 8), **under `/usr`**: even the mildest `ProtectSystem=yes` would make it read-only. Inside: `.ollama/models` (the models, 85 GB here; written by `pull`, `cp`, `rm`, `create`), `.ollama/cache` (changed at every start), `.ollama/id_ed25519` (Ollama's key for ollama.com, created once), and `.nv` (NVIDIA's cache of compiled CUDA kernels).
+
+**Decision:**
+
+| Option | `ReadWritePaths=` | For | Against |
+|---|---|---|---|
+| A | `/usr/share/ollama` | Nothing can be missed | Shell start-up files in the home become writable too |
+| **B (chosen)** | `/usr/share/ollama/.ollama` and `-/usr/share/ollama/.nv` | Only what Ollama writes; `-` keeps a host without `.nv` starting | A future version writing elsewhere fails; the test has to catch it |
+| C | Move the models to `/var/lib/ollama` (`OLLAMA_MODELS`) | The usual place for a service's data | Moves 85 GB; out of scope |
+
+Plus `ProtectHome=yes`: Ollama has no business in `/home`.
+
+**Added to `roles/ollama/files/hardening.conf`:**
+
+```ini
+ProtectSystem=strict
+ReadWritePaths=/usr/share/ollama/.ollama -/usr/share/ollama/.nv
+ProtectHome=yes
+```
+
+**Command** (control node; root on the node through become):
+
+```bash
+ansible-playbook site.yml --limit z790 --check --diff
+ansible-playbook site.yml --limit z790 --diff
+```
+
+**Result:** `hardening.conf` `changed` with the three directives (and their comment) in the diff, the handler restarts Ollama; recap `ok=23 changed=2 skipped=2 failed=0` in both runs.
+
+**Verify the running state and the score** (node, no root):
+
+```bash
+systemctl show ollama -p ActiveState,NRestarts,ExecMainStartTimestamp
+systemctl show ollama -p ProtectSystem,ProtectHome,ReadWritePaths
+journalctl -u ollama -n 40 --no-pager | grep 'inference compute'
+journalctl -u ollama -n 200 --no-pager | grep -iE 'read-only|permission denied'
+systemd-analyze security ollama.service --no-pager | tail -n 1
+```
+
+**Result:** active, started by the handler, `ProtectSystem=strict`, `ProtectHome=yes`, both paths; both cards found after the restart; no write errors; **8.3 EXPOSED** (from 8.7).
+
+**Test the effect** (node, no root; nothing is downloaded): copying a model writes a manifest under `models/`, deleting it removes it; a short generation loads a model.
+
+```bash
+ollama cp llama3.1:8b lab0b-rw-test
+ollama list | grep lab0b-rw-test
+ollama rm lab0b-rw-test
+ollama run llama3.1:8b 'Say OK.' --keepalive 1m
+ollama ps
+journalctl -u ollama --since '-5min' --no-pager \
+  | grep -iE 'read-only|permission denied|error' || echo "(no errors)"
+```
+
+**Result:**
+
+```
+copied 'llama3.1:8b' to 'lab0b-rw-test'
+lab0b-rw-test:latest                  46e0c10c039e    4.9 GB    Less than a second ago
+deleted 'lab0b-rw-test'
+OK.
+NAME           ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+llama3.1:8b    46e0c10c039e    9.2 GB    100% GPU     32768      59 seconds from now
+(no errors)
+```
