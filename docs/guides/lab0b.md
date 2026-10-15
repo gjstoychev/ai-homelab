@@ -216,7 +216,7 @@ index, memory.used [MiB], memory.total [MiB]
 ```
 
 - The cgroup grows from ≈ 550 MiB (idle) to ≈ 5.8 GiB. About 5.3 GiB of it is `file`: page cache of the files Ollama read, mostly the model. `file_mapped` is only ≈ 524 MiB, so the weights are not kept mapped: they are read and copied into VRAM.
-- `anon` (≈ 524 MiB) and `shmem` (≈ 108 MiB) are what the kernel cannot simply drop (without swap). With the model fully on the GPU, that is ≈ 0.6 GiB.
+- `anon` (≈ 524 MiB) and `shmem` (≈ 108 MiB) are what the kernel cannot simply drop: it can only move them to swap (this host has 8 GiB, step 18). With the model fully on the GPU, that is ≈ 0.6 GiB.
 - VRAM: 8.7 GiB on one card. The default context is 32768 tokens; the KV cache of Llama-3.1-8B is 128 KiB per token (roadmap, Lab 5), so 4 GiB for the context on top of ≈ 4.6 GiB of weights. `SIZE 9.2 GB` in `ollama ps` is weights plus KV cache.
 
 **Second case** (the first model is unloaded with `keep_alive: 0`, then the larger one is loaded; same readings):
@@ -333,7 +333,7 @@ The growth of `anon` is the **KV cache of the layers on the CPU**: 640 MiB. The 
 - `memory.current` is not Ollama's need. Most of it is page cache: of the model files read since the start, including models already unloaded. The kernel can drop it under a limit; the price is a slower next load.
 - Layers that do not fit into VRAM are file pages mapped from the model, not anonymous memory. A limit below the model's CPU share makes the kernel re-read them from disk during inference: very slow, but not an OOM kill (tested with a real limit in step 12).
 - The KV cache of layers on the CPU is anonymous memory and grows linearly with the context. This is the part that a limit can turn into an OOM kill, and only when a model does not fit into VRAM.
-- What cannot be dropped (`anon` + `shmem`) is 0.6–1.6 GiB in every case measured.
+- What cannot be dropped as cache (`anon` + `shmem`; it can only go to swap) is 0.6–1.6 GiB in every case measured.
 
 **Decision: a memory limit for Ollama.** `man systemd.resource-control` (systemd 255): `MemoryHigh=` is "the main mechanism to control memory usage of a unit": above it the processes are slowed down and memory is taken away aggressively, but not killed. `MemoryMax=` is the last line of defense: the OOM killer.
 
@@ -345,7 +345,7 @@ The growth of `anon` is the **KV cache of the layers on the CPU**: 640 MiB. The 
 | D | no limit | No protection for the rest of the host |
 
 - `MemoryHigh=16G` is about ten times what Ollama cannot give back (up to 1.6 GiB measured), and below the page cache it accumulates when models are switched (22 GiB measured): the cache is reclaimed above it.
-- `MemoryMax=32G` keeps at least half of the host's 64 GB for everything else. It can only be reached by memory that cannot be dropped, such as the KV cache of CPU layers with a very large context; then restarting Ollama is better than the kernel killing something else on the host.
+- `MemoryMax=32G` keeps at least half of the host's 64 GB for everything else. It can only be reached by memory that cannot be dropped as cache, such as the KV cache of CPU layers with a very large context; then an OOM kill of the runner is better than the kernel killing something else on the host. `MemoryMax=` limits RAM only: with swap on the host, the rest would go to swap unless `MemorySwapMax=0` is set too (step 18).
 - What happens when a limit is reached (`OOMPolicy=`, `Restart=`) is decided in step 9; the limits are tested in step 12.
 
 ## Step 8/20 — Design decisions
@@ -948,7 +948,7 @@ Pss_Anon:        9066332 kB
 Pss_File:          10417 kB
 ```
 
-8.65 GiB of anonymous memory: ≈ 4.6 GiB of weights and the 4 GiB KV cache (32768 tokens × 128 KiB). The conclusion of step 7 holds for models partly on the GPU only; a model entirely on the CPU is memory the kernel cannot reclaim. Two of them exceed `MemoryHigh=16G` and would be throttled hard with nothing to reclaim. The limits stay (this is a GPU server); the role's README records the caveat.
+8.65 GiB of anonymous memory: ≈ 4.6 GiB of weights and the 4 GiB KV cache (32768 tokens × 128 KiB). The conclusion of step 7 holds for models partly on the GPU only; a model entirely on the CPU is memory the kernel cannot drop as cache. Two of them exceed `MemoryHigh=16G`: they are throttled, and with `MemorySwapMax=0` (step 18) nothing can go to swap either; at `MemoryMax` the runner is OOM-killed. The limits stay (this is a GPU server); the role's README records the caveat.
 
 **Clean-up:** `sudo rm $d/lab0b-trial.conf && sudo systemctl daemon-reload` (the running process keeps the trial settings until the next restart, which the role run makes).
 
@@ -1103,3 +1103,111 @@ cat: /proc/<pid>/environ: Permission denied
 - systemd shows the path of the file, not its content.
 - The variable is in the process environment; another user cannot read that environment, root can.
 - A service with a dynamic user cannot read the file itself: only systemd does, before the process starts.
+
+## Step 17/20 — Hardening the demo service
+
+**Why:** how low the score can go for a service without a GPU, without downloads and without files of other users; the comparison with Ollama shows what the GPU and the network cost.
+
+**Starting point** (`systemd-analyze security lab0b-demo.service --no-pager | grep '✗'`): almost the same list as Ollama's at step 4, minus the six directives `DynamicUser=` implies.
+
+**Documentation for the new directives** (`man systemd.resource-control`, systemd 255): `IPAddressAllow=` and `IPAddressDeny=` filter IP packets in both directions for all sockets of the unit (ingress by source address, egress by destination), with eBPF on the cgroup. An address in the allow list is accepted, then one in the deny list is refused, otherwise accepted. `any` is `0.0.0.0/0 ::/0`, `localhost` is `127.0.0.0/8 ::1/128`.
+
+**Decision:** the same set as Ollama (steps 9–15), plus what Ollama cannot have:
+
+| Directive | Possible here because |
+|---|---|
+| `PrivateDevices=yes` | No devices needed |
+| `ProcSubset=pid` | `http.server` does not read `/proc/meminfo` |
+| `IPAddressDeny=any`, `IPAddressAllow=localhost` | Only local clients, nothing outgoing |
+| `SystemCallFilter=~@privileged @resources` | No thread placement or memory policy |
+| `UMask=0077`, `ProtectHome=yes` | Nobody else reads the demo's files; no need for `/home` even read-only |
+| `RestrictAddressFamilies=AF_INET` | Only IPv4 sockets (`AF_INET AF_UNIX` was the alternative, without a measured need) |
+
+Limits: `MemoryMax=64M`, `CPUQuota=50%`, `TasksMax=16`, and `Restart=on-failure`. Here the default start limit (5 starts in 10 s) does trigger: `RestartSec=` defaults to 100 ms.
+
+**Added to `roles/lab0b_demo/files/lab0b-demo.service`:**
+
+```ini
+Restart=on-failure
+MemoryMax=64M
+CPUQuota=50%
+TasksMax=16
+ProtectHome=yes
+PrivateDevices=yes
+PrivateUsers=yes
+CapabilityBoundingSet=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET
+IPAddressDeny=any
+IPAddressAllow=localhost
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+SystemCallErrorNumber=EPERM
+UMask=0077
+```
+
+**Command** (control node): `--check --diff`, then the real run. **Result:** the unit `changed`, the handler restarts the service; recap `ok=28 changed=2 failed=0`.
+
+**Test** (node, no root):
+
+```bash
+systemctl show lab0b-demo --no-pager -p ActiveState,NRestarts,MemoryCurrent,TasksCurrent
+curl -s -o /dev/null -w 'http=%{http_code}\n' http://127.0.0.1:8765/
+journalctl -u lab0b-demo -n 20 --no-pager
+systemd-analyze security lab0b-demo.service --no-pager | tail -n 1
+```
+
+**Result:** active, `NRestarts=0`, `MemoryCurrent=10207232` (9.7 MiB), `TasksCurrent=1`; `http=200`; the journal shows the restart and `"GET / HTTP/1.1" 200`, no errors; **0.9 SAFE** 😀.
+
+**Test the secret and the IP filter** (node; the `sudo` lines need root). A process cannot be put into a running service, but `IPAddressDeny=` is a property of the service's cgroup: a process moved into that cgroup gets the filter (and the resource limits), not the service's seccomp filter or namespaces. A short script, `work/lab0b/egress-test.py` (not in the repository), opens a TCP connection to `1.1.1.1:443` and one to `127.0.0.1:8765` and prints the result of each; it runs once normally as a control and once inside the cgroup (`echo $$ > …/cgroup.procs` moves the shell, `exec` replaces it with Python):
+
+```bash
+p=$(systemctl show lab0b-demo -p MainPID --value)
+sudo sh -c "tr '\0' '\n' < /proc/$p/environ" | grep -c '^DEMO_TOKEN='
+t=<repo>/work/lab0b/egress-test.py
+python3 -I $t
+cg=/sys/fs/cgroup/system.slice/lab0b-demo.service
+sudo sh -c "echo \$\$ > $cg/cgroup.procs; exec python3 -I $t"
+```
+
+**Result:**
+
+```
+1
+1.1.1.1:443: connected          # control, outside the service
+127.0.0.1:8765: connected
+1.1.1.1:443: timed out          # inside the service's cgroup
+127.0.0.1:8765: connected
+```
+
+The secret still reaches the process under `PrivateUsers=` and `ProtectProc=`. The IP filter **drops** packets silently: the program sees a timeout, not "permission denied". When a service with `IPAddressDeny=` cannot reach something, it looks like an unreachable host.
+
+**What is still failed** (`systemd-analyze security lab0b-demo.service --no-pager | grep '✗'`):
+
+| Check | Value | Why it stays |
+|---|---|---|
+| `PrivateNetwork=` | 0.5 | It listens on the host's loopback; with an own network namespace the host could not reach it |
+| `RestrictAddressFamilies=~AF_(INET\|INET6)` | 0.3 | `AF_INET` is allowed so that it can listen |
+| `RootDirectory=`/`RootImage=` | 0.1 | It runs in the host's root |
+| `DeviceAllow=` | 0.1 | `char-rtc:r` stays even with `PrivateDevices=yes`: `ProtectClock=yes` adds it |
+| `IPAddressDeny=` | 0.1 | Partly: an allow list "with only localhost entries" |
+
+**Comparison:**
+
+| | Ollama | Demo |
+|---|---|---|
+| Score at the start | 9.2 UNSAFE | 8.2 EXPOSED (only `DynamicUser`, `StateDirectory`, `EnvironmentFile`) |
+| Score at the end | 1.4 OK | 0.9 SAFE |
+| What keeps the rest | network to clients and the internet, GPU devices, `/proc/meminfo`, thread placement | a network listener on loopback |

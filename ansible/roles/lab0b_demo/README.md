@@ -27,7 +27,7 @@ The role stops with an error if the file is missing or is not `root:root 0600`.
 | `StateDirectory=lab0b-demo` | systemd creates `/var/lib/lab0b-demo` and gives it to the dynamic user; it stays writable under `ProtectSystem=strict`. |
 | `EnvironmentFile=/etc/lab0b-demo.env` | Read by systemd (as root) before the process starts, so the service user never needs to read the file. Without a `-` prefix a missing file stops the service from starting. |
 | `Restart=on-failure` | Restart after a crash. The default start limit (5 starts in 10 s) does trigger here: `RestartSec` is 100 ms by default. |
-| `MemoryMax=64M`, `CPUQuota=50%`, `TasksMax=16` | A small server: one process, a thread per request. |
+| `MemoryMax=64M`, `MemorySwapMax=0`, `CPUQuota=50%`, `TasksMax=16` | A small server: one process, a thread per request. Without `MemorySwapMax=0`, `MemoryMax=` limits RAM only and the rest goes to swap. |
 | The hardening block | The same set as `ollama` (see `roles/ollama/README.md`), plus what Ollama cannot have: `PrivateDevices=yes`, `ProcSubset=pid`, `IPAddressDeny=any` with `IPAddressAllow=localhost` (all IP traffic of the unit, both directions, filtered with eBPF), `SystemCallFilter=~@resources`, `ProtectHome=yes`, `UMask=0077`, and only `AF_INET` sockets. |
 
 ## Removal
