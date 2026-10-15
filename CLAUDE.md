@@ -12,7 +12,7 @@
 # Claude Code on z790 (Lab 0f)
 
 - Shell commands run in Claude Code's sandbox (managed settings in `/etc/claude-code/`, role `claude_code`): the home directory is read-only, the network goes only to the allowlisted hosts, and there is no SSH, no Ollama on localhost and no GPU. If a command hits the sandbox, report the restriction; do not look for a way around it.
-- Stage explicit paths (`git add <file> …`). Never `git add -A` or `git add .` from a sandboxed command: the sandbox's placeholders for protected paths (`.bashrc`, `.gitconfig`, `.mcp.json`, …) appear as untracked files inside it.
+- `git add` and `git commit` are pre-approved in `.claude/settings.json` (the diff and the exclusion check are still shown, and nothing is committed before the user approves in the conversation); `git push` is the user's. Stage explicit paths (`git add <file> …`). Never `git add -A` or `git add .` from a sandboxed command: the sandbox's placeholders for protected paths (`.bashrc`, `.gitconfig`, `.mcp.json`, …) appear as untracked files inside it.
 - Claude writes Ansible; the user runs it from the control node. Connection-free checks (`--syntax-check`, `ansible-lint`) work in the sandbox; `ANSIBLE_LOCAL_TEMP` comes from `.claude/settings.json`.
 - `ansible/roles/claude_code/files/{managed-settings.json,claude-bwrap}` define the sandbox and take effect when the role runs. Call out every change to them explicitly when asking for approval.
 - Do not ask to read `/proc/<pid>/environ` with the file tools (they run outside the sandbox; process environments hold tokens).

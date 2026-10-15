@@ -3,7 +3,9 @@
     "allow": [
       "Read(//etc/**)",
       "Read(//usr/share/**)",
-      "Read(//sys/**)"
+      "Read(//sys/**)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   },
   "env": {

@@ -941,6 +941,7 @@ What *does* still loosen it, per the documentation: managed settings, `--setting
 
 - **Allow** system reads in the repository's `.claude/settings.json` (committed; applies to this repository only; a repository may add permission rules under an admin-required sandbox, it just cannot loosen the sandbox): `Read(//etc/**)`, `Read(//usr/share/**)`, `Read(//sys/**)`. Secrets in `/etc` (`shadow`) are protected by Unix permissions anyway.
 - **Not** `Read(//proc/**)`. The Read tool runs **outside** the sandbox, and `/proc/<pid>/environ` of every process of the user is readable to the user: Claude Code's own session token, a bot's token. Without a rule that takes one approval; an allow rule would make it silent. The opposite, a deny rule `Read(//proc/**/environ)`, is not usable either: permission deny rules are merged into the sandbox and their globs are expanded at every command, and over `/proc` that is every process on the host, past bwrap's limit of 9000 arguments (about 3000 mounts). No rule then: in manual mode such a read asks for approval, and `CLAUDE.md` says not to approve it. Sandboxed commands cannot reach it anyway: they have their own PID namespace and a fresh `/proc` (step 22).
+- **`git add` and `git commit` without a tool prompt:** `Bash(git add *)` and `Bash(git commit *)` in the repository's settings. Both already run inside the sandbox; the allow rules only remove the extra approval prompt. The review gate stays in the conversation: the diff and the exclusion check are shown, and nothing is committed before the user says so. `git push` stays with the user (deny rule, hidden deploy keys, `github.com` not on the allowlist).
 - **Ansible in the sandbox without `export`:** `env.ANSIBLE_LOCAL_TEMP` in the repository's settings with a fixed path inside the sandbox's writable temp directory, `/tmp/claude-1000/ansible-tmp` (settings `env` values do not expand `$TMPDIR`).
 
 **Files:**
@@ -948,7 +949,7 @@ What *does* still loosen it, per the documentation: managed settings, `--setting
 ```json
 // <repo>/.claude/settings.json
 {
-  "permissions": { "allow": ["Read(//etc/**)", "Read(//usr/share/**)", "Read(//sys/**)"] },
+  "permissions": { "allow": ["Read(//etc/**)", "Read(//usr/share/**)", "Read(//sys/**)", "Bash(git add *)", "Bash(git commit *)"] },
   "env": { "ANSIBLE_LOCAL_TEMP": "/tmp/claude-1000/ansible-tmp" }
 }
 ```
