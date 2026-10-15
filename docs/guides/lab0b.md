@@ -1211,3 +1211,145 @@ The secret still reaches the process under `PrivateUsers=` and `ProtectProc=`. T
 | Score at the start | 9.2 UNSAFE | 8.2 EXPOSED (only `DynamicUser`, `StateDirectory`, `EnvironmentFile`) |
 | Score at the end | 1.4 OK | 0.9 SAFE |
 | What keeps the rest | network to clients and the internet, GPU devices, `/proc/meminfo`, thread placement | a network listener on loopback |
+
+## Step 18/20 — Deliberate failures
+
+**Why:** the restart, start-limit and OOM decisions of step 9 have only been read in the documentation so far. One question was open: does `Restart=on-failure` restart a service that `OOMPolicy=stop` has stopped?
+
+All on the node; `kill`, `set-property` and moving a process into a service's cgroup need root.
+
+**1. `kill -9` of Ollama.** SIGKILL is not one of the four "clean" signals, so `Restart=on-failure` applies.
+
+```bash
+systemctl show ollama --no-pager -p MainPID,NRestarts
+sudo kill -9 "$(systemctl show ollama -p MainPID --value)"
+sleep 15
+systemctl show ollama --no-pager -p ActiveState,MainPID,NRestarts
+journalctl -u ollama -n 30 --no-pager \
+  | grep -E 'Main process exited|Failed with result|Scheduled restart|Started ollama|inference compute'
+```
+
+**Result:** a new `MainPID`, `NRestarts=1`, active. Journal: `Main process exited, code=killed, status=9/KILL`, `Failed with result 'signal'`, 4 s later `Scheduled restart job, restart counter is at 1`, `Started`, both cards found 4 s after the start.
+
+**2. A crash loop and the start limit** (5 starts in 5 minutes, step 9). One start is already in the window; four more kills give starts 2–5, the fifth kill asks for a sixth. `[ "$pid" -gt 0 ]` matters: `kill -9 0` would kill the caller's own process group if Ollama is between restarts.
+
+```bash
+for i in 1 2 3 4 5; do
+  pid=$(systemctl show ollama -p MainPID --value)
+  echo "kill $i: pid=$pid"
+  [ "$pid" -gt 0 ] && sudo kill -9 "$pid"
+  sleep 8
+done
+systemctl show ollama --no-pager -p ActiveState,Result,NRestarts
+journalctl -u ollama -n 40 --no-pager \
+  | grep -E 'Scheduled restart|repeated too quickly|start-limit'
+```
+
+**Result:**
+
+```
+ActiveState=failed
+Result=signal
+NRestarts=6
+… Scheduled restart job, restart counter is at 6.
+… Start request repeated too quickly.
+```
+
+- The sixth start is refused and Ollama stays `failed`.
+- `NRestarts` counts scheduled restarts, the refused one included (6, not 5).
+- `Result=` keeps the cause of the last process failure (`signal`); the start limit shows up only in the journal (`Start request repeated too quickly`). When a service does not come back, read the journal, not just `Result=`.
+
+Recovery: `reset-failed` clears the counter (without it, `start` works again only after the 5-minute window).
+
+```bash
+sudo systemctl reset-failed ollama
+sudo systemctl start ollama
+systemctl show ollama --no-pager -p ActiveState,Result,NRestarts
+```
+
+Result: active, `Result=success`, `NRestarts=0`, both cards found.
+
+**3. OOM in the demo service** (`OOMPolicy=stop`, the default, and `Restart=on-failure`). A process moved into the service's cgroup (as for the IP filter in step 17) gets its memory limits; it allocates 200 MB under `MemoryMax=64M`, and the OOM killer takes the largest process in the cgroup, which is that process:
+
+```bash
+cg=/sys/fs/cgroup/system.slice/lab0b-demo.service
+systemctl show lab0b-demo --no-pager -p MainPID,NRestarts
+sudo sh -c "echo \$\$ > $cg/cgroup.procs; exec python3 -I -c 'b=b\"x\"*(200*1024*1024)'"
+echo "exit=$?"
+sleep 5
+systemctl show lab0b-demo --no-pager -p ActiveState,Result,NRestarts,MainPID
+journalctl -u lab0b-demo -n 15 --no-pager | grep -vE '"GET '
+curl -s -o /dev/null -w 'http=%{http_code}\n' http://127.0.0.1:8765/
+```
+
+**First result: no OOM at all.** `exit=0`; the allocation succeeded and the service was untouched. The host has 8 GiB of swap (`/proc/swaps`), and the cgroup's own counters show where the memory went:
+
+```bash
+cg=/sys/fs/cgroup/system.slice/lab0b-demo.service
+for f in memory.max memory.swap.max memory.peak memory.swap.peak memory.events; do
+  printf '%s: ' $f; tr '\n' ' ' < $cg/$f; echo; done
+```
+
+```
+memory.max: 67108864
+memory.swap.max: max
+memory.peak: 67108864
+memory.swap.peak: 162553856
+memory.events: low 0 high 0 max 629 oom 0 oom_kill 0 oom_group_kill 0 sock_throttled 0
+```
+
+RAM stopped exactly at the limit (hit 629 times) and 155 MiB went to swap. **`MemoryMax=` limits RAM only**; `MemorySwapMax=` (`man systemd.resource-control`: the limit on swap, `memory.swap.max`, none by default) is separate. Step 6 set it to 0 for the scope; the units did not.
+
+**Decision:**
+
+| Option | Effect | Against |
+|---|---|---|
+| **A (chosen):** `MemorySwapMax=0` for both services | `MemoryMax=` is a real ceiling: above it the OOM killer, as designed (`OOMPolicy=continue` kills Ollama's runner, the demo restarts) | No buffer: a peak above the limit is an OOM kill |
+| B: no swap limit | Above `MemoryMax=` the service slows down through swap | A model or KV cache in swap means answers in minutes instead of an error a client can handle; the limit does not do what it says |
+| C: a small swap limit (`MemorySwapMax=1G`) | A buffer for peaks | Hard to reason about, still slow |
+
+Added to both roles (`hardening.conf` and `lab0b-demo.service`): `MemorySwapMax=0`. Check and real run from the control node: both files `changed`, both handlers restart their services, recap `ok=29 changed=4 failed=0`. Running state: `memory.swap.max` `0` and `MemorySwapMax=0` for both.
+
+**The same test again:**
+
+```
+Killed
+exit=137
+… lab0b-demo.service: A process of this unit has been killed by the OOM killer.
+… lab0b-demo.service: Failed with result 'oom-kill'.
+… lab0b-demo.service: Scheduled restart job, restart counter is at 1.
+… Started lab0b-demo.service - Lab 0b demo service (python3 -m http.server).
+ActiveState=active  NRestarts=1  (new MainPID)  http=200
+```
+
+**Answer to the open question: yes.** `OOMPolicy=stop` stops the unit as a failure (`Result=oom-kill`), not as an ordinary stop, and `Restart=on-failure` brings it back (within the same second: `RestartSec=` defaults to 100 ms).
+
+**4. OOM in Ollama** (`OOMPolicy=continue`). The memory limit is lowered for the test only with `systemctl set-property --runtime` (a file under `/run/systemd/system.control/`, gone after a reboot; the change applies at once, without a restart). No model is loaded, so a 6 GiB allocation is the largest process in the cgroup:
+
+```bash
+ollama ps
+sudo systemctl set-property --runtime ollama MemoryMax=4G
+systemctl show ollama --no-pager -p MemoryMax,MainPID,NRestarts,DropInPaths
+cg=/sys/fs/cgroup/system.slice/ollama.service
+sudo sh -c "echo \$\$ > $cg/cgroup.procs; exec python3 -I -c 'b=b\"x\"*(6*1024**3)'"
+echo "exit=$?"
+sleep 5
+systemctl show ollama --no-pager -p ActiveState,MainPID,NRestarts,Result
+grep -E '^(oom|oom_kill) ' $cg/memory.events
+journalctl -u ollama -n 10 --no-pager | grep -E 'OOM|Failed with|Scheduled|Started'
+curl -s localhost:11434/api/version
+```
+
+**Result:** `MemoryMax=4294967296`, a new drop-in `/run/systemd/system.control/ollama.service.d/50-MemoryMax.conf`; `Killed`, `exit=137`; the same `MainPID`, `NRestarts=0`, active; `oom 1`, `oom_kill 1`; the journal has only `A process of this unit has been killed by the OOM killer.`, no `Failed with result`, no restart; the API answers. `OOMPolicy=continue` keeps the service and loses only the victim.
+
+**Undo** (not `systemctl revert ollama`: it removes every drop-in of the unit, the role's in `/etc` included):
+
+```bash
+sudo systemctl set-property --runtime ollama MemoryMax=32G
+sudo rm /run/systemd/system.control/ollama.service.d/50-MemoryMax.conf
+sudo systemctl daemon-reload
+systemctl show ollama --no-pager -p MemoryMax,DropInPaths
+cat /sys/fs/cgroup/system.slice/ollama.service/memory.max
+```
+
+Result: `MemoryMax=34359738368` in systemd and in the cgroup, only the two drop-ins in `/etc`.

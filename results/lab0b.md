@@ -30,6 +30,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
     Final: `SystemCallFilter=~@privileged` added (the `@system-service` set still contains privileged calls); score 1.4 OK; the regression tests pass on the final configuration (CPU 13.5 tokens/s).
 16. Demo service, role `lab0b_demo`: `python3 -m http.server` on `127.0.0.1:8765`, `DynamicUser=yes`, `StateDirectory=`, `EnvironmentFile=/etc/lab0b-demo.env` (root:root `0600`, created by hand, asserted by the role). First check mode run `failed=1` (unit not there yet), real run `ok=28 changed=3`. The secret reaches the process; neither another user nor the service user can read it; systemd shows only the path. Score 8.2 (step 16).
 17. Demo hardening: the Ollama set plus `PrivateDevices`, `ProcSubset=pid`, `IPAddressDeny=any`/`IPAddressAllow=localhost`, `~@resources`, `ProtectHome=yes`, `UMask=0077`, `AF_INET` only; `MemoryMax=64M`, `CPUQuota=50%`, `TasksMax=16`. Works (`http=200`, 9.7 MiB, 1 task), the secret still reaches it, outgoing traffic from its cgroup times out while loopback connects; score 8.2 → 0.9 SAFE (step 17).
+18. Deliberate failures: `kill -9` → Ollama back in 4 s (`NRestarts=1`); a crash loop stops at the start limit (`Start request repeated too quickly`, `failed`, `NRestarts=6`, `Result=signal`), `reset-failed` + `start` recovers it. OOM in the demo: first no OOM at all (the allocation went to swap: `MemoryMax=` limits RAM only), so both services got `MemorySwapMax=0`; then `oom-kill` and `Restart=on-failure` restarts it. OOM in Ollama with `OOMPolicy=continue` (temporary `MemoryMax=4G`): only the victim is killed, the service keeps running (step 18).
 
 ## Measurements
 
@@ -90,7 +91,21 @@ CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
 | no quota | 13.6 | 789% | — |
 | `CPUQuota=1600%` | 13.2 | 783% | 0 |
 
+Deliberate failures (2026-10-15):
+
+| Test | Result |
+|---|---|
+| `kill -9` Ollama | restarted after 4 s, `NRestarts=1`, both cards back |
+| 5 more kills within a minute | 6th start refused, `failed`, `Result=signal`, `NRestarts=6` |
+| 200 MB in the demo's cgroup, `MemoryMax=64M`, no swap limit | no OOM: `memory.peak` 64 MiB, `memory.swap.peak` 155 MiB, `max 629` |
+| the same with `MemorySwapMax=0` | `exit=137`, `Result=oom-kill`, restarted (`NRestarts=1`) |
+| 6 GiB in Ollama's cgroup, `MemoryMax=4G` (temporary), `OOMPolicy=continue` | victim killed (`oom_kill 1`), same `MainPID`, `NRestarts=0` |
+
 ## What surprised me
+
+- `MemoryMax=` limits RAM only: on a host with swap, a service above its limit goes to swap instead of being OOM-killed. `MemorySwapMax=0` makes the limit real.
+- `OOMPolicy=stop` counts as a failure: `Restart=on-failure` brings the service back.
+- `NRestarts` counts the restart refused by the start limit, and `Result=` does not show the start limit; only the journal does.
 
 - systemd's default `OOMPolicy=stop`: one process killed by the OOM killer stops the whole unit, not just that process.
 - systemd's default start limit (5 starts in 10 s) never triggers for a service with `RestartSec=3`: a permanently broken service restarts forever.
