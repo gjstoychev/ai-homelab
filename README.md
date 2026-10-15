@@ -18,7 +18,7 @@ One RTX 5060 Ti will later move to `b760` to compare single-node multi-GPU (scal
 - Lab 0a — Container from Scratch: `results/lab0a.md`. Write-up: [A container in 81 lines of Bash](https://gshell.dev/blog/container-from-scratch/)
 - Lab 0g — Ansible Fundamentals: `results/lab0g.md`. Write-up: [From manual tweaks to Ansible roles](https://gshell.dev/blog/ansible-first-steps/)
 - Lab 0f — Claude Code on a Linux Server: `results/lab0f.md`. Write-up: [Sandboxing Claude Code on Ubuntu](https://gshell.dev/blog/claude-code-sandbox/)
-- Lab 0b — systemd as a Platform: `results/lab0b.md`
+- Lab 0b — systemd as a Platform: `results/lab0b.md`. Write-up: [Hardening Ollama with systemd](https://gshell.dev/blog/systemd-ollama/)
 - Lab 0c — iptables → nftables
 - Lab 0d — Python for Infrastructure
 - Lab 0e — Nagios → Prometheus

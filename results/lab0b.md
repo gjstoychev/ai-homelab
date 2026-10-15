@@ -1,5 +1,7 @@
 # Lab 0b — systemd as a Platform
 
+Write-up: [Hardening Ollama with systemd](https://gshell.dev/blog/systemd-ollama/)
+
 Date: 2026-10-15 · Z790, Ubuntu 24.04, kernel 7.0.0-38-generic, cgroup v2, systemd 255 (255.4-1ubuntu8.17), Ollama 0.32.14, 2× RTX 5060 Ti 16 GB, 64 GB RAM, 8 GiB swap file. Guide: `docs/guides/lab0b.md` (step numbers below refer to it).
 
 ## Goal
