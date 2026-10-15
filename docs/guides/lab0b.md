@@ -990,3 +990,116 @@ SystemCallFilter=~@privileged
 **Result:** `✓ SystemCallFilter=~@privileged … @privileged is not included`; both cards found within 4 seconds of the start; **1.4 OK** 🙂.
 
 **Regression tests on the final configuration** (step 14, all of them): copy and delete, pull, `dims 384`, the container client (`{"version":"0.32.14"}`), `qwen3.8:27b` `100% GPU` on both cards (10554 / 11016 MiB), `Red`, CPU speed 13.5 tokens/s at 790% with `nr_throttled 0`; nothing in the journal.
+
+## Step 16/20 — The demo service: a unit of our own with a secret
+
+**Why:** Ollama's unit belongs to its installer; a service of our own shows what a unit can do from the start, and how a secret reaches a service without entering git. The service is deliberately trivial: `python3 -m http.server` on loopback.
+
+**Documentation** (`man systemd.exec`, systemd 255):
+
+- `DynamicUser=yes`: a user and group are allocated from 61184–65519 when the unit starts and released when it stops; nothing in `/etc/passwd`. It implies `RemoveIPC=`, `PrivateTmp=`, `NoNewPrivileges=`, `RestrictSUIDSGID=`, `ProtectSystem=strict` and `ProtectHome=read-only`.
+- `StateDirectory=<name>`: systemd creates `/var/lib/<name>` for the service user, writable under `ProtectSystem=strict` (the modern replacement for `ReadWritePaths=` for a service's own data; the path is in `$STATE_DIRECTORY`). With a dynamic user the directory lives in `/var/lib/private/<name>`, inaccessible to unprivileged users, so that a recycled UID cannot reach old data; `/var/lib/<name>` is a symbolic link to it.
+- `EnvironmentFile=`: read by the service manager (as root) shortly before the process starts, before any mount namespacing. A root-only file works for any service user. Without the `-` prefix a missing file stops the service from starting.
+
+**Decisions:**
+
+| Topic | Chosen | Alternative and why not |
+|---|---|---|
+| User | `DynamicUser=yes` | A system user created by the role: one more account to manage and remove |
+| Data | `StateDirectory=lab0b-demo` (`/var/lib/lab0b-demo`), served by `http.server` | `ReadWritePaths=`: already shown with Ollama |
+| Network | `127.0.0.1:8765` only (the port was free: `ss -ltnH 'sport = :8765'`) | Any wider binding exposes the demo |
+| Secret | `/etc/lab0b-demo.env`, root:root `0600`, one variable `DEMO_TOKEN`, created by hand; the role only asserts it exists with that owner and mode | Ansible Vault (step 8) |
+
+**Files** (`<repo>/ansible`):
+
+- `roles/lab0b_demo/files/lab0b-demo.service`:
+
+  ```ini
+  [Unit]
+  Description=Lab 0b demo service (python3 -m http.server)
+
+  [Service]
+  ExecStart=/usr/bin/python3 -m http.server 8765 --bind 127.0.0.1 --directory /var/lib/lab0b-demo
+  DynamicUser=yes
+  StateDirectory=lab0b-demo
+  EnvironmentFile=/etc/lab0b-demo.env
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+- `roles/lab0b_demo/tasks/main.yml`: `stat` of the secrets file and an `assert` (exists, `root`/`root`, `0600`; a clear message otherwise; works in check mode), the unit (`copy`, `0644`, `notify: Restart the demo service`), the service `enabled` + `started` with `daemon_reload: true`.
+- `roles/lab0b_demo/handlers/main.yml`, `roles/lab0b_demo/README.md` (how to create the secret, how to remove the role).
+- `lab0b.yml` (`hosts: z790`, `become: true`), imported at the end of `site.yml`.
+
+**The secret, by hand** (node, root). `install` creates the file empty and already `0600`, so the value is never world-readable, not even for a moment; the value is random and never printed:
+
+```bash
+sudo install -o root -g root -m 0600 /dev/null /etc/lab0b-demo.env
+printf 'DEMO_TOKEN=%s\n' "$(openssl rand -hex 16)" \
+  | sudo tee /etc/lab0b-demo.env >/dev/null
+sudo ls -l /etc/lab0b-demo.env
+```
+
+Result: `-rw------- 1 root root 44 … /etc/lab0b-demo.env`.
+
+**Command** (node in `<repo>/ansible`, then the control node after `git pull --ff-only`; then from the control node):
+
+```bash
+ansible-playbook site.yml --syntax-check && ansible-lint
+ansible-playbook site.yml --limit z790 --check --diff
+ansible-playbook site.yml --limit z790 --diff
+```
+
+**Result:**
+
+- Lint on both: `Passed: 0 failure(s), 0 warning(s) in 24 files processed of 40 encountered`.
+- **The first check mode run fails, as expected:**
+
+  ```
+  TASK [lab0b_demo : Keep the demo service enabled and running]
+  fatal: [z790]: FAILED! => {"changed": false, "msg": "Could not find the requested service lab0b-demo: host"}
+  PLAY RECAP
+  z790 : ok=26 changed=1 unreachable=0 failed=1 skipped=2
+  ```
+
+  The same chain as Lab 0f's first run (step 8 there): in check mode the unit file is only reported as `changed`, not written, so systemd does not know the service the next task asks about. Only on a host where the unit does not exist yet.
+- Real run: recap `ok=28 changed=3 failed=0` (the unit, the service started and enabled, the handler).
+
+**Test the service** (node, no root):
+
+```bash
+systemctl show lab0b-demo --no-pager -p ActiveState,MainPID,User,DynamicUser
+ls -ld /var/lib/lab0b-demo /var/lib/private/lab0b-demo
+curl -s -o /dev/null -w 'http=%{http_code}\n' http://127.0.0.1:8765/
+systemd-analyze security lab0b-demo.service --no-pager | tail -n 1
+```
+
+**Result:** `ActiveState=active`, `User=lab0b-demo`, `DynamicUser=yes`; `/var/lib/lab0b-demo -> private/lab0b-demo`, and `/var/lib/private/lab0b-demo` is `Permission denied` for an unprivileged user; `http=200`; **8.2 EXPOSED** 🙁. The six directives `DynamicUser=` implies are almost the set Ollama had after step 10 (8.3): they weigh little in the score.
+
+**Test the secret** (node; the `sudo` lines need root; only the presence of the variable is counted, never its value):
+
+```bash
+p=$(systemctl show lab0b-demo -p MainPID --value)
+systemctl show lab0b-demo --no-pager -p EnvironmentFiles,Environment
+cat /proc/$p/environ >/dev/null && echo "readable" || true
+sudo sh -c "tr '\0' '\n' < /proc/$p/environ" | grep -c '^DEMO_TOKEN='
+sudo systemd-run --wait --pipe --quiet -p DynamicUser=yes \
+  cat /etc/lab0b-demo.env
+```
+
+`sudo sh -c "… < file"`: with `sudo cmd < file` the redirection is done by the calling, unprivileged shell.
+
+**Result:**
+
+```
+EnvironmentFiles=/etc/lab0b-demo.env (ignore_errors=no)
+Environment=
+cat: /proc/<pid>/environ: Permission denied
+1
+/usr/bin/cat: /etc/lab0b-demo.env: Permission denied
+```
+
+- systemd shows the path of the file, not its content.
+- The variable is in the process environment; another user cannot read that environment, root can.
+- A service with a dynamic user cannot read the file itself: only systemd does, before the process starts.

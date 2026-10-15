@@ -28,6 +28,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 14. Regression tests: copy/delete/pull, embeddings, a client in a Docker container, a two-card model, an image through the vision encoder, CPU speed (13.4 tokens/s, unchanged); all pass, no errors in the journal (step 14).
 15. The risky directives one at a time, with a temporary runtime drop-in: `RestrictAddressFamilies`, `SystemCallFilter=@system-service` with `SystemCallErrorNumber=EPERM`, `PrivateUsers=yes` and `MemoryDenyWriteExecute=yes` pass; `ProcSubset=pid` hides `/proc/meminfo` (`error looking up system memory`) and is not used. Along the way: a model entirely on the CPU is loaded without mmap, all anonymous memory (step 15).
     Final: `SystemCallFilter=~@privileged` added (the `@system-service` set still contains privileged calls); score 1.4 OK; the regression tests pass on the final configuration (CPU 13.5 tokens/s).
+16. Demo service, role `lab0b_demo`: `python3 -m http.server` on `127.0.0.1:8765`, `DynamicUser=yes`, `StateDirectory=`, `EnvironmentFile=/etc/lab0b-demo.env` (root:root `0600`, created by hand, asserted by the role). First check mode run `failed=1` (unit not there yet), real run `ok=28 changed=3`. The secret reaches the process; neither another user nor the service user can read it; systemd shows only the path. Score 8.2 (step 16).
 
 ## Measurements
 
@@ -41,6 +42,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
+| `lab0b-demo.service` | 8.2 EXPOSED (step 16: `DynamicUser`, `StateDirectory`, `EnvironmentFile`) | |
 | `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`); 8.3 EXPOSED (step 10: `ProtectSystem=strict`, `ProtectHome`); 8.2 EXPOSED (step 11: `DevicePolicy=closed`, `DeviceAllow=`); 3.4 OK (step 13: kernel, process and privilege restrictions); 1.5 OK (step 15: address families, system call filter, `PrivateUsers`, `MemoryDenyWriteExecute`); **1.4 OK** (`SystemCallFilter=~@privileged`) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
@@ -92,6 +94,7 @@ CPU, `llama3.1:8b` entirely on the CPU, 150 tokens:
 - systemd's default `OOMPolicy=stop`: one process killed by the OOM killer stops the whole unit, not just that process.
 - systemd's default start limit (5 starts in 10 s) never triggers for a service with `RestartSec=3`: a permanently broken service restarts forever.
 - `DevicePolicy=`/`DeviceAllow=` apply to the whole cgroup: the `+` prefix of `ExecStartPre=` does not bypass them, and a `DeviceAllow=` group missing at start is silently dropped.
+- `DynamicUser=yes` implies six protections (`ProtectSystem=strict`, `ProtectHome=read-only`, `PrivateTmp`, `NoNewPrivileges`, `RestrictSUIDSGID`, `RemoveIPC`), yet the score is still 8.2: those weigh little.
 - Unloading a model frees VRAM, not the page cache of its file: Ollama's `memory.current` grows with every model read and is mostly cache, not need.
 - Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
 - A model entirely on the CPU is loaded without mmap (`load_mode = none`): weights and KV cache are anonymous memory (8.65 GiB for `llama3.1:8b` at 32768 tokens), unlike the CPU layers of a model partly on the GPU.

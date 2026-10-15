@@ -11,6 +11,41 @@ DynamicUser=yes
 StateDirectory=lab0b-demo
 # Read by systemd (root) before the process starts; root:root 0600, created by hand.
 EnvironmentFile=/etc/lab0b-demo.env
+Restart=on-failure
+
+# Resource limits (Lab 0b, step 17).
+MemoryMax=64M
+CPUQuota=50%
+TasksMax=16
+
+# Hardening (Lab 0b, step 17). DynamicUser= already implies ProtectSystem=strict,
+# ProtectHome=read-only, PrivateTmp, NoNewPrivileges, RestrictSUIDSGID, RemoveIPC.
+# The same set as Ollama, plus what Ollama cannot have: no devices, only process
+# entries in /proc, no traffic except loopback, no @resources, UMask=0077.
+ProtectHome=yes
+PrivateDevices=yes
+PrivateUsers=yes
+CapabilityBoundingSet=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET
+IPAddressDeny=any
+IPAddressAllow=localhost
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+SystemCallErrorNumber=EPERM
+UMask=0077
 
 [Install]
 WantedBy=multi-user.target
