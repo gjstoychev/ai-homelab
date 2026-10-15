@@ -377,3 +377,90 @@ The existing `override.conf` (listen address, GPU wait) moves into the role with
 |---|---|---|
 | **A (chosen):** role `ollama` (permanent, playbook `ollama.yml`) and role `lab0b_demo` (lab only, playbook `lab0b.yml`), both imported by `site.yml` | Different lifecycles: Ollama stays, the demo can be removed; the same split as `claude_code` vs `lab_tools` | Two roles for one lab |
 | B: one role `systemd_services` | Fewer files | Mixes permanent and temporary configuration |
+
+## Step 9/18 — Role `ollama`: restart policy, start limit, OOM policy, base sandboxing
+
+**Why:** put Ollama's systemd configuration into git, and add the first, cheapest directives.
+
+**Documentation** (systemd 255):
+
+- `Restart=` (`man systemd.service`): `on-failure` restarts after a non-zero exit code, a signal other than the four "clean" ones (SIGHUP, SIGINT, SIGTERM, SIGPIPE), a timeout or a watchdog; `always` also after a clean exit. A stop by systemd itself (`systemctl stop`, `restart`) never triggers a restart. The table of exit causes does not list an OOM kill; how `OOMPolicy=` and `Restart=` interact is tested in step 16.
+- `StartLimitIntervalSec=`, `StartLimitBurst=` (`man systemd.unit`, section `[Unit]`): more than *burst* starts within *interval* and the unit is not started again; `Restart=` stops trying, the unit stays `failed` until it is started by hand after the interval or `systemctl reset-failed` clears the counter. All starts count, manual ones too. The defaults (`man systemd-system.conf`) are 5 starts in 10 s; with `RestartSec=3` Ollama starts at most 4 times in 10 s, so the default never triggers and a permanently broken Ollama would restart forever.
+- `RestartSteps=`, `RestartMaxDelaySec=` (since 254): a growing delay between restarts instead of a limit.
+- `NoNewPrivileges=` (`man systemd.exec`): the process and its children can never gain privileges through `execve()` (setuid/setgid bits, file capabilities).
+- `PrivateTmp=`: private `/tmp` and `/var/tmp`, removed when the service stops.
+- The `+` prefix of `ExecStartPre=` (`man systemd.service`): that command runs with full privileges; `User=`, `CapabilityBoundingSet=` and the namespacing options (`PrivateDevices=`, `PrivateTmp=`) do not apply to it, but options that apply to the whole control group, such as `DevicePolicy=`, still do (step 11).
+
+**Decisions:**
+
+| Setting | Options | Chosen | Why |
+|---|---|---|---|
+| `Restart=` | `always` (installer), `on-failure` | `on-failure` | A clean exit is deliberate; a crash is not |
+| `OOMPolicy=` | `stop` (default), `continue`, `kill` | `continue` | The OOM victim is normally the model runner (`llama-server`, which holds the memory); the server stays up and can start a new runner (tested in step 16). With `stop` every client loses the service |
+| Restart loop | start limit; growing delay (`RestartSteps=`); both | start limit: 5 starts in 5 minutes | A finite number of attempts and a clear `failed` state. Both together are hard to reason about: growing delays move the attempts out of the window. Nothing alerts on `failed` yet (Lab 2) |
+
+**Files** (`<repo>/ansible`):
+
+- `ollama.yml`: `hosts: z790`, `become: true`, role `ollama`; imported at the end of `site.yml`.
+- `roles/ollama/files/override.conf`: the existing drop-in, same settings, comments rewritten.
+- `roles/ollama/files/hardening.conf`:
+
+  ```ini
+  [Unit]
+  StartLimitIntervalSec=5min
+  StartLimitBurst=5
+
+  [Service]
+  Restart=on-failure
+  OOMPolicy=continue
+  NoNewPrivileges=yes
+  PrivateTmp=yes
+  ```
+
+  `Restart=` in a drop-in replaces the base unit's value. Drop-ins are read in alphabetical order; the two files set different keys.
+- `roles/ollama/tasks/main.yml`: the directory `ollama.service.d` (`0755`), both drop-ins (`0644`, `notify: Restart Ollama`), and the service `enabled` + `started`.
+- `roles/ollama/handlers/main.yml`: `ansible.builtin.systemd_service` with `daemon_reload: true`, `state: restarted`. Unit settings take effect only after a reload and a restart; the restart makes Ollama unavailable for a few seconds and unloads every model, so the role restarts it only when a drop-in changes.
+- `roles/ollama/README.md`.
+
+**Command** (node in `<repo>/ansible`, then the control node after `git pull --ff-only`; then from the control node):
+
+```bash
+ansible-playbook site.yml --syntax-check && ansible-lint
+ansible-playbook site.yml --limit z790 --check --diff
+ansible-playbook site.yml --limit z790 --diff
+```
+
+**Result:**
+
+- Lint on both control points: `Passed: 0 failure(s), 0 warning(s) in 20 files processed of 34 encountered`, profile `production`.
+- Check mode: `override.conf` `changed` with a diff of comments only, `hardening.conf` `changed` with a diff from nothing, the service `ok`, the handler `changed` (reported, not run). Recap `ok=23 changed=2 skipped=2 failed=0`.
+- Real run: the same, and the handler restarts Ollama. Recap `ok=23 changed=2 skipped=2 failed=0`.
+
+**Verify the running state** (node, no root): the files say what was written, `systemctl show` what systemd loaded.
+
+```bash
+systemctl show ollama -p ActiveState,NRestarts,DropInPaths
+systemctl show ollama -p Restart,OOMPolicy,NoNewPrivileges,PrivateTmp
+systemctl show ollama -p StartLimitIntervalUSec,StartLimitBurst
+journalctl -u ollama -n 40 --no-pager | grep 'inference compute'
+systemd-analyze security ollama.service --no-pager | tail -n 1
+```
+
+**Result:**
+
+```
+ActiveState=active
+NRestarts=0
+DropInPaths=/etc/systemd/system/ollama.service.d/hardening.conf /etc/systemd/system/ollama.service.d/override.conf
+Restart=on-failure
+OOMPolicy=continue
+NoNewPrivileges=yes
+PrivateTmp=yes
+StartLimitIntervalUSec=5min
+StartLimitBurst=5
+msg="inference compute" id=0 … library=CUDA … name=CUDA0 … pci_id=0000:01:00.0 …
+msg="inference compute" id=1 … library=CUDA … name=CUDA1 … pci_id=0000:02:00.0 …
+→ Overall exposure level for ollama.service: 8.7 EXPOSED 🙁
+```
+
+Both cards are found after the restart (the GPU wait works), and the score drops from 9.2 UNSAFE to 8.7 EXPOSED.

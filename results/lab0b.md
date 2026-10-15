@@ -19,6 +19,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
    With one of the two cards temporarily disabled for Ollama (restored afterwards), after dropping the page cache: `qwen3.8:27b` runs 25%/75% CPU/GPU in a separate `llama-server` process; the CPU layers are mapped from the model file (`file_mapped` ≈ 4.2 GiB), not anonymous memory; with a 32768-token context the KV cache of the CPU layers adds 640 MiB of anonymous memory.
    Decision: `MemoryHigh=16G` + `MemoryMax=32G` for Ollama.
 8. Design: Ollama keeps its installer-written unit (rewritten on every upgrade) and gets drop-ins from a role `ollama`; the demo service's secret is an `EnvironmentFile` (root, `0600`) created by hand; the demo lives in its own role `lab0b_demo` (step 8).
+9. Role `ollama` (drop-ins `override.conf` and `hardening.conf`): `Restart=on-failure`, `OOMPolicy=continue`, start limit 5 in 5 minutes (the default 5 in 10 s never triggers with `RestartSec=3`), `NoNewPrivileges`, `PrivateTmp`; lint clean (20 of 34 files), check and real run `ok=23 changed=2 skipped=2`; running state verified with `systemctl show`; score 9.2 → 8.7 (step 9).
 
 ## Measurements
 
@@ -32,7 +33,7 @@ Run Ollama and a small demo service under systemd with resource limits and sandb
 
 | Unit | Before | After |
 |---|---|---|
-| `ollama.service` | 9.2 UNSAFE | |
+| `ollama.service` | 9.2 UNSAFE | 8.7 EXPOSED (step 9: `NoNewPrivileges`, `PrivateTmp`) |
 
 Baseline report for `ollama.service`: 81 checks, 6 passed (`User=`, `AmbientCapabilities=`, `SupplementaryGroups=`, `KeyringMode=`, `Delegate=`, `NotifyAccess=`), 75 failed; highest single value 0.5 (`PrivateNetwork=`), then 0.3 (`RestrictNamespaces=~user`, `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SET(UID|GID|PCAP)`, `RestrictAddressFamilies=~AF_(INET|INET6)` and exotic families).
 
@@ -66,6 +67,7 @@ Ollama's cgroup with a model loaded (2026-10-15, default context 32768):
 ## What surprised me
 
 - systemd's default `OOMPolicy=stop`: one process killed by the OOM killer stops the whole unit, not just that process.
+- systemd's default start limit (5 starts in 10 s) never triggers for a service with `RestartSec=3`: a permanently broken service restarts forever.
 - Unloading a model frees VRAM, not the page cache of its file: Ollama's `memory.current` grows with every model read and is mostly cache, not need.
 - Layers that do not fit into VRAM are mapped from the model file, not copied into anonymous memory: a memory limit should slow them down (re-reads from disk) rather than kill the process (step 12).
 - Ollama's default context depends on total VRAM (below 24 GiB 4k, 24–48 GiB 32k): one card gives 4096 tokens, two give 32768.

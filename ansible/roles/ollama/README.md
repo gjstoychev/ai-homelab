@@ -24,3 +24,6 @@ Ollama's installer (`scripts/install.sh`) rewrites `/etc/systemd/system/ollama.s
 | `OOMPolicy=continue` | An OOM kill takes only the victim, normally the model runner (`llama-server`); the server stays up. The default, `stop`, stops the whole service. |
 | `NoNewPrivileges=yes` | No privilege gain through setuid/setgid binaries or file capabilities. |
 | `PrivateTmp=yes` | Private `/tmp` and `/var/tmp`, removed when the service stops. |
+| `ProtectSystem=strict` | The whole file system is read-only for Ollama, except `/dev`, `/proc` and `/sys`. |
+| `ReadWritePaths=/usr/share/ollama/.ollama -/usr/share/ollama/.nv` | What Ollama writes: models, cache and its key (`~/.ollama`), the CUDA compute cache (`~/.nv`; `-` skips it when it does not exist). Ollama's home is `/usr/share/ollama`, under `/usr`. With `OLLAMA_MODELS` set elsewhere, add that path. |
+| `ProtectHome=yes` | `/home`, `/root` and `/run/user` are empty and inaccessible. |
