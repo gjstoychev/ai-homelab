@@ -1,0 +1,6 @@
+---
+- name: Restart the demo service
+  ansible.builtin.systemd_service:
+    name: lab0b-demo
+    state: restarted
+    daemon_reload: true

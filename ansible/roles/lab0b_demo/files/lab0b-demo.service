@@ -1,0 +1,16 @@
+# Managed by Ansible (role lab0b_demo). Lab 0b: a self-written service with a
+# secret, as a contrast to Ollama. Serves /var/lib/lab0b-demo on loopback.
+[Unit]
+Description=Lab 0b demo service (python3 -m http.server)
+
+[Service]
+ExecStart=/usr/bin/python3 -m http.server 8765 --bind 127.0.0.1 --directory /var/lib/lab0b-demo
+# A user and group allocated at start and released at stop; no account in /etc/passwd.
+DynamicUser=yes
+# /var/lib/lab0b-demo, created by systemd and owned by the dynamic user.
+StateDirectory=lab0b-demo
+# Read by systemd (root) before the process starts; root:root 0600, created by hand.
+EnvironmentFile=/etc/lab0b-demo.env
+
+[Install]
+WantedBy=multi-user.target

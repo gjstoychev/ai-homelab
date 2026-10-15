@@ -10,3 +10,6 @@
 
 - name: Ollama
   ansible.builtin.import_playbook: ollama.yml
+
+- name: Lab 0b demo service
+  ansible.builtin.import_playbook: lab0b.yml

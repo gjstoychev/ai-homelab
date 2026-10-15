@@ -1,0 +1,34 @@
+---
+# The secret never enters git: the file is created by hand on the host.
+- name: Read the demo service's secrets file
+  ansible.builtin.stat:
+    path: /etc/lab0b-demo.env
+  register: lab0b_demo_env
+
+- name: Check that the secrets file exists, belongs to root and is 0600
+  ansible.builtin.assert:
+    that:
+      - lab0b_demo_env.stat.exists
+      - lab0b_demo_env.stat.pw_name == 'root'
+      - lab0b_demo_env.stat.gr_name == 'root'
+      - lab0b_demo_env.stat.mode == '0600'
+    fail_msg: >-
+      /etc/lab0b-demo.env must exist as root:root 0600 (create it by hand,
+      see roles/lab0b_demo/README.md)
+    quiet: true
+
+- name: Install the demo service unit
+  ansible.builtin.copy:
+    src: lab0b-demo.service
+    dest: /etc/systemd/system/lab0b-demo.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart the demo service
+
+- name: Keep the demo service enabled and running
+  ansible.builtin.systemd_service:
+    name: lab0b-demo
+    enabled: true
+    state: started
+    daemon_reload: true

@@ -1,0 +1,6 @@
+---
+- name: Lab 0b demo service
+  hosts: z790
+  become: true
+  roles:
+    - lab0b_demo
