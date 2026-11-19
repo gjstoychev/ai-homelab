@@ -410,3 +410,28 @@ Ollama: load a model without generating, and with request options:
 ```bash
 curl -s localhost:11434/api/generate -d '{"model":"<model>","keep_alive":"10m","options":{"num_ctx":32768,"num_gpu":0}}'
 ```
+
+### Troubleshooting: Black screen + no SSH after boot (NVIDIA driver deadlock)
+
+Symptoms: after a boot the console stays black (no login prompt), SSH does not answer, Ollama is not running. Seen 2026-11-19; needs a hard reset to get the machine back.
+
+Diagnosis, after the reset (the hung boot is the previous one, `-1`):
+
+```bash
+journalctl --list-boots
+journalctl -b -1 -p err --no-pager | tail -60
+```
+
+What the log looks like:
+
+- udev's `modprobe nvidia-drm` times out after 3 minutes (udev worker killed or reported as timed out).
+- Kernel hung-task reports (`task ... blocked for more than ... seconds`) for the udev worker and for `nvidia-smi`, each blocked on the NVIDIA driver's locks.
+- `setfont` and `agetty` hang (no TTY), then `ssh.service` and `ollama.service` fail to start.
+
+Cause: the Ollama drop-in's `ExecStartPre` polls `nvidia-smi -L` while udev is still loading `nvidia-drm`; the two race on the driver and can deadlock.
+
+Fix: wait for udev to finish before the `nvidia-smi` loop, with `ExecStartPre=+/usr/bin/udevadm settle --timeout=120` placed before it in `ansible/roles/ollama/files/override.conf`, then run the `ollama` role. Check that the order is right after deploying:
+
+```bash
+systemctl show ollama -p ExecStartPre --no-pager
+```

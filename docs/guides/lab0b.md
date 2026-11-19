@@ -71,14 +71,26 @@ systemctl show ollama -p MainPID,ActiveState,SubState,User,ControlGroup,MemoryCu
 
 ```ini
 [Service]
+# Listen on all interfaces: other clients on the server use Ollama too.
+# What can reach the port is decided by the firewall.
 Environment="OLLAMA_HOST=0.0.0.0:11434"
+# Wait for udev to finish loading the NVIDIA modules (incl. nvidia-drm)
+# before touching the driver. Calling nvidia-smi while udev is still
+# loading nvidia-drm can deadlock the driver at boot, which hangs the
+# console, SSH and Ollama (seen 2026-11-19).
+ExecStartPre=+/usr/bin/udevadm settle --timeout=120
+# Wait up to 60 s for the GPU driver: started too early, Ollama sees
+# fewer cards and stays on the CPU until the next restart.
 ExecStartPre=+/usr/bin/timeout 60 /bin/sh -c 'until /usr/bin/nvidia-smi -L >/dev/null 2>&1; do sleep 1; done'
 ```
 
 - `OLLAMA_HOST=0.0.0.0:11434`: other clients on the server use Ollama too, so it listens on all interfaces; what can actually reach the port is decided by the firewall (Lab 0c).
-- The `ExecStartPre` waits up to 60 seconds for the GPU driver. It is a guard against a start-up race: without the wait, Ollama does not see both cards and runs on the CPU until the next restart. The `+` prefix runs this command with full privileges, outside the unit's sandboxing (`man systemd.service`, step 9).
+- The first `ExecStartPre` (`udevadm settle`) waits up to 120 seconds for udev to empty its event queue, that is, to finish loading the NVIDIA modules, `nvidia-drm` included. `ExecStartPre=` commands run in order, so `nvidia-smi` is never called before udev is done.
+- The second `ExecStartPre` waits up to 60 seconds for the GPU driver. It is a guard against a start-up race: without the wait, Ollama does not see both cards and runs on the CPU until the next restart. The `+` prefix runs these commands with full privileges, outside the unit's sandboxing (`man systemd.service`, step 9).
 
-Both stay in the hardened configuration.
+All of it stays in the hardened configuration.
+
+**Note: the `udevadm settle` line was added on 2026-11-19.** On 2026-10-15 the drop-in had only the listen address and the `nvidia-smi` loop, without comments. On 2026-11-19 one boot hung with a black console and no SSH. The previous boot's errors (`journalctl -b -1 -p err`) showed udev's `modprobe nvidia-drm` timing out after 3 minutes and hung-task reports: the udev worker and the `nvidia-smi` started by the polling loop blocked each other on the driver's locks. `setfont` and `agetty` then hung (no TTY), and `ssh.service` and `ollama.service` failed to start. The loop had called `nvidia-smi -L` while udev was still loading `nvidia-drm`; waiting for udev first removes that race. Diagnosis: `docs/runbook.md`, Lab 0b, "Black screen + no SSH after boot".
 
 Running state:
 

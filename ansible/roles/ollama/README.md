@@ -5,7 +5,7 @@ systemd configuration for an Ollama installed with its official install script. 
 ## What it does
 
 - Installs two drop-ins in `/etc/systemd/system/ollama.service.d/` (root:root `0644`) and restarts Ollama (with `daemon-reload`) when either changes:
-  - `override.conf`: listen on all interfaces (`OLLAMA_HOST=0.0.0.0:11434`, for other clients on the server) and wait up to 60 seconds for the GPU driver before starting (`ExecStartPre=+…nvidia-smi -L`). Without the wait Ollama can start before both cards are visible and stay on the CPU until the next restart.
+  - `override.conf`: listen on all interfaces (`OLLAMA_HOST=0.0.0.0:11434`, for other clients on the server), then two `ExecStartPre=+` steps before starting. First `udevadm settle --timeout=120` waits for udev to finish loading the NVIDIA modules; it comes first because calling `nvidia-smi` while udev is still loading `nvidia-drm` can deadlock the driver at boot (the udev worker and `nvidia-smi` block each other), which hangs the console, SSH and Ollama. Then it waits up to 60 seconds for the GPU driver (`nvidia-smi -L`). Without that wait Ollama can start before both cards are visible and stay on the CPU until the next restart.
   - `hardening.conf`: restart policy, start limit, OOM policy and sandboxing directives (see below).
 - Keeps the service enabled and running.
 
