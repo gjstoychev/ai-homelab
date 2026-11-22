@@ -1,0 +1,13 @@
+Sun Nov 22 09:03:57 UTC 2026
+00:01.0 PCI bridge: Intel Corporation Device a70d (rev 01)
+		LnkCap:	Port #2, Speed 32GT/s, Width x8, ASPM not supported
+		LnkSta:	Speed 2.5GT/s, Width x8
+01:00.0 VGA compatible controller: NVIDIA Corporation Device 2d04 (rev a1)
+		LnkCap:	Port #0, Speed 32GT/s, Width x8, ASPM L1, Exit Latency L1 unlimited
+		LnkSta:	Speed 2.5GT/s (downgraded), Width x8
+00:01.1 PCI bridge: Intel Corporation Device a72d (rev 01)
+		LnkCap:	Port #4, Speed 32GT/s, Width x8, ASPM not supported
+		LnkSta:	Speed 2.5GT/s, Width x8
+02:00.0 VGA compatible controller: NVIDIA Corporation Device 2d04 (rev a1)
+		LnkCap:	Port #0, Speed 32GT/s, Width x8, ASPM L1, Exit Latency L1 unlimited
+		LnkSta:	Speed 2.5GT/s (downgraded), Width x8

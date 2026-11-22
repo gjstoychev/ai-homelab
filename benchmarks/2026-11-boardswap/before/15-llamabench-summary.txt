@@ -1,0 +1,12 @@
+
+pp512 (t/s, mean of 5)
+model                layer    tensor
+qwen3-30b-a3b       4395.4    3919.5
+qwen3-32b            929.2    1110.7
+qwen3.8-27b         1103.3    1193.9
+
+tg128 (t/s, mean of 5)
+model                layer    tensor
+qwen3-30b-a3b        152.5     136.8
+qwen3-32b             20.3      33.6
+qwen3.8-27b           24.2      37.9

@@ -1,0 +1,235 @@
+== Thu Nov 19 20:40:12 UTC 2026  phase=before image=local/llama.cpp:b12464-nccl (sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b)
+== llama-server -ngl 99 -c 4096 -np 1 -fa on -b 512 -ub 512 --host 0.0.0.0 --port 8080
+version: 1.0.0-dev (build 12464, commit d3c3e242c)
+built with GNU 14.2.0 for Linux x86_64
+== speculative options in this build:
+--spec-draft-n-max N                    number of tokens to draft for speculative decoding (default: 3)
+--spec-draft-backend-sampling, --no-spec-draft-backend-sampling
+--spec-type none,draft-simple,draft-eagle3,draft-mtp,draft-dflash,draft-dspark,draft-dflash2,draft-lilicorr,ngram-simple,ngram-map-k,ngram-map-k4v,ngram-mod,ngram-cache
+--draft, --draft-n, --draft-max N       the argument has been removed. use --spec-draft-n-max or
+
+== 20:40:13  llama3-8b (llama3:8b)  config=gpu0
+  warmup   req 0: pp 544 tok   3552.1 t/s | tg 128 tok   88.1 t/s | load 3.95 s
+  measured req 1: pp 544 tok   3990.5 t/s | tg 128 tok   88.4 t/s
+  measured req 2: pp 544 tok   4039.7 t/s | tg 128 tok   88.4 t/s
+  measured req 3: pp 544 tok   4040.7 t/s | tg 128 tok   88.3 t/s
+  measured req 4: pp 544 tok   4038.9 t/s | tg 128 tok   88.4 t/s
+  measured req 5: pp 544 tok   4035.7 t/s | tg 128 tok   88.3 t/s
+
+== 20:40:32  llama3-8b (llama3:8b)  config=gpu1
+  warmup   req 0: pp 544 tok   3801.7 t/s | tg 128 tok   87.5 t/s | load 2.13 s
+  measured req 1: pp 544 tok   3948.9 t/s | tg 128 tok   87.9 t/s
+  measured req 2: pp 544 tok   3990.8 t/s | tg 128 tok   87.8 t/s
+  measured req 3: pp 544 tok   3998.1 t/s | tg 128 tok   87.8 t/s
+  measured req 4: pp 544 tok   3988.8 t/s | tg 128 tok   87.8 t/s
+  measured req 5: pp 544 tok   3991.9 t/s | tg 128 tok   87.8 t/s
+
+== 20:40:49  llama3-8b (llama3:8b)  config=layer
+  warmup   req 0: pp 544 tok   4043.2 t/s | tg 128 tok   87.2 t/s | load 2.14 s
+  measured req 1: pp 544 tok   4240.8 t/s | tg 128 tok   87.5 t/s
+  measured req 2: pp 544 tok   4245.8 t/s | tg 128 tok   87.8 t/s
+  measured req 3: pp 544 tok   4240.9 t/s | tg 128 tok   87.8 t/s
+  measured req 4: pp 544 tok   4243.9 t/s | tg 128 tok   87.8 t/s
+  measured req 5: pp 544 tok   4245.6 t/s | tg 128 tok   87.7 t/s
+
+== 20:41:07  llama3-8b (llama3:8b)  config=tensor
+  warmup   req 0: pp 544 tok   3159.6 t/s | tg 128 tok  123.2 t/s | load 2.12 s
+  measured req 1: pp 544 tok   3527.7 t/s | tg 128 tok  123.2 t/s
+  measured req 2: pp 544 tok   3536.7 t/s | tg 128 tok  123.9 t/s
+  measured req 3: pp 544 tok   3539.4 t/s | tg 128 tok  123.0 t/s
+  measured req 4: pp 544 tok   3538.2 t/s | tg 128 tok  124.2 t/s
+  measured req 5: pp 544 tok   3538.5 t/s | tg 128 tok  123.1 t/s
+
+== 20:41:22  llama3.1-8b (llama3.1:8b)  config=gpu0
+  warmup   req 0: pp 544 tok   3222.7 t/s | tg 128 tok   82.2 t/s | load 3.74 s
+  measured req 1: pp 544 tok   3729.8 t/s | tg 128 tok   82.4 t/s
+  measured req 2: pp 544 tok   3768.5 t/s | tg 128 tok   82.8 t/s
+  measured req 3: pp 544 tok   3769.3 t/s | tg 128 tok   82.6 t/s
+  measured req 4: pp 544 tok   3767.2 t/s | tg 128 tok   82.7 t/s
+  measured req 5: pp 544 tok   3768.4 t/s | tg 128 tok   82.8 t/s
+
+== 20:41:41  llama3.1-8b (llama3.1:8b)  config=gpu1
+  warmup   req 0: pp 544 tok   3451.0 t/s | tg 128 tok   82.0 t/s | load 2.79 s
+  measured req 1: pp 544 tok   3701.3 t/s | tg 128 tok   82.3 t/s
+  measured req 2: pp 544 tok   3743.0 t/s | tg 128 tok   82.3 t/s
+  measured req 3: pp 544 tok   3741.1 t/s | tg 128 tok   82.3 t/s
+  measured req 4: pp 544 tok   3736.1 t/s | tg 128 tok   82.2 t/s
+  measured req 5: pp 544 tok   3735.7 t/s | tg 128 tok   82.3 t/s
+
+== 20:42:00  llama3.1-8b (llama3.1:8b)  config=layer
+  warmup   req 0: pp 544 tok   3699.7 t/s | tg 128 tok   81.8 t/s | load 2.15 s
+  measured req 1: pp 544 tok   4008.7 t/s | tg 128 tok   82.1 t/s
+  measured req 2: pp 544 tok   4008.9 t/s | tg 128 tok   82.3 t/s
+  measured req 3: pp 544 tok   4003.3 t/s | tg 128 tok   82.2 t/s
+  measured req 4: pp 544 tok   4010.0 t/s | tg 128 tok   82.2 t/s
+  measured req 5: pp 544 tok   4007.0 t/s | tg 128 tok   82.3 t/s
+
+== 20:42:18  llama3.1-8b (llama3.1:8b)  config=tensor
+  warmup   req 0: pp 544 tok   2974.9 t/s | tg 128 tok  116.5 t/s | load 2.09 s
+  measured req 1: pp 544 tok   3405.5 t/s | tg 128 tok  116.0 t/s
+  measured req 2: pp 544 tok   3411.2 t/s | tg 128 tok  117.5 t/s
+  measured req 3: pp 544 tok   3415.9 t/s | tg 128 tok  116.0 t/s
+  measured req 4: pp 544 tok   3414.4 t/s | tg 128 tok  117.4 t/s
+  measured req 5: pp 544 tok   3417.3 t/s | tg 128 tok  116.2 t/s
+
+== 20:42:34  qwen3-8b (qwen3:8b)  config=gpu0
+  warmup   req 0: pp 543 tok   2436.8 t/s | tg 128 tok   77.1 t/s | load 3.80 s
+  measured req 1: pp 543 tok   3615.8 t/s | tg 128 tok   77.6 t/s
+  measured req 2: pp 543 tok   3640.6 t/s | tg 128 tok   77.7 t/s
+  measured req 3: pp 543 tok   3643.9 t/s | tg 128 tok   77.6 t/s
+  measured req 4: pp 543 tok   3639.0 t/s | tg 128 tok   77.5 t/s
+  measured req 5: pp 543 tok   3650.1 t/s | tg 128 tok   77.6 t/s
+
+== 20:42:54  qwen3-8b (qwen3:8b)  config=gpu1
+  warmup   req 0: pp 543 tok   2780.8 t/s | tg 128 tok   77.0 t/s | load 2.24 s
+  measured req 1: pp 543 tok   3573.5 t/s | tg 128 tok   77.7 t/s
+  measured req 2: pp 543 tok   3617.8 t/s | tg 128 tok   77.6 t/s
+  measured req 3: pp 543 tok   3613.5 t/s | tg 128 tok   77.6 t/s
+  measured req 4: pp 543 tok   3617.0 t/s | tg 128 tok   77.6 t/s
+  measured req 5: pp 543 tok   3611.6 t/s | tg 128 tok   77.6 t/s
+
+== 20:43:13  qwen3-8b (qwen3:8b)  config=layer
+  warmup   req 0: pp 543 tok   2927.4 t/s | tg 128 tok   76.8 t/s | load 2.12 s
+  measured req 1: pp 543 tok   3876.5 t/s | tg 128 tok   77.5 t/s
+  measured req 2: pp 543 tok   3874.9 t/s | tg 128 tok   77.5 t/s
+  measured req 3: pp 543 tok   3872.3 t/s | tg 128 tok   77.5 t/s
+  measured req 4: pp 543 tok   3873.0 t/s | tg 128 tok   77.3 t/s
+  measured req 5: pp 543 tok   3870.5 t/s | tg 128 tok   77.5 t/s
+
+== 20:43:31  qwen3-8b (qwen3:8b)  config=tensor
+  warmup   req 0: pp 543 tok   2214.2 t/s | tg 128 tok  107.0 t/s | load 2.16 s
+  measured req 1: pp 543 tok   3154.4 t/s | tg 128 tok  108.7 t/s
+  measured req 2: pp 543 tok   3168.9 t/s | tg 128 tok  108.9 t/s
+  measured req 3: pp 543 tok   3168.9 t/s | tg 128 tok  108.8 t/s
+  measured req 4: pp 543 tok   3167.6 t/s | tg 128 tok  108.8 t/s
+  measured req 5: pp 543 tok   3164.7 t/s | tg 128 tok  108.9 t/s
+
+== 20:43:47  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu0
+  warmup   req 0: pp 543 tok   1913.5 t/s | tg 128 tok   44.2 t/s | load 5.42 s
+  measured req 1: pp 543 tok   2018.2 t/s | tg 128 tok   44.2 t/s
+  measured req 2: pp 543 tok   2027.3 t/s | tg 128 tok   44.3 t/s
+  measured req 3: pp 543 tok   2025.7 t/s | tg 128 tok   44.2 t/s
+  measured req 4: pp 543 tok   2023.4 t/s | tg 128 tok   44.2 t/s
+  measured req 5: pp 543 tok   2022.9 t/s | tg 128 tok   44.3 t/s
+
+== 20:44:18  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu1
+  warmup   req 0: pp 543 tok   1930.7 t/s | tg 128 tok   44.0 t/s | load 2.79 s
+  measured req 1: pp 543 tok   2005.5 t/s | tg 128 tok   44.2 t/s
+  measured req 2: pp 543 tok   2014.7 t/s | tg 128 tok   44.2 t/s
+  measured req 3: pp 543 tok   2015.4 t/s | tg 128 tok   44.2 t/s
+  measured req 4: pp 543 tok   2012.6 t/s | tg 128 tok   44.1 t/s
+  measured req 5: pp 543 tok   2012.2 t/s | tg 128 tok   44.1 t/s
+
+== 20:44:45  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=layer
+  warmup   req 0: pp 543 tok   2050.3 t/s | tg 128 tok   44.0 t/s | load 2.64 s
+  measured req 1: pp 543 tok   2141.4 t/s | tg 128 tok   44.0 t/s
+  measured req 2: pp 543 tok   2140.4 t/s | tg 128 tok   44.1 t/s
+  measured req 3: pp 543 tok   2138.7 t/s | tg 128 tok   44.1 t/s
+  measured req 4: pp 543 tok   2140.9 t/s | tg 128 tok   44.1 t/s
+  measured req 5: pp 543 tok   2140.1 t/s | tg 128 tok   44.1 t/s
+
+== 20:45:13  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=tensor
+  warmup   req 0: pp 543 tok   1758.1 t/s | tg 128 tok   65.9 t/s | load 3.19 s
+  measured req 1: pp 543 tok   1848.7 t/s | tg 128 tok   66.2 t/s
+  measured req 2: pp 543 tok   1854.1 t/s | tg 128 tok   66.2 t/s
+  measured req 3: pp 543 tok   1854.3 t/s | tg 128 tok   66.1 t/s
+  measured req 4: pp 543 tok   1854.0 t/s | tg 128 tok   66.2 t/s
+  measured req 5: pp 543 tok   1853.0 t/s | tg 128 tok   66.1 t/s
+
+== 20:45:35  qwen3-14b (qwen3:14b)  config=gpu0
+  warmup   req 0: pp 543 tok   1625.4 t/s | tg 128 tok   43.9 t/s | load 5.39 s
+  measured req 1: pp 543 tok   2010.6 t/s | tg 128 tok   44.1 t/s
+  measured req 2: pp 543 tok   2024.1 t/s | tg 128 tok   44.1 t/s
+  measured req 3: pp 543 tok   2025.0 t/s | tg 128 tok   44.0 t/s
+  measured req 4: pp 543 tok   2026.0 t/s | tg 128 tok   44.1 t/s
+  measured req 5: pp 543 tok   2023.3 t/s | tg 128 tok   44.1 t/s
+
+== 20:46:05  qwen3-14b (qwen3:14b)  config=gpu1
+  warmup   req 0: pp 543 tok   1732.8 t/s | tg 128 tok   43.7 t/s | load 2.78 s
+  measured req 1: pp 543 tok   2000.6 t/s | tg 128 tok   43.8 t/s
+  measured req 2: pp 543 tok   2011.0 t/s | tg 128 tok   43.8 t/s
+  measured req 3: pp 543 tok   2010.6 t/s | tg 128 tok   43.8 t/s
+  measured req 4: pp 543 tok   2011.2 t/s | tg 128 tok   43.8 t/s
+  measured req 5: pp 543 tok   2011.5 t/s | tg 128 tok   43.8 t/s
+
+== 20:46:33  qwen3-14b (qwen3:14b)  config=layer
+  warmup   req 0: pp 543 tok   1825.0 t/s | tg 128 tok   43.7 t/s | load 2.67 s
+  measured req 1: pp 543 tok   2145.5 t/s | tg 128 tok   43.8 t/s
+  measured req 2: pp 543 tok   2143.5 t/s | tg 128 tok   43.8 t/s
+  measured req 3: pp 543 tok   2142.5 t/s | tg 128 tok   43.8 t/s
+  measured req 4: pp 543 tok   2142.3 t/s | tg 128 tok   43.8 t/s
+  measured req 5: pp 543 tok   2142.2 t/s | tg 128 tok   43.9 t/s
+
+== 20:47:00  qwen3-14b (qwen3:14b)  config=tensor
+  warmup   req 0: pp 543 tok   1624.9 t/s | tg 128 tok   68.1 t/s | load 2.65 s
+  measured req 1: pp 543 tok   2019.3 t/s | tg 128 tok   68.5 t/s
+  measured req 2: pp 543 tok   2024.8 t/s | tg 128 tok   68.5 t/s
+  measured req 3: pp 543 tok   2022.7 t/s | tg 128 tok   68.5 t/s
+  measured req 4: pp 543 tok   2023.8 t/s | tg 128 tok   68.6 t/s
+  measured req 5: pp 543 tok   2025.2 t/s | tg 128 tok   68.8 t/s
+
+== 20:47:22  qwen3.8-27b (qwen3.8:27b)  config=layer
+  warmup   req 0: pp 543 tok    791.3 t/s | tg 128 tok   24.2 t/s | load 6.97 s
+  measured req 1: pp 543 tok    827.8 t/s | tg 128 tok   24.2 t/s
+  measured req 2: pp 543 tok    822.3 t/s | tg 128 tok   24.2 t/s
+  measured req 3: pp 543 tok    827.6 t/s | tg 128 tok   24.2 t/s
+  measured req 4: pp 543 tok    830.3 t/s | tg 128 tok   24.2 t/s
+  measured req 5: pp 543 tok    828.8 t/s | tg 128 tok   24.2 t/s
+
+== 20:48:11  qwen3.8-27b (qwen3.8:27b)  config=tensor
+  warmup   req 0: pp 543 tok    794.0 t/s | tg 128 tok   37.7 t/s | load 4.36 s
+  measured req 1: pp 543 tok    816.0 t/s | tg 128 tok   37.8 t/s
+  measured req 2: pp 543 tok    816.9 t/s | tg 128 tok   37.8 t/s
+  measured req 3: pp 543 tok    818.6 t/s | tg 128 tok   37.8 t/s
+  measured req 4: pp 543 tok    815.4 t/s | tg 128 tok   37.8 t/s
+  measured req 5: pp 543 tok    811.4 t/s | tg 128 tok   37.8 t/s
+
+== 20:48:45  qwen3.8-27b (qwen3.8:27b)  config=layer-mtp
+  warmup   req 0: pp 543 tok    740.7 t/s | tg 128 tok   46.0 t/s | draft 80/184 accepted | load 3.74 s
+  measured req 1: pp 543 tok    814.0 t/s | tg 128 tok   45.7 t/s | draft 80/186 accepted
+  measured req 2: pp 543 tok    813.9 t/s | tg 128 tok   47.0 t/s | draft 81/184 accepted
+  measured req 3: pp 543 tok    814.0 t/s | tg 128 tok   65.2 t/s | draft 94/132 accepted
+  measured req 4: pp 543 tok    814.3 t/s | tg 128 tok   50.0 t/s | draft 84/169 accepted
+  measured req 5: pp 543 tok    800.3 t/s | tg 128 tok   51.2 t/s | draft 85/165 accepted
+
+== 20:49:14  qwen3.8-27b (qwen3.8:27b)  config=tensor-mtp
+  warmup   req 0: pp 543 tok    751.6 t/s | tg 128 tok   63.6 t/s | draft 79/190 accepted | load 4.22 s
+  measured req 1: pp 543 tok    789.3 t/s | tg 128 tok   68.0 t/s | draft 82/178 accepted
+  measured req 2: pp 543 tok    789.4 t/s | tg 128 tok   93.1 t/s | draft 94/132 accepted
+  measured req 3: pp 543 tok    789.2 t/s | tg 128 tok   63.2 t/s | draft 78/196 accepted
+  measured req 4: pp 543 tok    790.1 t/s | tg 128 tok   72.4 t/s | draft 85/164 accepted
+  measured req 5: pp 543 tok    772.2 t/s | tg 128 tok   72.6 t/s | draft 85/164 accepted
+
+== 20:49:40  qwen3-30b-a3b (qwen3:30b-a3b)  config=layer
+  warmup   req 0: pp 543 tok   2325.0 t/s | tg 128 tok  143.5 t/s | load 10.90 s
+  measured req 1: pp 543 tok   4008.2 t/s | tg 128 tok  144.8 t/s
+  measured req 2: pp 543 tok   4019.3 t/s | tg 128 tok  144.9 t/s
+  measured req 3: pp 543 tok   4017.3 t/s | tg 128 tok  144.3 t/s
+  measured req 4: pp 543 tok   4015.4 t/s | tg 128 tok  144.8 t/s
+  measured req 5: pp 543 tok   4020.5 t/s | tg 128 tok  144.7 t/s
+
+== 20:50:03  qwen3-30b-a3b (qwen3:30b-a3b)  config=tensor
+  warmup   req 0: pp 543 tok   1973.1 t/s | tg 128 tok  133.4 t/s | load 12.22 s
+  measured req 1: pp 543 tok   3118.4 t/s | tg 128 tok  130.0 t/s
+  measured req 2: pp 543 tok   3128.7 t/s | tg 128 tok  133.9 t/s
+  measured req 3: pp 543 tok   3126.5 t/s | tg 128 tok  129.6 t/s
+  measured req 4: pp 543 tok   3126.9 t/s | tg 128 tok  133.8 t/s
+  measured req 5: pp 543 tok   3120.1 t/s | tg 128 tok  130.0 t/s
+
+== 20:50:28  qwen3-32b (qwen3:32b)  config=layer
+  warmup   req 0: pp 543 tok    847.3 t/s | tg 128 tok   20.1 t/s | load 10.26 s
+  measured req 1: pp 543 tok    927.1 t/s | tg 128 tok   20.1 t/s
+  measured req 2: pp 543 tok    926.7 t/s | tg 128 tok   20.1 t/s
+  measured req 3: pp 543 tok    926.1 t/s | tg 128 tok   20.1 t/s
+  measured req 4: pp 543 tok    926.4 t/s | tg 128 tok   20.1 t/s
+  measured req 5: pp 543 tok    924.9 t/s | tg 128 tok   20.1 t/s
+
+== 20:51:26  qwen3-32b (qwen3:32b)  config=tensor
+  warmup   req 0: pp 543 tok    925.3 t/s | tg 128 tok   33.4 t/s | load 3.95 s
+  measured req 1: pp 543 tok   1038.0 t/s | tg 128 tok   33.5 t/s
+  measured req 2: pp 543 tok   1039.0 t/s | tg 128 tok   33.5 t/s
+  measured req 3: pp 543 tok   1039.3 t/s | tg 128 tok   33.5 t/s
+  measured req 4: pp 543 tok   1039.5 t/s | tg 128 tok   33.5 t/s
+  measured req 5: pp 543 tok   1039.0 t/s | tg 128 tok   33.5 t/s
+
+== done Thu Nov 19 20:52:02 UTC 2026

@@ -1,0 +1,47 @@
+Unable to find image 'nvidia/cuda:13.0.0-base-ubuntu24.04' locally
+13.0.0-base-ubuntu24.04: Pulling from nvidia/cuda
+32f112e3802c: Pulling fs layer
+13e8f87efde8: Pulling fs layer
+9c9b39ad83d5: Pulling fs layer
+0acb0bb33f99: Pulling fs layer
+ddc61996788f: Pulling fs layer
+13e8f87efde8: Download complete
+9c9b39ad83d5: Download complete
+ddc61996788f: Download complete
+32f112e3802c: Download complete
+32f112e3802c: Pull complete
+9c9b39ad83d5: Pull complete
+0acb0bb33f99: Download complete
+13e8f87efde8: Pull complete
+ddc61996788f: Pull complete
+0acb0bb33f99: Pull complete
+Digest: sha256:6e43a6b02e5f16e4a715953be8b29c40acbe84aed11a61357ef0fc899967fbd9
+Status: Downloaded newer image for nvidia/cuda:13.0.0-base-ubuntu24.04
+Thu Nov 19 18:48:38 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5060 Ti     On  |   00000000:01:00.0  On |                  N/A |
+|  0%   35C    P8             10W /  180W |      12MiB /  16311MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA GeForce RTX 5060 Ti     On  |   00000000:02:00.0 Off |                  N/A |
+|  0%   29C    P8              9W /  180W |       2MiB /  16311MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+index, name, pci.bus_id, driver_version
+0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 580.178.04
+1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 580.178.04
+nvidia/cuda@sha256:6e43a6b02e5f16e4a715953be8b29c40acbe84aed11a61357ef0fc899967fbd9

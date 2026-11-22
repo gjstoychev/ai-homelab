@@ -1,0 +1,82 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.35kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/ggml-org/llama.cpp@sha256:962077c3231fe2005da07be469136c25222b4d48434e98634bd20fa9cc1fc949
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [1/2] FROM ghcr.io/ggml-org/llama.cpp@sha256:962077c3231fe2005da07be469136c25222b4d48434e98634bd20fa9cc1fc949
+#4 resolve ghcr.io/ggml-org/llama.cpp@sha256:962077c3231fe2005da07be469136c25222b4d48434e98634bd20fa9cc1fc949 0.0s done
+#4 DONE 0.7s
+
+#5 [2/2] RUN set -eu;     echo "== before";     ldd /app/libggml-cuda.so | grep -i nccl || echo "no dynamic libnccl";     dpkg -l | grep -i nccl || echo "no nccl package";     apt-get update;     v=$(apt-cache madison libnccl2 | awk '{print $3}' | grep '+cuda12' | head -n1);     echo "== installing libnccl2=$v";     apt-mark unhold libnccl2 || true;     apt-get install -y --no-install-recommends --allow-change-held-packages       "libnccl2=$v";     rm -rf /var/lib/apt/lists/*;     echo "libnccl2 $v" > /nccl-version.txt;     echo "== after";     ldd /app/libggml-cuda.so | grep -i nccl || echo "no dynamic libnccl";     dpkg -l | grep -i nccl
+#5 0.223 == before
+#5 0.229 	libnccl.so.2 => /lib/x86_64-linux-gnu/libnccl.so.2 (0x000072ff217ff000)
+#5 0.239 hi  libnccl2                        2.25.1-1+cuda12.8                 amd64        NVIDIA Collective Communication Library (NCCL) Runtime
+#5 0.550 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#5 0.557 Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#5 1.128 Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#5 1.179 Get:4 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2216 kB]
+#5 1.271 Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#5 1.417 Get:6 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#5 1.540 Get:7 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#5 1.563 Get:8 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#5 1.588 Get:9 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease [1578 B]
+#5 1.768 Get:10 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [55.6 kB]
+#5 1.775 Get:11 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1475 kB]
+#5 1.879 Get:12 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1560 kB]
+#5 2.691 Get:13 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+#5 2.712 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1822 kB]
+#5 2.717 Get:15 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  Packages [2088 kB]
+#5 2.775 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [61.7 kB]
+#5 2.776 Get:17 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2371 kB]
+#5 2.962 Get:18 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2184 kB]
+#5 3.065 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.0 kB]
+#5 3.067 Get:20 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.0 kB]
+#5 3.069 Get:21 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [669 B]
+#5 3.504 Fetched 36.1 MB in 3s (11.2 MB/s)
+#5 3.504 Reading package lists...
+#5 3.941 W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+#5 4.371 == installing libnccl2=2.32.6-1+cuda12.9
+#5 4.836 Canceled hold on libnccl2.
+#5 4.849 Reading package lists...
+#5 5.310 Building dependency tree...
+#5 5.407 Reading state information...
+#5 5.516 The following packages will be upgraded:
+#5 5.516   libnccl2
+#5 7.571 1 upgraded, 0 newly installed, 0 to remove and 62 not upgraded.
+#5 7.571 Need to get 222 MB of archives.
+#5 7.571 After this operation, 52.2 MB of additional disk space will be used.
+#5 7.571 Get:1 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  libnccl2 2.32.6-1+cuda12.9 [222 MB]
+#5 68.75 debconf: delaying package configuration, since apt-utils is not installed
+#5 68.78 Fetched 222 MB in 1min 3s (3515 kB/s)
+#5 68.82 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 35264 files and directories currently installed.)
+#5 68.85 Preparing to unpack .../libnccl2_2.32.6-1+cuda12.9_amd64.deb ...
+#5 68.90 Unpacking libnccl2 (2.32.6-1+cuda12.9) over (2.25.1-1+cuda12.8) ...
+#5 70.10 Setting up libnccl2 (2.32.6-1+cuda12.9) ...
+#5 70.14 Processing triggers for libc-bin (2.39-0ubuntu8.12) ...
+#5 70.26 == after
+#5 70.28 	libnccl.so.2 => /lib/x86_64-linux-gnu/libnccl.so.2 (0x0000792c8fa00000)
+#5 70.30 ii  libnccl2                        2.32.6-1+cuda12.9                 amd64        NVIDIA Collective Communication Library (NCCL) Runtime
+#5 DONE 70.4s
+
+#6 exporting to image
+#6 exporting layers
+#6 exporting layers 19.2s done
+#6 exporting manifest sha256:992f66b4082f130a9bc569ea13c39e9446bd55a9a3c73065a6fafb2f6eb1a888 0.0s done
+#6 exporting config sha256:ec9b76900f6f6959085456de82241782778f5624a867e7768a0bd7645ceda90c 0.0s done
+#6 exporting attestation manifest sha256:ee70483b09c27409ca4c78e9c9397483816750681cddd43736de6903bcf2b439
+#6 exporting attestation manifest sha256:ee70483b09c27409ca4c78e9c9397483816750681cddd43736de6903bcf2b439 0.0s done
+#6 exporting manifest list sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b 0.0s done
+#6 naming to docker.io/local/llama.cpp:b12464-nccl done
+#6 unpacking to docker.io/local/llama.cpp:b12464-nccl
+#6 unpacking to docker.io/local/llama.cpp:b12464-nccl 1.8s done
+#6 DONE 21.3s
+libnccl2 2.32.6-1+cuda12.9
+sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b

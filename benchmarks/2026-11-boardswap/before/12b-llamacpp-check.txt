@@ -1,0 +1,15 @@
+Thu Nov 19 19:21:52 UTC 2026
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --------------: | -------------------: |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  -1 |            pp64 |       2518.00 ± 0.00 |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  -1 |            tg16 |         83.79 ± 0.00 |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  -1 |            pp64 |        818.83 ± 0.00 |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  -1 |            tg16 |         24.03 ± 0.00 |
+
+build: d3c3e242c (12464)

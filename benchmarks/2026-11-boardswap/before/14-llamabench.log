@@ -1,0 +1,254 @@
+== Thu Nov 19 19:47:16 UTC 2026  phase=before group=single image=local/llama.cpp:b12464-nccl (sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b)
+== llama-bench -ngl 99 -fa on -p 512 -n 128 -r 5 -o jsonl -oe md
+
+== 19:47:16  llama3-8b (llama3:8b)  config=gpu0
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15838 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4313.23 ± 27.04 |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         90.42 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:47:30  llama3-8b (llama3:8b)  config=gpu1
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15847 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4273.05 ± 30.63 |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         89.97 ± 0.05 |
+
+build: d3c3e242c (12464)
+
+== 19:47:45  llama3-8b (llama3:8b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4288.12 ± 29.55 |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         89.83 ± 0.03 |
+
+build: d3c3e242c (12464)
+
+== 19:47:59  llama3-8b (llama3:8b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 | tensor |   1 |           pp512 |       3858.24 ± 5.80 |
+| llama 8B Q4_0                  |   4.33 GiB |     8.03 B | CUDA       |  99 | tensor |   1 |           tg128 |        124.98 ± 0.03 |
+
+build: d3c3e242c (12464)
+
+== 19:48:13  llama3.1-8b (llama3.1:8b)  config=gpu0
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15838 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4062.62 ± 23.78 |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         84.58 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:48:28  llama3.1-8b (llama3.1:8b)  config=gpu1
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15847 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4032.43 ± 20.64 |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         84.14 ± 0.04 |
+
+build: d3c3e242c (12464)
+
+== 19:48:43  llama3.1-8b (llama3.1:8b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           pp512 |      4052.17 ± 21.83 |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 |   1 |           tg128 |         84.05 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:48:59  llama3.1-8b (llama3.1:8b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 | tensor |   1 |           pp512 |       3717.47 ± 4.99 |
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  99 | tensor |   1 |           tg128 |        118.84 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:49:12  qwen3-8b (qwen3:8b)  config=gpu0
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15838 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           pp512 |      3946.12 ± 20.14 |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           tg128 |         79.87 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:49:28  qwen3-8b (qwen3:8b)  config=gpu1
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15847 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           pp512 |      3914.70 ± 21.21 |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           tg128 |         79.40 ± 0.04 |
+
+build: d3c3e242c (12464)
+
+== 19:49:43  qwen3-8b (qwen3:8b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           pp512 |      3930.91 ± 22.47 |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 |   1 |           tg128 |         79.34 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:50:00  qwen3-8b (qwen3:8b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 | tensor |   1 |           pp512 |       3456.65 ± 7.97 |
+| qwen3 8B Q4_K - Medium         |   4.86 GiB |     8.19 B | CUDA       |  99 | tensor |   1 |           tg128 |        110.60 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:50:14  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu0
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15838 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2157.67 ± 4.26 |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         45.03 ± 0.00 |
+
+build: d3c3e242c (12464)
+
+== 19:50:36  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu1
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15847 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2141.20 ± 7.94 |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         44.85 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:51:00  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2155.59 ± 6.88 |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         44.87 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:51:23  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 | tensor |   1 |           pp512 |       1990.36 ± 1.81 |
+| qwen2 14B Q4_K - Medium        |   8.37 GiB |    14.77 B | CUDA       |  99 | tensor |   1 |           tg128 |         66.68 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:51:43  qwen3-14b (qwen3:14b)  config=gpu0
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15838 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2155.18 ± 3.80 |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         44.68 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:52:05  qwen3-14b (qwen3:14b)  config=gpu1
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15847 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2142.81 ± 6.56 |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         44.57 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:52:29  qwen3-14b (qwen3:14b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           pp512 |       2151.82 ± 5.77 |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 |   1 |           tg128 |         44.54 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== 19:52:52  qwen3-14b (qwen3:14b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 | tensor |   1 |           pp512 |       2163.34 ± 2.75 |
+| qwen3 14B Q4_K - Medium        |   8.63 GiB |    14.77 B | CUDA       |  99 | tensor |   1 |           tg128 |         69.34 ± 0.01 |
+
+build: d3c3e242c (12464)
+
+== done Thu Nov 19 19:53:11 UTC 2026

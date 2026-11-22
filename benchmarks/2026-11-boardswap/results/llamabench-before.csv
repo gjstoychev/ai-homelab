@@ -1,0 +1,53 @@
+model,config,test,tps,stddev,model_type,split_mode,build,n_reps
+llama3-8b,gpu0,pp512,4313.23,27.04,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu0,tg128,90.42,0.02,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu1,pp512,4273.05,30.63,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu1,tg128,89.97,0.05,llama 8B Q4_0,layer,12464,5
+llama3-8b,layer,pp512,4288.12,29.55,llama 8B Q4_0,layer,12464,5
+llama3-8b,layer,tg128,89.83,0.03,llama 8B Q4_0,layer,12464,5
+llama3-8b,tensor,pp512,3858.24,5.8,llama 8B Q4_0,tensor,12464,5
+llama3-8b,tensor,tg128,124.98,0.03,llama 8B Q4_0,tensor,12464,5
+llama3.1-8b,gpu0,pp512,4062.62,23.78,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu0,tg128,84.58,0.02,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu1,pp512,4032.43,20.64,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu1,tg128,84.14,0.04,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,layer,pp512,4052.17,21.83,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,layer,tg128,84.05,0.02,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,tensor,pp512,3717.47,4.99,llama 8B Q4_K - Medium,tensor,12464,5
+llama3.1-8b,tensor,tg128,118.84,0.01,llama 8B Q4_K - Medium,tensor,12464,5
+qwen2.5-14b,gpu0,pp512,2157.67,4.26,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu0,tg128,45.03,0.0,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu1,pp512,2141.2,7.94,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu1,tg128,44.85,0.01,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,layer,pp512,2155.59,6.88,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,layer,tg128,44.87,0.01,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,tensor,pp512,1990.36,1.81,qwen2 14B Q4_K - Medium,tensor,12464,5
+qwen2.5-14b,tensor,tg128,66.68,0.01,qwen2 14B Q4_K - Medium,tensor,12464,5
+qwen3-14b,gpu0,pp512,2155.18,3.8,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu0,tg128,44.68,0.01,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu1,pp512,2142.81,6.56,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu1,tg128,44.57,0.01,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,layer,pp512,2151.82,5.77,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,layer,tg128,44.54,0.01,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,tensor,pp512,2163.34,2.75,qwen3 14B Q4_K - Medium,tensor,12464,5
+qwen3-14b,tensor,tg128,69.34,0.01,qwen3 14B Q4_K - Medium,tensor,12464,5
+qwen3-8b,gpu0,pp512,3946.12,20.14,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu0,tg128,79.87,0.02,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu1,pp512,3914.7,21.21,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu1,tg128,79.4,0.04,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,layer,pp512,3930.91,22.47,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,layer,tg128,79.34,0.02,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,tensor,pp512,3456.65,7.97,qwen3 8B Q4_K - Medium,tensor,12464,5
+qwen3-8b,tensor,tg128,110.6,0.02,qwen3 8B Q4_K - Medium,tensor,12464,5
+qwen3-30b-a3b,layer,pp512,4395.4,21.42,qwen3moe 30B.A3B Q4_K - Medium,layer,12464,5
+qwen3-30b-a3b,layer,tg128,152.5,0.03,qwen3moe 30B.A3B Q4_K - Medium,layer,12464,5
+qwen3-30b-a3b,tensor,pp512,3919.49,9.94,qwen3moe 30B.A3B Q4_K - Medium,tensor,12464,5
+qwen3-30b-a3b,tensor,tg128,136.82,0.06,qwen3moe 30B.A3B Q4_K - Medium,tensor,12464,5
+qwen3-32b,layer,pp512,929.2,1.24,qwen3 32B Q4_K - Medium,layer,12464,5
+qwen3-32b,layer,tg128,20.29,0.0,qwen3 32B Q4_K - Medium,layer,12464,5
+qwen3-32b,tensor,pp512,1110.73,0.76,qwen3 32B Q4_K - Medium,tensor,12464,5
+qwen3-32b,tensor,tg128,33.62,0.0,qwen3 32B Q4_K - Medium,tensor,12464,5
+qwen3.8-27b,layer,pp512,1103.33,1.24,qwen35 27B Q4_K - Medium,layer,12464,5
+qwen3.8-27b,layer,tg128,24.2,0.0,qwen35 27B Q4_K - Medium,layer,12464,5
+qwen3.8-27b,tensor,pp512,1193.89,0.43,qwen35 27B Q4_K - Medium,tensor,12464,5
+qwen3.8-27b,tensor,tg128,37.86,0.02,qwen35 27B Q4_K - Medium,tensor,12464,5

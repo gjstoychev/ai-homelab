@@ -1,0 +1,87 @@
+Thu Nov 19 19:40:01 UTC 2026
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+97511bda532b:1:1 [1] NCCL INFO cudaDriverVersion 13000
+97511bda532b:1:1 [1] NCCL INFO Bootstrap: Using eth0:<docker-ip><0>
+97511bda532b:1:1 [0] NCCL INFO NCCL version 2.25.1+cuda12.8
+97511bda532b:1:69 [0] NCCL INFO ncclMaxSharedMem 82240 exceeds device/fn maxSharedMem 79856
+97511bda532b:1:69 [0] NCCL INFO NET/Plugin: Could not find: libnccl-net.so. Using internal network plugin.
+97511bda532b:1:69 [0] NCCL INFO Failed to open libibverbs.so[.1]
+97511bda532b:1:69 [0] NCCL INFO NET/Socket : Using [0]eth0:<docker-ip><0>
+97511bda532b:1:69 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so.
+97511bda532b:1:69 [0] NCCL INFO Using network Socket
+97511bda532b:1:70 [1] NCCL INFO ncclMaxSharedMem 82240 exceeds device/fn maxSharedMem 79856
+97511bda532b:1:70 [1] NCCL INFO Using network Socket
+97511bda532b:1:69 [0] NCCL INFO ncclCommInitAll comm 0x56c82d9e0880 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xf226cf2a01e79b91 - Init START
+97511bda532b:1:70 [1] NCCL INFO ncclCommInitAll comm 0x56c82db66ec0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xf226cf2a01e79b91 - Init START
+97511bda532b:1:69 [0] NCCL INFO RAS client listening socket at ::1<28028>
+97511bda532b:1:69 [0] NCCL INFO Bootstrap timings total 0.000848 (create 0.000025, send 0.000099, recv 0.000192, ring 0.000156, delay 0.000000)
+97511bda532b:1:70 [1] NCCL INFO Bootstrap timings total 0.000792 (create 0.000027, send 0.000085, recv 0.000181, ring 0.000027, delay 0.000000)
+
+97511bda532b:1:69 [0] graph/search.cc:1135 NCCL WARN Could not find a path for pattern 4, falling back to simple order
+
+97511bda532b:1:69 [0] graph/search.cc:1135 NCCL WARN Could not find a path for pattern 1, falling back to simple order
+
+97511bda532b:1:70 [1] graph/search.cc:1135 NCCL WARN Could not find a path for pattern 4, falling back to simple order
+
+97511bda532b:1:70 [1] graph/search.cc:1135 NCCL WARN Could not find a path for pattern 1, falling back to simple order
+97511bda532b:1:70 [1] NCCL INFO comm 0x56c82db66ec0 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+97511bda532b:1:69 [0] NCCL INFO comm 0x56c82d9e0880 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+97511bda532b:1:69 [0] NCCL INFO Channel 00/02 : 0 1
+97511bda532b:1:70 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+97511bda532b:1:69 [0] NCCL INFO Channel 01/02 : 0 1
+97511bda532b:1:70 [1] NCCL INFO P2P Chunksize set to 131072
+97511bda532b:1:69 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+97511bda532b:1:69 [0] NCCL INFO P2P Chunksize set to 131072
+97511bda532b:1:69 [0] NCCL INFO Check P2P Type intraNodeP2pSupport 0 directMode 1
+97511bda532b:1:73 [0] NCCL INFO [Proxy Service] Device 0 CPU core 17
+97511bda532b:1:72 [1] NCCL INFO [Proxy Service] Device 1 CPU core 17
+97511bda532b:1:74 [1] NCCL INFO [Proxy Service UDS] Device 1 CPU core 24
+97511bda532b:1:75 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 22
+97511bda532b:1:70 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+97511bda532b:1:70 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+97511bda532b:1:69 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+97511bda532b:1:69 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+97511bda532b:1:69 [0] NCCL INFO CC Off, workFifoBytes 1048576
+97511bda532b:1:70 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so libnccl-net.so. Using internal tuner plugin.
+97511bda532b:1:70 [1] NCCL INFO ncclCommInitAll comm 0x56c82db66ec0 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0xf226cf2a01e79b91 - Init COMPLETE
+97511bda532b:1:70 [1] NCCL INFO Init timings - ncclCommInitAll: rank 1 nranks 2 total 0.17 (kernels 0.14, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.CUDA error: unhandled cuda error (run with NCCL_DEBUG=INFO for details)
+  current device: 1, in function ggml_backend_cuda_comm_allreduce_nccl at /app/ggml/src/ggml-cuda/ggml-cuda.cu:1390
+  ncclGroupEnd()
+/app/ggml/src/ggml-cuda/ggml-cuda.cu:113: CUDA error
+01, graphs 0.00, connections 0.00, rest 0.00)
+97511bda532b:1:69 [0] NCCL INFO ncclCommInitAll comm 0x56c82d9e0880 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0xf226cf2a01e79b91 - Init COMPLETE
+97511bda532b:1:69 [0] NCCL INFO Init timings - ncclCommInitAll: rank 0 nranks 2 total 0.17 (kernels 0.14, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+97511bda532b:1:76 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct/direct
+97511bda532b:1:76 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct/direct
+97511bda532b:1:77 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct/direct
+97511bda532b:1:77 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct/direct
+97511bda532b:1:76 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+97511bda532b:1:77 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+
+97511bda532b:1:1 [1] enqueue.cc:1500 NCCL WARN Cuda failure 1 'invalid argument'
+97511bda532b:1:1 [1] NCCL INFO group.cc:242 -> 1
+97511bda532b:1:1 [1] NCCL INFO group.cc:470 -> 1
+97511bda532b:1:1 [1] NCCL INFO group.cc:573 -> 1
+97511bda532b:1:1 [1] NCCL INFO group.cc:106 -> 1
+libggml-base.so.1(+0x183a6)[0x7ebca970b3a6]
+libggml-base.so.1(+0x1882a)[0x7ebca970b82a]
+libggml-base.so.1(ggml_abort+0x15b)[0x7ebca970ba0b]
+/app/libggml-cuda.so(_Z15ggml_cuda_errorPKcS0_S0_iS0_+0xb5)[0x7ebc9d549185]
+/app/libggml-cuda.so(+0x30fbfa)[0x7ebc9d553bfa]
+/app/libggml-cuda.so(+0x30fecd)[0x7ebc9d553ecd]
+libggml-base.so.1(+0x511da)[0x7ebca97441da]
+libggml-base.so.1(ggml_backend_sched_graph_compute_async+0x779)[0x7ebca972ab39]
+libllama.so.1(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xdb)[0x7ebca9a427cb]
+libllama.so.1(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0x134)[0x7ebca9a45f64]
+libllama.so.1(_ZN13llama_context6decodeERK15llama_batch_ext+0x7ca)[0x7ebca9a5067a]
+libllama-bench-impl.so(+0x1cbcb)[0x7ebcaa6f4bcb]
+libllama-bench-impl.so(_Z11llama_benchiPPc+0xfea)[0x7ebcaa705aaa]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7ebcaa23b1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7ebcaa23b28b]
+/app/llama-bench(+0x1315)[0x56c7f6117315]

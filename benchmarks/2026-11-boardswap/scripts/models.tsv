@@ -1,0 +1,13 @@
+# key	ollama_tag	blob (in /usr/share/ollama/.ollama/models/blobs)	fit	engines
+# fit: single = fits one 16 GB card (GPU0, GPU1, both cards); dual = both cards only
+# engines: both, or ollama (translategemma: Ollama's GGUF lacks
+#   gemma3.attention.layer_norm_rms_epsilon, llama.cpp cannot load it)
+gemma3-4b	translategemma:4b	sha256-bdbf939b402e2f88fbe3e918beb777813009335756b4c17be7fe008dfe4815d4	single	ollama
+llama3-8b	llama3:8b	sha256-6a0746a1ec1aef3e7ec53868f220ff6e389f6f8ef87a01d77c96807de94ca2aa	single	both
+llama3.1-8b	llama3.1:8b	sha256-667b0c1932bc6ffc593ed1d03f895bf2dc8dc6df21db3042284a6f4416b06a29	single	both
+qwen3-8b	qwen3:8b	sha256-a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f	single	both
+qwen2.5-14b	qwen2.5:14b-instruct-q4_K_M	sha256-2049f5674b1e92b4464e5729975c9689fcfbf0b0e4443ccf10b5339f370f9a54	single	both
+qwen3-14b	qwen3:14b	sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e	single	both
+qwen3.8-27b	qwen3.8:27b	sha256-f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d	dual	both
+qwen3-30b-a3b	qwen3:30b-a3b	sha256-58574f2e94b99fb9e4391408b57e5aeaaaec10f6384e9a699fc2cb43a5c8eabf	dual	both
+qwen3-32b	qwen3:32b	sha256-3291abe70f16ee9682de7bfae08db5373ea9d6497e614aaad63340ad421d6312	dual	both

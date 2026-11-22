@@ -1,0 +1,72 @@
+Hit:1 http://<mirror>.archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://<mirror>.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:4 http://<mirror>.archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  InRelease [1477 B]
+Hit:6 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:7 https://downloads.claude.ai/claude-code/apt/stable stable InRelease
+Get:8 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages [29.0 kB]
+Fetched 30.5 kB in 1s (34.7 kB/s)
+Reading package lists...
+nvidia-container-toolkit:
+  Installed: (none)
+  Candidate: 1.20.2-1
+  Version table:
+     1.20.2-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.20.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.20.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.19.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.19.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.18.2-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.18.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.18.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.9-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.8-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.7-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.6-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.5-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.4-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.3-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.2-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.17.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.16.2-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.16.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.16.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.15.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.6-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.5-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.4-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.3-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.2-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.1-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages
+     1.14.0-1 500
+        500 https://nvidia.github.io/libnvidia-container/stable/deb/amd64  Packages

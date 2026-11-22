@@ -1,0 +1,8 @@
+GPU0:
+   273 samples  P1  Gen5 x8  (max Gen5 x8)  mem 13801 MHz
+     6 samples  P8  Gen1 x8  (max Gen5 x8)  mem 405 MHz
+  under load: 273 samples, 19:08:17.926 .. 19:09:12.364, power avg 35.0 W, max 41.5 W
+GPU1:
+   273 samples  P1  Gen4 x4  (max Gen4 x8)  mem 13801 MHz
+     6 samples  P8  Gen1 x4  (max Gen4 x8)  mem 405 MHz
+  under load: 273 samples, 19:08:17.926 .. 19:09:12.364, power avg 36.9 W, max 38.2 W

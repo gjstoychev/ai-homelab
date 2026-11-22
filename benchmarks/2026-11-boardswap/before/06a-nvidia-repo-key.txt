@@ -1,0 +1,7 @@
+gpg: directory '/home/llama/.gnupg' created
+gpg: keybox '/home/llama/.gnupg/pubring.kbx' created
+pub   rsa4096 2017-09-28 [SCE]
+      C95B321B61E88C1809C4F759DDCAE044F796ECB0
+uid                      NVIDIA CORPORATION (Open Source Projects) <cudatools@nvidia.com>
+sub   rsa2048 2019-09-18 [S] [expired: 2021-06-16]
+

@@ -1,0 +1,7 @@
+Thu Nov 19 18:11:20 UTC 2026
+7.0.0-38-generic
+index, name, pci.bus_id, driver_version, vbios_version, power.limit [W], persistence_mode
+0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 580.178.04, 98.06.4E.00.8B, 180.00 W, Enabled
+1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 580.178.04, 98.06.4E.00.8B, 180.00 W, Enabled
+ollama version is 0.32.14
+Docker version 29.8.0, build 88096ef

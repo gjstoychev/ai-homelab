@@ -1,0 +1,151 @@
+phase,engine,model,scenario,test,tokens,tps,stddev,n,load_s,draft_accept,quant,kv_cache
+after,llama-bench,llama3-8b,gpu0,pp,512,4264.0,25.33,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,gpu0,tg,128,90.51,0.03,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,gpu1,pp,512,4304.83,25.67,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,gpu1,tg,128,90.54,0.03,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,layer,pp,512,4302.89,26.68,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,layer,tg,128,90.39,0.02,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,tensor,pp,512,5339.77,15.19,5,,,Q4_0,f16/f16
+after,llama-bench,llama3-8b,tensor,tg,128,143.35,0.07,5,,,Q4_0,f16/f16
+after,llama-bench,llama3.1-8b,gpu0,pp,512,4030.65,17.82,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,gpu0,tg,128,84.62,0.01,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,gpu1,pp,512,4058.23,17.87,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,gpu1,tg,128,84.68,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,layer,pp,512,4076.65,24.89,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,layer,tg,128,84.51,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,tensor,pp,512,5083.24,16.27,5,,,Q4_K_M,f16/f16
+after,llama-bench,llama3.1-8b,tensor,tg,128,134.97,0.03,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,gpu0,pp,512,2130.4,9.35,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,gpu0,tg,128,45.03,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,gpu1,pp,512,2163.7,5.79,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,gpu1,tg,128,45.05,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,layer,pp,512,2162.62,6.97,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,layer,tg,128,45.04,0.01,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,tensor,pp,512,2731.54,5.88,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen2.5-14b,tensor,tg,128,73.21,0.01,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,gpu0,pp,512,2128.79,8.1,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,gpu0,tg,128,44.71,0.01,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,gpu1,pp,512,2161.75,4.45,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,gpu1,tg,128,44.75,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,layer,pp,512,2159.97,5.8,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,layer,tg,128,44.68,0.01,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,tensor,pp,512,2870.63,5.55,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-14b,tensor,tg,128,75.22,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,gpu0,pp,512,3923.08,13.71,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,gpu0,tg,128,79.92,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,gpu1,pp,512,3956.23,17.49,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,gpu1,tg,128,79.96,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,layer,pp,512,3953.68,22.86,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,layer,tg,128,79.83,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,tensor,pp,512,4810.12,16.59,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-8b,tensor,tg,128,126.3,0.02,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-30b-a3b,layer,pp,512,4409.0,23.86,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-30b-a3b,layer,tg,128,154.37,0.04,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-30b-a3b,tensor,pp,512,4774.45,17.39,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-30b-a3b,tensor,tg,128,165.48,0.36,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-32b,layer,pp,512,930.62,1.08,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-32b,layer,tg,128,20.33,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-32b,tensor,pp,512,1389.16,2.2,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3-32b,tensor,tg,128,35.86,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3.8-27b,layer,pp,512,1104.76,1.58,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3.8-27b,layer,tg,128,24.27,0.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3.8-27b,tensor,pp,512,1527.44,2.0,5,,,Q4_K_M,f16/f16
+after,llama-bench,qwen3.8-27b,tensor,tg,128,40.89,0.02,5,,,Q4_K_M,f16/f16
+after,llama-server,llama3-8b,gpu0,pp,544,3989.17,18.3,5,3.9,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,gpu0,tg,128,87.93,0.05,5,3.9,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,gpu1,pp,544,4016.94,18.21,5,1.59,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,gpu1,tg,128,88.02,0.03,5,1.59,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,layer,pp,544,4254.74,9.78,5,2.28,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,layer,tg,128,87.77,0.09,5,2.28,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,tensor,pp,544,4748.19,9.52,5,2.15,,Q4_0,f16/f16 (default)
+after,llama-server,llama3-8b,tensor,tg,128,139.27,1.04,5,2.15,,Q4_0,f16/f16 (default)
+after,llama-server,llama3.1-8b,gpu0,pp,544,3745.29,17.86,5,3.71,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,gpu0,tg,128,82.43,0.03,5,3.71,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,gpu1,pp,544,3760.25,20.6,5,1.65,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,gpu1,tg,128,82.44,0.04,5,1.65,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,layer,pp,544,4023.21,2.84,5,2.09,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,layer,tg,128,82.33,0.01,5,2.09,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,tensor,pp,544,4517.67,11.04,5,2.15,,Q4_K_M,f16/f16 (default)
+after,llama-server,llama3.1-8b,tensor,tg,128,130.35,1.17,5,2.15,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,gpu0,pp,543,3613.66,13.86,5,3.76,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,gpu0,tg,128,77.58,0.08,5,3.76,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,gpu1,pp,543,3646.76,16.2,5,1.64,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,gpu1,tg,128,77.68,0.1,5,1.64,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,layer,pp,543,3894.76,2.77,5,2.12,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,layer,tg,128,77.55,0.06,5,2.12,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,tensor,pp,543,4260.93,6.23,5,2.07,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-8b,tensor,tg,128,123.57,0.16,5,2.07,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,gpu0,pp,543,2011.86,4.66,5,5.38,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,gpu0,tg,128,44.19,0.01,5,5.38,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,gpu1,pp,543,2028.11,5.46,5,2.2,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,gpu1,tg,128,44.22,0.01,5,2.2,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,layer,pp,543,2148.79,1.76,5,2.1,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,layer,tg,128,44.13,0.02,5,2.1,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,tensor,pp,543,2468.08,7.58,5,2.67,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen2.5-14b,tensor,tg,128,72.37,0.07,5,2.67,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,gpu0,pp,543,2009.5,4.61,5,5.48,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,gpu0,tg,128,43.85,0.07,5,5.48,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,gpu1,pp,543,2026.2,5.42,5,2.13,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,gpu1,tg,128,44.01,0.03,5,2.13,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,layer,pp,543,2149.53,0.25,5,2.11,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,layer,tg,128,43.86,0.05,5,2.11,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,tensor,pp,543,2613.19,6.92,5,2.66,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-14b,tensor,tg,128,74.3,0.03,5,2.66,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,layer,pp,543,838.38,0.67,5,6.53,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,layer,tg,128,24.21,0.01,5,6.53,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,tensor,pp,543,985.79,1.75,5,3.26,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,tensor,tg,128,40.4,0.01,5,3.26,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,layer-mtp,pp,543,823.75,0.94,5,3.26,0.507,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,layer-mtp,tg,128,52.08,7.84,5,3.26,0.507,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,tensor-mtp,pp,543,950.75,1.04,5,3.22,0.508,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3.8-27b,tensor-mtp,tg,128,77.81,12.02,5,3.22,0.508,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-30b-a3b,layer,pp,543,4022.63,4.66,5,10.32,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-30b-a3b,layer,tg,128,143.83,0.12,5,10.32,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-30b-a3b,tensor,pp,543,3622.41,11.54,5,8.64,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-30b-a3b,tensor,tg,128,158.22,3.73,5,8.64,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-32b,layer,pp,543,926.86,0.72,5,10.32,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-32b,layer,tg,128,20.15,0.01,5,10.32,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-32b,tensor,pp,543,1276.12,1.37,5,3.45,,Q4_K_M,f16/f16 (default)
+after,llama-server,qwen3-32b,tensor,tg,128,35.75,0.01,5,3.45,,Q4_K_M,f16/f16 (default)
+after,Ollama,gemma3-4b,gpu0,pp,535,5318.41,51.98,5,21.13,,Q4_K_M,f16/f16
+after,Ollama,gemma3-4b,gpu0,tg,128,124.65,2.16,5,21.13,,Q4_K_M,f16/f16
+after,Ollama,gemma3-4b,gpu1,pp,535,5344.02,38.77,5,19.87,,Q4_K_M,f16/f16
+after,Ollama,gemma3-4b,gpu1,tg,128,123.67,0.31,5,19.87,,Q4_K_M,f16/f16
+after,Ollama,gemma3-4b,layer,pp,535,5317.07,27.24,5,20.24,,Q4_K_M,f16/f16
+after,Ollama,gemma3-4b,layer,tg,128,124.67,2.19,5,20.24,,Q4_K_M,f16/f16
+after,Ollama,llama3-8b,gpu0,pp,544,3908.65,8.75,5,17.93,,Q4_0,f16/f16
+after,Ollama,llama3-8b,gpu0,tg,128,87.61,0.65,5,17.93,,Q4_0,f16/f16
+after,Ollama,llama3-8b,gpu1,pp,544,3929.14,2.76,5,16.19,,Q4_0,f16/f16
+after,Ollama,llama3-8b,gpu1,tg,128,86.87,1.02,5,16.19,,Q4_0,f16/f16
+after,Ollama,llama3-8b,layer,pp,544,4182.4,9.06,5,16.5,,Q4_0,f16/f16
+after,Ollama,llama3-8b,layer,tg,128,86.7,0.78,5,16.5,,Q4_0,f16/f16
+after,Ollama,llama3.1-8b,gpu0,pp,544,3498.44,7.32,5,16.2,,Q4_K_M,f16/f16
+after,Ollama,llama3.1-8b,gpu0,tg,128,81.75,0.54,5,16.2,,Q4_K_M,f16/f16
+after,Ollama,llama3.1-8b,gpu1,pp,544,3534.32,4.18,5,16.17,,Q4_K_M,f16/f16
+after,Ollama,llama3.1-8b,gpu1,tg,128,82.0,0.91,5,16.17,,Q4_K_M,f16/f16
+after,Ollama,llama3.1-8b,layer,pp,544,3751.29,4.71,5,16.53,,Q4_K_M,f16/f16
+after,Ollama,llama3.1-8b,layer,tg,128,82.22,0.56,5,16.53,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,gpu0,pp,543,3446.31,6.26,5,17.39,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,gpu0,tg,128,77.2,0.5,5,17.39,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,gpu1,pp,543,3469.35,12.64,5,17.39,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,gpu1,tg,128,77.48,0.57,5,17.39,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,layer,pp,543,3692.91,4.83,5,18.05,,Q4_K_M,f16/f16
+after,Ollama,qwen3-8b,layer,tg,128,77.43,0.61,5,18.05,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,gpu0,pp,543,1905.9,2.3,5,18.12,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,gpu0,tg,128,44.06,0.09,5,18.12,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,gpu1,pp,543,1916.28,1.7,5,14.62,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,gpu1,tg,128,44.17,0.05,5,14.62,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,layer,pp,543,2034.88,2.36,5,15.22,,Q4_K_M,f16/f16
+after,Ollama,qwen2.5-14b,layer,tg,128,44.12,0.14,5,15.22,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,gpu0,pp,543,1882.69,2.51,5,19.65,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,gpu0,tg,128,44.05,0.08,5,19.65,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,gpu1,pp,543,1900.8,2.4,5,16.15,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,gpu1,tg,128,44.09,0.05,5,16.15,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,layer,pp,543,2014.09,2.0,5,16.51,,Q4_K_M,f16/f16
+after,Ollama,qwen3-14b,layer,tg,128,44.05,0.12,5,16.51,,Q4_K_M,f16/f16
+after,Ollama,qwen3.8-27b,layer-mtp,pp,543,700.53,1.53,5,32.69,,Q4_K_M,f16/f16
+after,Ollama,qwen3.8-27b,layer-mtp,tg,128,42.82,8.95,5,32.69,,Q4_K_M,f16/f16
+after,Ollama,qwen3-30b-a3b,layer,pp,543,3031.72,1.44,5,28.08,,Q4_K_M,f16/f16
+after,Ollama,qwen3-30b-a3b,layer,tg,128,156.39,1.46,5,28.08,,Q4_K_M,f16/f16
+after,Ollama,qwen3-32b,layer,pp,543,879.02,1.28,5,21.77,,Q4_K_M,f16/f16
+after,Ollama,qwen3-32b,layer,tg,128,20.12,0.02,5,21.77,,Q4_K_M,f16/f16

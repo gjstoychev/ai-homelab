@@ -1,0 +1,82 @@
+== Thu Nov 19 19:56:02 UTC 2026  phase=before group=dual image=local/llama.cpp:b12464-nccl (sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b)
+== llama-bench -ngl 99 -fa on -p 512 -n 128 -r 5 -o jsonl -oe md
+
+== 19:56:02  qwen3.8-27b (qwen3.8:27b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  99 |   1 |           pp512 |       1103.33 ± 1.24 |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  99 |   1 |           tg128 |         24.20 ± 0.00 |
+
+build: d3c3e242c (12464)
+
+== 19:56:42  qwen3.8-27b (qwen3.8:27b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  99 | tensor |   1 |           pp512 |       1193.89 ± 0.43 |
+| qwen35 27B Q4_K - Medium       |  15.65 GiB |    27.32 B | CUDA       |  99 | tensor |   1 |           tg128 |         37.86 ± 0.02 |
+
+build: d3c3e242c (12464)
+
+== 19:57:11  qwen3-30b-a3b (qwen3:30b-a3b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3moe 30B.A3B Q4_K - Medium |  17.28 GiB |    30.53 B | CUDA       |  99 |   1 |           pp512 |      4395.40 ± 21.42 |
+| qwen3moe 30B.A3B Q4_K - Medium |  17.28 GiB |    30.53 B | CUDA       |  99 |   1 |           tg128 |        152.50 ± 0.03 |
+
+build: d3c3e242c (12464)
+
+== 19:57:31  qwen3-30b-a3b (qwen3:30b-a3b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen3moe 30B.A3B Q4_K - Medium |  17.28 GiB |    30.53 B | CUDA       |  99 | tensor |   1 |           pp512 |       3919.49 ± 9.94 |
+| qwen3moe 30B.A3B Q4_K - Medium |  17.28 GiB |    30.53 B | CUDA       |  99 | tensor |   1 |           tg128 |        136.82 ± 0.06 |
+
+build: d3c3e242c (12464)
+
+== 19:57:55  qwen3-32b (qwen3:32b)  config=layer
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | --: | --------------: | -------------------: |
+| qwen3 32B Q4_K - Medium        |  18.81 GiB |    32.76 B | CUDA       |  99 |   1 |           pp512 |        929.20 ± 1.24 |
+| qwen3 32B Q4_K - Medium        |  18.81 GiB |    32.76 B | CUDA       |  99 |   1 |           tg128 |         20.29 ± 0.00 |
+
+build: d3c3e242c (12464)
+
+== 19:58:45  qwen3-32b (qwen3:32b)  config=tensor
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+| qwen3 32B Q4_K - Medium        |  18.81 GiB |    32.76 B | CUDA       |  99 | tensor |   1 |           pp512 |       1110.73 ± 0.76 |
+| qwen3 32B Q4_K - Medium        |  18.81 GiB |    32.76 B | CUDA       |  99 | tensor |   1 |           tg128 |         33.62 ± 0.00 |
+
+build: d3c3e242c (12464)
+
+== done Thu Nov 19 19:59:16 UTC 2026

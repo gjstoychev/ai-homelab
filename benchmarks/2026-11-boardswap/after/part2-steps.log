@@ -1,0 +1,8 @@
+== 09:06:33 step start (CPU power sampling, pid 13139)
+== 09:06:33 step 10 nvbandwidth
+== 09:09:28 step 11 link under load
+== 09:10:00 step 14 llama-bench single
+== 09:15:58 step 15 llama-bench dual
+== 09:19:07 step 16 Ollama
+== 09:39:20 step 17 llama-server
+== 09:50:44 step done

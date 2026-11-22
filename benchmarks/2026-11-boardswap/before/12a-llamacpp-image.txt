@@ -1,0 +1,141 @@
+full-cuda: Pulling from ggml-org/llama.cpp
+5a7813e071bf: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+cbb9175a9bc5: Pulling fs layer
+a102f36d092c: Pulling fs layer
+05ec76e31584: Pulling fs layer
+398182656c47: Pulling fs layer
+dae971b83885: Pulling fs layer
+3d6ab8c799cd: Pulling fs layer
+7209097bfb98: Pulling fs layer
+545a3ada5b6b: Pulling fs layer
+634288b2efa0: Pulling fs layer
+0298babf2dee: Pulling fs layer
+a949bfc68f60: Pulling fs layer
+73389fbd088f: Pulling fs layer
+4f4fb700ef54: Already exists
+5a7813e071bf: Download complete
+a102f36d092c: Download complete
+398182656c47: Download complete
+5a7813e071bf: Pull complete
+a102f36d092c: Pull complete
+3d6ab8c799cd: Download complete
+7209097bfb98: Download complete
+05ec76e31584: Download complete
+545a3ada5b6b: Download complete
+398182656c47: Pull complete
+05ec76e31584: Pull complete
+dae971b83885: Download complete
+634288b2efa0: Download complete
+0298babf2dee: Download complete
+73389fbd088f: Download complete
+73389fbd088f: Pull complete
+a949bfc68f60: Download complete
+cbb9175a9bc5: Download complete
+3d6ab8c799cd: Pull complete
+cbb9175a9bc5: Pull complete
+7209097bfb98: Pull complete
+545a3ada5b6b: Pull complete
+634288b2efa0: Pull complete
+0298babf2dee: Pull complete
+4f4fb700ef54: Pull complete
+a949bfc68f60: Pull complete
+dae971b83885: Pull complete
+Digest: sha256:962077c3231fe2005da07be469136c25222b4d48434e98634bd20fa9cc1fc949
+Status: Downloaded newer image for ghcr.io/ggml-org/llama.cpp:full-cuda
+ghcr.io/ggml-org/llama.cpp:full-cuda
+ghcr.io/ggml-org/llama.cpp@sha256:962077c3231fe2005da07be469136c25222b4d48434e98634bd20fa9cc1fc949
+conversion
+convert_hf_to_gguf.py
+convert_hf_to_gguf_update.py
+convert_llama_ggml_to_gguf.py
+convert_lora_to_gguf.py
+gguf-py
+libggml-base.so
+libggml-base.so.1
+libggml-base.so.1.0.0
+libggml-cpu-alderlake.so
+libggml-cpu-cannonlake.so
+libggml-cpu-cascadelake.so
+libggml-cpu-cooperlake.so
+libggml-cpu-haswell.so
+libggml-cpu-icelake.so
+libggml-cpu-ivybridge.so
+libggml-cpu-piledriver.so
+libggml-cpu-sandybridge.so
+libggml-cpu-sapphirerapids.so
+libggml-cpu-skylakex.so
+libggml-cpu-sse42.so
+libggml-cpu-x64.so
+libggml-cpu-zen4.so
+libggml-cuda.so
+libggml.so
+libggml.so.1
+libggml.so.1.0.0
+libllama-batched-bench-impl.so
+libllama-bench-impl.so
+libllama-cli-impl.so
+libllama-common.so
+libllama-common.so.1
+libllama-common.so.1.0.0
+libllama-completion-impl.so
+libllama-fit-params-impl.so
+libllama-perplexity-impl.so
+libllama-quantize-impl.so
+libllama-server-impl.so
+libllama.so
+libllama.so.1
+libllama.so.1.0.0
+libmtmd.so
+libmtmd.so.1
+libmtmd.so.1.0.0
+llama
+llama-batched
+llama-batched-bench
+llama-bench
+llama-cli
+llama-completion
+llama-debug
+llama-diffusion-cli
+llama-embedding
+llama-eval-callback
+llama-finetune
+llama-fit-params
+llama-gemma3-cli
+llama-gen-docs
+llama-gguf
+llama-gguf-hash
+llama-gguf-split
+llama-idle
+llama-imatrix
+llama-llava-cli
+llama-lookahead
+llama-lookup
+llama-lookup-create
+llama-lookup-merge
+llama-lookup-stats
+llama-minicpmv-cli
+llama-mtmd-cli
+llama-mtmd-debug
+llama-parallel
+llama-passkey
+llama-perplexity
+llama-quantize
+llama-qwen2vl-cli
+llama-results
+llama-retrieval
+llama-server
+llama-simple
+llama-simple-chat
+llama-speculative
+llama-speculative-simple
+llama-tokenize
+llama-tts
+requirements
+requirements.txt
+tools.sh
+version: 1.0.0-dev (build 12464, commit d3c3e242c)
+built with GNU 14.2.0 for Linux x86_64
+Available devices:
+  CUDA0: NVIDIA GeForce RTX 5060 Ti (15838 MiB, 15691 MiB free)
+  CUDA1: NVIDIA GeForce RTX 5060 Ti (15847 MiB, 15710 MiB free)

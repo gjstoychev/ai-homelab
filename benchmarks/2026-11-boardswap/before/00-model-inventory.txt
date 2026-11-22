@@ -1,0 +1,14 @@
+Thu Nov 19 18:07:15 UTC 2026
+tag                                    blob           GiB  family    params  quant
+llama3:8b                              6a0746a1ec1a   4.3  llama     8.0B    Q4_0
+llama3.1:8b                            667b0c1932bc   4.6  llama     8.0B    Q4_K_M
+qwen2.5:14b-instruct-q4_K_M            2049f5674b1e   8.4  qwen2     14.8B   Q4_K_M
+qwen25-64k:latest                      2049f5674b1e   8.4  qwen2     14.8B   Q4_K_M
+qwen27b-stable:latest                  f5f1dd8920d4  15.7  qwen35    27.3B   Q4_K_M
+qwen3:14b                              a8cc1361f314   8.6  qwen3     14.8B   Q4_K_M
+qwen3:30b-a3b                          58574f2e94b9  17.3  qwen3moe  30.5B   Q4_K_M
+qwen3:30b-a3b-instruct-2507-q4_K_M     78b329e716e7  17.3  qwen3moe  30.5B   Q4_K_M
+qwen3:8b                               a3de86cd1c13   4.9  qwen3     8.2B    Q4_K_M
+qwen3-64k:latest                       78b329e716e7  17.3  qwen3moe  30.5B   Q4_K_M
+qwen3.8:27b                            f5f1dd8920d4  15.7  qwen35    27.3B   Q4_K_M
+translategemma:4b                      bdbf939b402e   3.1  gemma3    4.3B    Q4_K_M

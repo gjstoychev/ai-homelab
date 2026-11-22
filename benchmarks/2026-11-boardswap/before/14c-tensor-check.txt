@@ -1,0 +1,28 @@
+Thu Nov 19 19:35:07 UTC 2026
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+CUDA error: unhandled cuda error (run with NCCL_DEBUG=INFO for details)
+  current device: 1, in function ggml_backend_cuda_comm_allreduce_nccl at /app/ggml/src/ggml-cuda/ggml-cuda.cu:1390
+  ncclGroupEnd()
+/app/ggml/src/ggml-cuda/ggml-cuda.cu:113: CUDA error
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+libggml-base.so.1(+0x183a6)[0x70fed440c3a6]
+libggml-base.so.1(+0x1882a)[0x70fed440c82a]
+libggml-base.so.1(ggml_abort+0x15b)[0x70fed440ca0b]
+/app/libggml-cuda.so(_Z15ggml_cuda_errorPKcS0_S0_iS0_+0xb5)[0x70fec824a185]
+/app/libggml-cuda.so(+0x30fbfa)[0x70fec8254bfa]
+/app/libggml-cuda.so(+0x30fecd)[0x70fec8254ecd]
+libggml-base.so.1(+0x511da)[0x70fed44451da]
+libggml-base.so.1(ggml_backend_sched_graph_compute_async+0x779)[0x70fed442bb39]
+libllama.so.1(_ZN13llama_context13graph_computeEP11ggml_cgraphb+0xdb)[0x70fed47437cb]
+libllama.so.1(_ZN13llama_context14process_ubatchERK12llama_ubatch14llm_graph_typeP22llama_memory_context_iR11ggml_status+0x134)[0x70fed4746f64]
+libllama.so.1(_ZN13llama_context6decodeERK15llama_batch_ext+0x7ca)[0x70fed475167a]
+libllama-bench-impl.so(+0x1cbcb)[0x70fed53f5bcb]
+libllama-bench-impl.so(_Z11llama_benchiPPc+0xfea)[0x70fed5406aaa]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x70fed4f3c1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x70fed4f3c28b]
+/app/llama-bench(+0x1315)[0x60c8f3f5b315]

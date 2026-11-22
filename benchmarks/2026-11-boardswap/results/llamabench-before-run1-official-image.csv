@@ -1,0 +1,31 @@
+model,config,test,tps,stddev,model_type,split_mode,build,n_reps
+llama3-8b,gpu0,pp512,4254.63,141.38,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu0,tg128,90.42,0.03,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu1,pp512,4270.22,25.3,llama 8B Q4_0,layer,12464,5
+llama3-8b,gpu1,tg128,89.97,0.04,llama 8B Q4_0,layer,12464,5
+llama3-8b,layer,pp512,4283.96,28.63,llama 8B Q4_0,layer,12464,5
+llama3-8b,layer,tg128,89.86,0.04,llama 8B Q4_0,layer,12464,5
+llama3.1-8b,gpu0,pp512,4063.92,20.1,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu0,tg128,84.57,0.01,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu1,pp512,4028.88,23.31,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,gpu1,tg128,84.16,0.04,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,layer,pp512,4048.61,24.51,llama 8B Q4_K - Medium,layer,12464,5
+llama3.1-8b,layer,tg128,84.05,0.02,llama 8B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu0,pp512,2154.49,4.87,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu0,tg128,45.02,0.01,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu1,pp512,2129.89,10.18,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,gpu1,tg128,44.87,0.01,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,layer,pp512,2151.83,7.84,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen2.5-14b,layer,tg128,44.87,0.01,qwen2 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu0,pp512,2159.47,6.5,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu0,tg128,44.69,0.01,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu1,pp512,2141.76,6.07,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,gpu1,tg128,44.57,0.0,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,layer,pp512,2153.09,6.82,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-14b,layer,tg128,44.54,0.01,qwen3 14B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu0,pp512,3953.31,19.35,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu0,tg128,79.88,0.02,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu1,pp512,3915.88,22.54,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,gpu1,tg128,79.41,0.04,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,layer,pp512,3930.34,20.0,qwen3 8B Q4_K - Medium,layer,12464,5
+qwen3-8b,layer,tg128,79.33,0.01,qwen3 8B Q4_K - Medium,layer,12464,5

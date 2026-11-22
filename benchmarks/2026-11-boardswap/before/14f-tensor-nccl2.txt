@@ -1,0 +1,161 @@
+Thu Nov 19 19:44:43 UTC 2026
+ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31686 MiB):
+  Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15838 MiB
+  Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-alderlake.so
+| model                          |       size |     params | backend    | ngl |     sm |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | --: | --------------: | -------------------: |
+de460b648663:1:1 [1] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+de460b648663:1:1 [1] NCCL INFO cudaDriverVersion 13000
+de460b648663:1:1 [1] NCCL INFO Bootstrap: Using eth0:<docker-ip><0>
+de460b648663:1:68 [0] NCCL INFO Socket handshake magic 0x564ab9f2fc4b9d6c (built-in default)
+de460b648663:1:1 [0] NCCL INFO NCCL version 2.32.6+cuda12.9
+de460b648663:1:1 [0] NCCL INFO NCCL git version unknown unknown
+de460b648663:1:70 [1] NCCL INFO NET/Plugin: Could not find: libnccl-net.so
+de460b648663:1:70 [1] NCCL INFO Could not open libibverbs.so
+de460b648663:1:70 [1] NCCL INFO Could not open libibverbs.so.1
+de460b648663:1:70 [1] NCCL INFO transport/net_ib/init.cc:691 (ncclIbInit) -> 3
+
+[2026-11-19 19:44:45] de460b648663:1:70 [1] plugin/net.cc:229 (ncclNetPluginInit) NCCL ATTN Failed to initialize NET plugin IB
+de460b648663:1:70 [1] NCCL INFO NET/Socket : Using [0]eth0:<docker-ip><0>
+de460b648663:1:70 [1] NCCL INFO Initialized NET plugin Socket
+de460b648663:1:70 [1] NCCL INFO Assigned NET plugin Socket to comm
+de460b648663:1:69 [0] NCCL INFO Initialized NET plugin Socket
+de460b648663:1:69 [0] NCCL INFO Assigned NET plugin Socket to comm
+de460b648663:1:70 [1] NCCL INFO RMA/Plugin: Could not find: libnccl-rma.so
+
+[2026-11-19 19:44:45] de460b648663:1:70 [1] misc/ibvwrap.cc:190 (wrap_ibv_alloc_pd) NCCL WARN lib wrapper not initialized.
+de460b648663:1:70 [1] NCCL INFO transport/net_ib/gdr.cc:55 (ibDmaBufSupportInitOnce) -> 3
+de460b648663:1:70 [1] NCCL INFO RMA/Plugin: Failed to initialize plugin 
+
+[2026-11-19 19:44:45] de460b648663:1:70 [1] transport/rma_socket.cc:32 (ncclRmaSocketProxyInit) NCCL WARN RMA/Socket : rma_socket requires GDRCopy; and GDR Copy is not available
+de460b648663:1:70 [1] NCCL INFO RMA/Plugin: Failed to initialize plugin 
+de460b648663:1:70 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+de460b648663:1:69 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+de460b648663:1:70 [1] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+de460b648663:1:70 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+de460b648663:1:70 [1] NCCL INFO Using network Socket
+de460b648663:1:69 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+de460b648663:1:69 [0] NCCL INFO Using network Socket
+de460b648663:1:70 [1] NCCL INFO Loaded NVML from libnvidia-ml.so.1
+de460b648663:1:69 [0] NCCL INFO [Rank 0] ncclCommInitAll comm 0x5d0ed3ad80c0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x12e3fa2201f6bf86 - Init START
+de460b648663:1:70 [1] NCCL INFO [Rank 1] ncclCommInitAll comm 0x5d0ed3bfda20 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x12e3fa2201f6bf86 - Init START
+de460b648663:1:69 [0] NCCL INFO RAS client listening socket at ::1<28028>
+de460b648663:1:69 [0] NCCL INFO Bootstrap timings total 0.000875 (create 0.000047, send 0.000143, recv 0.000169, ring 0.000024, delay 0.000001)
+de460b648663:1:70 [1] NCCL INFO Bootstrap timings total 0.000833 (create 0.000030, send 0.000120, recv 0.000222, ring 0.000024, delay 0.000000)
+de460b648663:1:70 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+de460b648663:1:70 [1] NCCL INFO NVLS multicast support is not available on dev 1, transport disabled, symmetric multimem disabled
+de460b648663:1:69 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+de460b648663:1:69 [0] NCCL INFO NVLS multicast support is not available on dev 0, transport disabled, symmetric multimem disabled
+de460b648663:1:70 [1] NCCL INFO Rank 1: 1 Net devices
+de460b648663:1:70 [1] NCCL INFO Rank 1: 0 CollNet devices
+de460b648663:1:69 [0] NCCL INFO Rank 0: 1 Net devices
+de460b648663:1:69 [0] NCCL INFO Rank 0: 0 CollNet devices
+de460b648663:1:70 [1] NCCL INFO comm 0x5d0ed3bfda20 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+de460b648663:1:69 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+de460b648663:1:69 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+de460b648663:1:69 [0] NCCL INFO comm 0x5d0ed3ad80c0 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+de460b648663:1:70 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+de460b648663:1:70 [1] NCCL INFO P2P Chunksize set to 131072
+de460b648663:1:70 [1] NCCL INFO Simple Buffer Size set to 4194304
+de460b648663:1:69 [0] NCCL INFO Channel 00/02 : 0 1
+de460b648663:1:69 [0] NCCL INFO Channel 01/02 : 0 1
+de460b648663:1:69 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+de460b648663:1:69 [0] NCCL INFO P2P Chunksize set to 131072
+de460b648663:1:69 [0] NCCL INFO Simple Buffer Size set to 4194304
+de460b648663:1:70 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+de460b648663:1:70 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+de460b648663:1:69 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+de460b648663:1:69 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+de460b648663:1:75 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 17
+de460b648663:1:72 [0] NCCL INFO [Proxy Service] Device 1 CPU core 24
+de460b648663:1:72 [1] NCCL INFO proxy listening socket at <docker-ip><45539>
+de460b648663:1:73 [0] NCCL INFO [Proxy Service] Device 0 CPU core 22
+de460b648663:1:74 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 23
+de460b648663:1:73 [0] NCCL INFO proxy listening socket at <docker-ip><34393>
+de460b648663:1:70 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+de460b648663:1:70 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+de460b648663:1:70 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+de460b648663:1:69 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+de460b648663:1:70 [1] NCCL INFO Rank 1 RMA strides: baseStride 0 userCtxStride 1 defaultUserStride 1 networkRmaSupport 0 (crossNic 1 contiguousRanksPerHost 2 numRmaCtx 1)
+de460b648663:1:70 [1] NCCL INFO symmetricSupport 0, cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0, contiguousRanksPerHost 2, crossNicSupport 1
+de460b648663:1:69 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+de460b648663:1:69 [0] NCCL INFO Rank 0 RMA strides: baseStride 0 userCtxStride 1 defaultUserStride 1 networkRmaSupport 0 (crossNic 1 contiguousRanksPerHost 2 numRmaCtx 1)
+de460b648663:1:69 [0] NCCL INFO symmetricSupport 0, cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0, contiguousRanksPerHost 2, crossNicSupport 1
+de460b648663:1:69 [0] NCCL INFO CC Off, workFifoBytes 1048576
+de460b648663:1:70 [1] NCCL INFO ncclCommInitAll comm 0x5d0ed3bfda20 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x12e3fa2201f6bf86 - Init COMPLETE
+de460b648663:1:70 [1] NCCL INFO Init timings - ncclCommInitAll: rank 1 nranks 2 total 0.21 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+de460b648663:1:69 [0] NCCL INFO ncclCommInitAll comm 0x5d0ed3ad80c0 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x12e3fa2201f6bf86 - Init COMPLETE
+de460b648663:1:69 [0] NCCL INFO Init timings - ncclCommInitAll: rank 0 nranks 2 total 0.21 (kernels 0.18, alloc 0.02, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+de460b648663:1:76 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+de460b648663:1:77 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+de460b648663:1:76 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+de460b648663:1:77 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+de460b648663:1:77 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+de460b648663:1:76 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  -1 | tensor |   1 |            pp64 |       2639.34 ± 0.00 |
+de460b648663:1:81 [1] NCCL INFO Initialized NET plugin Socket
+de460b648663:1:81 [1] NCCL INFO Assigned NET plugin Socket to comm
+de460b648663:1:81 [1] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+de460b648663:1:81 [1] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+de460b648663:1:81 [1] NCCL INFO Using network Socket
+de460b648663:1:81 [1] NCCL INFO [Rank 1] ncclCommInitAll comm 0x5d0ed3922f70 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x799f9db9507e4817 - Init START
+de460b648663:1:80 [0] NCCL INFO Initialized NET plugin Socket
+de460b648663:1:80 [0] NCCL INFO Assigned NET plugin Socket to comm
+de460b648663:1:80 [0] NCCL INFO RMA/Plugin: Failed to initialize any plugin
+de460b648663:1:80 [0] NCCL INFO GIN/Plugin: Failed to initialize any GIN plugin
+de460b648663:1:80 [0] NCCL INFO Using network Socket
+de460b648663:1:80 [0] NCCL INFO [Rank 0] ncclCommInitAll comm 0x5d0ed37fd610 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x799f9db9507e4817 - Init START
+de460b648663:1:81 [1] NCCL INFO Bootstrap timings total 0.000420 (create 0.000021, send 0.000063, recv 0.000194, ring 0.000033, delay 0.000000)
+de460b648663:1:80 [0] NCCL INFO Bootstrap timings total 0.000327 (create 0.000028, send 0.000065, recv 0.000123, ring 0.000017, delay 0.000000)
+de460b648663:1:81 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+de460b648663:1:81 [1] NCCL INFO NVLS multicast support is not available on dev 1, transport disabled, symmetric multimem disabled
+de460b648663:1:81 [1] NCCL INFO Rank 1: 1 Net devices
+de460b648663:1:81 [1] NCCL INFO Rank 1: 0 CollNet devices
+de460b648663:1:80 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is empty, ignoring. (GPU affinity =  ; CPU affinity = 0-27).
+de460b648663:1:80 [0] NCCL INFO NVLS multicast support is not available on dev 0, transport disabled, symmetric multimem disabled
+de460b648663:1:80 [0] NCCL INFO Rank 0: 1 Net devices
+de460b648663:1:80 [0] NCCL INFO Rank 0: 0 CollNet devices
+de460b648663:1:81 [1] NCCL INFO comm 0x5d0ed3922f70 rank 1 nRanks 2 nNodes 1 localRanks 2 localRank 1 MNNVL 0
+de460b648663:1:80 [0] NCCL INFO Local Net device counts across ranks: min 1 max 1
+de460b648663:1:80 [0] NCCL INFO Local CollNet device counts across ranks: min 0 max 0
+de460b648663:1:80 [0] NCCL INFO comm 0x5d0ed37fd610 rank 0 nRanks 2 nNodes 1 localRanks 2 localRank 0 MNNVL 0
+de460b648663:1:81 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+de460b648663:1:81 [1] NCCL INFO P2P Chunksize set to 131072
+de460b648663:1:81 [1] NCCL INFO Simple Buffer Size set to 4194304
+de460b648663:1:80 [0] NCCL INFO Channel 00/02 : 0 1
+de460b648663:1:80 [0] NCCL INFO Channel 01/02 : 0 1
+de460b648663:1:81 [1] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+de460b648663:1:80 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+de460b648663:1:80 [0] NCCL INFO P2P Chunksize set to 131072
+de460b648663:1:80 [0] NCCL INFO Simple Buffer Size set to 4194304
+de460b648663:1:80 [0] NCCL INFO Check P2P Type isAllDirectP2p 0 directMode 1 isAllCudaP2p 0
+de460b648663:1:82 [0] NCCL INFO [Proxy Service] Device 1 CPU core 19
+de460b648663:1:82 [1] NCCL INFO proxy listening socket at <docker-ip><36741>
+de460b648663:1:83 [0] NCCL INFO [Proxy Service] Device 0 CPU core 19
+de460b648663:1:84 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 24
+de460b648663:1:85 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 21
+de460b648663:1:83 [0] NCCL INFO proxy listening socket at <docker-ip><58689>
+de460b648663:1:80 [0] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+de460b648663:1:80 [0] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+de460b648663:1:80 [0] NCCL INFO Rank 0 RMA strides: baseStride 0 userCtxStride 1 defaultUserStride 1 networkRmaSupport 0 (crossNic 1 contiguousRanksPerHost 2 numRmaCtx 1)
+de460b648663:1:80 [0] NCCL INFO symmetricSupport 0, cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0, contiguousRanksPerHost 2, crossNicSupport 1
+de460b648663:1:80 [0] NCCL INFO CC Off, workFifoBytes 1048576
+de460b648663:1:81 [1] NCCL INFO threadThresholds 8/8/64 | 16/8/64 | 512 | 512
+de460b648663:1:81 [1] NCCL INFO 2 coll channels, 2 collnet channels, 0 nvls channels, 2 p2p channels, 2 p2p channels per peer
+de460b648663:1:81 [1] NCCL INFO Rank 1 RMA strides: baseStride 0 userCtxStride 1 defaultUserStride 1 networkRmaSupport 0 (crossNic 1 contiguousRanksPerHost 2 numRmaCtx 1)
+de460b648663:1:81 [1] NCCL INFO symmetricSupport 0, cuMemEnable 1, globalGinSupport 0, cuMemGdrSupport 0, contiguousRanksPerHost 2, crossNicSupport 1
+de460b648663:1:80 [0] NCCL INFO ncclCommInitAll comm 0x5d0ed37fd610 rank 0 nranks 2 cudaDev 0 nvmlDev 0 busId 1000 commId 0x799f9db9507e4817 - Init COMPLETE
+de460b648663:1:80 [0] NCCL INFO Init timings - ncclCommInitAll: rank 0 nranks 2 total 0.01 (kernels 0.00, alloc 0.00, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+de460b648663:1:81 [1] NCCL INFO ncclCommInitAll comm 0x5d0ed3922f70 rank 1 nranks 2 cudaDev 1 nvmlDev 1 busId 2000 commId 0x799f9db9507e4817 - Init COMPLETE
+de460b648663:1:81 [1] NCCL INFO Init timings - ncclCommInitAll: rank 1 nranks 2 total 0.01 (kernels 0.00, alloc 0.00, bootstrap 0.00, allgathers 0.00, topo 0.01, graphs 0.00, connections 0.00, rest 0.00)
+de460b648663:1:87 [0] NCCL INFO Channel 00 : 0[0] -> 1[1] via SHM/direct
+de460b648663:1:87 [0] NCCL INFO Channel 01 : 0[0] -> 1[1] via SHM/direct
+de460b648663:1:86 [1] NCCL INFO Channel 00 : 1[1] -> 0[0] via SHM/direct
+de460b648663:1:86 [1] NCCL INFO Channel 01 : 1[1] -> 0[0] via SHM/direct
+de460b648663:1:86 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+de460b648663:1:87 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+| llama 8B Q4_K - Medium         |   4.58 GiB |     8.03 B | CUDA       |  -1 | tensor |   1 |            tg16 |        118.90 ± 0.00 |
+
+build: d3c3e242c (12464)

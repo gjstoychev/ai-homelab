@@ -1,0 +1,51 @@
+0.32.14: Pulling from ollama/ollama
+fbe9cb41ddd4: Pulling fs layer
+62d7c76c55cb: Pulling fs layer
+966c395d29cb: Pulling fs layer
+f0c89c51c516: Pulling fs layer
+966c395d29cb: Download complete
+966c395d29cb: Pull complete
+f0c89c51c516: Download complete
+62d7c76c55cb: Download complete
+62d7c76c55cb: Pull complete
+f0c89c51c516: Pull complete
+fbe9cb41ddd4: Download complete
+fbe9cb41ddd4: Pull complete
+Digest: sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+Status: Downloaded newer image for ollama/ollama:0.32.14
+docker.io/ollama/ollama:0.32.14
+ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+3ca5f3f142d257b27d7517f152707a03bc3a11cc4fea909bd7c9f08276c61342
+ollama version is 0.32.14
+NAME                                  ID              SIZE      MODIFIED     
+qwen3:32b                             030ee887880f    20 GB     2 hours ago     
+qwen27b-stable:latest                 8f4a7574ab3a    17 GB     7 weeks ago     
+qwen3.8:27b                           aaee06c39dcf    17 GB     7 weeks ago     
+qwen3-64k:latest                      f38c884cceb6    18 GB     2 months ago    
+qwen3:30b-a3b-instruct-2507-q4_K_M    19e422b02313    18 GB     2 months ago    
+qwen25-64k:latest                     80baafe85553    9.0 GB    2 months ago    
+qwen2.5:14b-instruct-q4_K_M           7cdf5a0187d5    9.0 GB    2 months ago    
+llama3.1:8b                           46e0c10c039e    4.9 GB    3 months ago    
+llama3:8b                             365c0bd3c000    4.7 GB    3 months ago    
+qwen3:30b-a3b                         ad815644918f    18 GB     3 months ago    
+translategemma:4b                     c49d986b0764    3.3 GB    3 months ago    
+qwen3:14b                             bdbd181c33f2    9.3 GB    3 months ago    
+qwen3:8b                              500a1f067a9f    5.2 GB    3 months ago    
+Couldn't find '/root/.ollama/id_ed25519'. Generating new private key.
+Your new public key is: 
+
+ssh-ed25519 <redacted>
+
+time=2026-11-19T20:08:02.156Z level=INFO source=routes.go:1933 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://0.0.0.0:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/root/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:true OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+time=2026-11-19T20:08:02.156Z level=INFO source=routes.go:1935 msg="Ollama cloud disabled: false"
+time=2026-11-19T20:08:02.157Z level=INFO source=routes.go:1990 msg="Listening on [::]:11434 (version 0.32.14)"
+time=2026-11-19T20:08:02.159Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-11-19T20:08:02.173Z level=INFO source=model_list_cache.go:112 msg="model list cache hydration complete" models=13 failures=0 elapsed=16.363281ms
+time=2026-11-19T20:08:02.403Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h58m31.729043229s consecutive_failures=0
+time=2026-11-19T20:08:05.780Z level=INFO source=types.go:32 msg="inference compute" id=1 filter_id=1 library=CUDA compute=12.0 name=CUDA1 description="NVIDIA GeForce RTX 5060 Ti" libdirs=ollama,cuda_v13 driver=13.0 pci_id=0000:02:00.0 type=discrete total="15.5 GiB" available="15.3 GiB"
+time=2026-11-19T20:08:05.780Z level=INFO source=types.go:32 msg="inference compute" id=0 filter_id=0 library=CUDA compute=12.0 name=CUDA0 description="NVIDIA GeForce RTX 5060 Ti" libdirs=ollama,cuda_v13 driver=13.0 pci_id=0000:01:00.0 type=discrete total="15.5 GiB" available="15.3 GiB"
+time=2026-11-19T20:08:05.780Z level=INFO source=routes.go:2040 msg="vram-based default context" total_vram="30.9 GiB" default_num_ctx=32768
+[GIN] 2026/11/19 - 20:08:07 | 200 |      71.817µs |       127.0.0.1 | GET      "/api/version"
+[GIN] 2026/11/19 - 20:08:07 | 200 |      97.739µs |       127.0.0.1 | HEAD     "/"
+[GIN] 2026/11/19 - 20:08:07 | 200 |    1.471273ms |       127.0.0.1 | GET      "/api/tags"
+bench-ollama-check

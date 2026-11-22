@@ -1,0 +1,193 @@
+== Sun Nov 22 09:19:07 UTC 2026  phase=after image=ollama/ollama:0.32.14
+== digest ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad
+
+== 09:19:07  gemma3-4b (translategemma:4b)  config=gpu0
+  load     req 0: pp 535 tok     43.6 t/s | tg 128 tok   69.5 t/s | load 21.13 s
+  ps: translategemma:4b size 2.7 GiB, in VRAM 2.7 GiB
+  measured req 1: pp 535 tok   5297.3 t/s | tg 128 tok  123.4 t/s
+  measured req 2: pp 535 tok   5328.8 t/s | tg 128 tok  123.4 t/s
+  measured req 3: pp 535 tok   5300.0 t/s | tg 128 tok  122.9 t/s
+  measured req 4: pp 535 tok   5264.1 t/s | tg 128 tok  125.5 t/s
+  measured req 5: pp 535 tok   5401.9 t/s | tg 128 tok  128.1 t/s
+
+== 09:19:59  gemma3-4b (translategemma:4b)  config=gpu1
+  load     req 0: pp 535 tok     43.5 t/s | tg 128 tok   70.0 t/s | load 19.87 s
+  ps: translategemma:4b size 2.7 GiB, in VRAM 2.7 GiB
+  measured req 1: pp 535 tok   5356.3 t/s | tg 128 tok  124.1 t/s
+  measured req 2: pp 535 tok   5340.5 t/s | tg 128 tok  123.3 t/s
+  measured req 3: pp 535 tok   5391.2 t/s | tg 128 tok  123.9 t/s
+  measured req 4: pp 535 tok   5348.2 t/s | tg 128 tok  123.6 t/s
+  measured req 5: pp 535 tok   5284.0 t/s | tg 128 tok  123.5 t/s
+
+== 09:20:49  gemma3-4b (translategemma:4b)  config=spread
+  load     req 0: pp 535 tok     43.5 t/s | tg 128 tok   69.8 t/s | load 20.24 s
+  ps: translategemma:4b size 2.8 GiB, in VRAM 2.8 GiB
+  measured req 1: pp 535 tok   5303.8 t/s | tg 128 tok  122.3 t/s
+  measured req 2: pp 535 tok   5334.5 t/s | tg 128 tok  125.0 t/s
+  measured req 3: pp 535 tok   5275.0 t/s | tg 128 tok  122.7 t/s
+  measured req 4: pp 535 tok   5335.6 t/s | tg 128 tok  125.7 t/s
+  measured req 5: pp 535 tok   5336.4 t/s | tg 128 tok  127.6 t/s
+
+== 09:21:41  llama3-8b (llama3:8b)  config=gpu0
+  load     req 0: pp 544 tok     70.2 t/s | tg 128 tok   56.9 t/s | load 17.93 s
+  ps: llama3:8b size 4.7 GiB, in VRAM 4.7 GiB
+  measured req 1: pp 544 tok   3913.6 t/s | tg 128 tok   88.0 t/s
+  measured req 2: pp 544 tok   3917.6 t/s | tg 128 tok   88.0 t/s
+  measured req 3: pp 544 tok   3911.9 t/s | tg 128 tok   88.0 t/s
+  measured req 4: pp 544 tok   3904.8 t/s | tg 128 tok   87.6 t/s
+  measured req 5: pp 544 tok   3895.4 t/s | tg 128 tok   86.5 t/s
+
+== 09:22:26  llama3-8b (llama3:8b)  config=gpu1
+  load     req 0: pp 544 tok     70.9 t/s | tg 128 tok   56.7 t/s | load 16.19 s
+  ps: llama3:8b size 4.7 GiB, in VRAM 4.7 GiB
+  measured req 1: pp 544 tok   3926.6 t/s | tg 128 tok   86.0 t/s
+  measured req 2: pp 544 tok   3926.3 t/s | tg 128 tok   86.2 t/s
+  measured req 3: pp 544 tok   3928.9 t/s | tg 128 tok   86.1 t/s
+  measured req 4: pp 544 tok   3931.8 t/s | tg 128 tok   88.0 t/s
+  measured req 5: pp 544 tok   3932.1 t/s | tg 128 tok   88.0 t/s
+
+== 09:23:09  llama3-8b (llama3:8b)  config=spread
+  load     req 0: pp 544 tok     70.6 t/s | tg 128 tok   56.3 t/s | load 16.50 s
+  ps: llama3:8b size 4.9 GiB, in VRAM 4.9 GiB
+  measured req 1: pp 544 tok   4182.2 t/s | tg 128 tok   86.9 t/s
+  measured req 2: pp 544 tok   4181.8 t/s | tg 128 tok   85.8 t/s
+  measured req 3: pp 544 tok   4192.0 t/s | tg 128 tok   87.9 t/s
+  measured req 4: pp 544 tok   4187.9 t/s | tg 128 tok   86.6 t/s
+  measured req 5: pp 544 tok   4168.1 t/s | tg 128 tok   86.4 t/s
+
+== 09:23:55  llama3.1-8b (llama3.1:8b)  config=gpu0
+  load     req 0: pp 544 tok     42.6 t/s | tg 128 tok   54.4 t/s | load 16.20 s
+  ps: llama3.1:8b size 4.9 GiB, in VRAM 4.9 GiB
+  measured req 1: pp 544 tok   3504.3 t/s | tg 128 tok   81.8 t/s
+  measured req 2: pp 544 tok   3486.6 t/s | tg 128 tok   81.2 t/s
+  measured req 3: pp 544 tok   3501.0 t/s | tg 128 tok   82.4 t/s
+  measured req 4: pp 544 tok   3496.4 t/s | tg 128 tok   82.1 t/s
+  measured req 5: pp 544 tok   3503.9 t/s | tg 128 tok   81.2 t/s
+
+== 09:24:44  llama3.1-8b (llama3.1:8b)  config=gpu1
+  load     req 0: pp 544 tok     42.6 t/s | tg 128 tok   54.2 t/s | load 16.17 s
+  ps: llama3.1:8b size 4.9 GiB, in VRAM 4.9 GiB
+  measured req 1: pp 544 tok   3530.2 t/s | tg 128 tok   81.2 t/s
+  measured req 2: pp 544 tok   3532.6 t/s | tg 128 tok   83.0 t/s
+  measured req 3: pp 544 tok   3540.7 t/s | tg 128 tok   82.9 t/s
+  measured req 4: pp 544 tok   3536.1 t/s | tg 128 tok   81.8 t/s
+  measured req 5: pp 544 tok   3532.0 t/s | tg 128 tok   81.1 t/s
+
+== 09:25:33  llama3.1-8b (llama3.1:8b)  config=spread
+  load     req 0: pp 544 tok     42.4 t/s | tg 128 tok   54.3 t/s | load 16.53 s
+  ps: llama3.1:8b size 5.1 GiB, in VRAM 5.1 GiB
+  measured req 1: pp 544 tok   3748.5 t/s | tg 128 tok   81.9 t/s
+  measured req 2: pp 544 tok   3745.9 t/s | tg 128 tok   81.5 t/s
+  measured req 3: pp 544 tok   3755.3 t/s | tg 128 tok   82.8 t/s
+  measured req 4: pp 544 tok   3757.0 t/s | tg 128 tok   82.8 t/s
+  measured req 5: pp 544 tok   3749.7 t/s | tg 128 tok   82.1 t/s
+
+== 09:26:24  qwen3-8b (qwen3:8b)  config=gpu0
+  load     req 0: pp 543 tok     40.4 t/s | tg 128 tok   19.1 t/s | load 17.39 s
+  ps: qwen3:8b size 5.2 GiB, in VRAM 5.2 GiB
+  measured req 1: pp 543 tok   3450.1 t/s | tg 128 tok   77.7 t/s
+  measured req 2: pp 543 tok   3452.0 t/s | tg 128 tok   77.8 t/s
+  measured req 3: pp 543 tok   3448.6 t/s | tg 128 tok   77.0 t/s
+  measured req 4: pp 543 tok   3444.8 t/s | tg 128 tok   76.8 t/s
+  measured req 5: pp 543 tok   3436.2 t/s | tg 128 tok   76.7 t/s
+
+== 09:27:20  qwen3-8b (qwen3:8b)  config=gpu1
+  load     req 0: pp 543 tok     40.5 t/s | tg 128 tok   19.1 t/s | load 17.39 s
+  ps: qwen3:8b size 5.2 GiB, in VRAM 5.2 GiB
+  measured req 1: pp 543 tok   3465.7 t/s | tg 128 tok   76.9 t/s
+  measured req 2: pp 543 tok   3479.2 t/s | tg 128 tok   78.4 t/s
+  measured req 3: pp 543 tok   3479.5 t/s | tg 128 tok   77.2 t/s
+  measured req 4: pp 543 tok   3449.1 t/s | tg 128 tok   77.7 t/s
+  measured req 5: pp 543 tok   3473.2 t/s | tg 128 tok   77.2 t/s
+
+== 09:28:15  qwen3-8b (qwen3:8b)  config=spread
+  load     req 0: pp 543 tok     40.4 t/s | tg 128 tok   19.2 t/s | load 18.05 s
+  ps: qwen3:8b size 5.4 GiB, in VRAM 5.4 GiB
+  measured req 1: pp 543 tok   3686.7 t/s | tg 128 tok   77.1 t/s
+  measured req 2: pp 543 tok   3697.5 t/s | tg 128 tok   77.7 t/s
+  measured req 3: pp 543 tok   3697.8 t/s | tg 128 tok   78.2 t/s
+  measured req 4: pp 543 tok   3689.9 t/s | tg 128 tok   76.7 t/s
+  measured req 5: pp 543 tok   3692.7 t/s | tg 128 tok   77.5 t/s
+
+== 09:29:13  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu0
+  load     req 0: pp 543 tok     41.8 t/s | tg 128 tok   34.8 t/s | load 18.12 s
+  ps: qwen2.5:14b-instruct-q4_K_M size 8.8 GiB, in VRAM 8.8 GiB
+  measured req 1: pp 543 tok   1906.0 t/s | tg 128 tok   44.2 t/s
+  measured req 2: pp 543 tok   1904.5 t/s | tg 128 tok   44.0 t/s
+  measured req 3: pp 543 tok   1909.8 t/s | tg 128 tok   44.0 t/s
+  measured req 4: pp 543 tok   1904.6 t/s | tg 128 tok   44.0 t/s
+  measured req 5: pp 543 tok   1904.6 t/s | tg 128 tok   44.0 t/s
+
+== 09:30:13  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=gpu1
+  load     req 0: pp 543 tok     42.2 t/s | tg 128 tok   34.7 t/s | load 14.62 s
+  ps: qwen2.5:14b-instruct-q4_K_M size 8.8 GiB, in VRAM 8.8 GiB
+  measured req 1: pp 543 tok   1919.3 t/s | tg 128 tok   44.1 t/s
+  measured req 2: pp 543 tok   1915.8 t/s | tg 128 tok   44.1 t/s
+  measured req 3: pp 543 tok   1915.5 t/s | tg 128 tok   44.2 t/s
+  measured req 4: pp 543 tok   1915.2 t/s | tg 128 tok   44.2 t/s
+  measured req 5: pp 543 tok   1915.6 t/s | tg 128 tok   44.2 t/s
+
+== 09:31:09  qwen2.5-14b (qwen2.5:14b-instruct-q4_K_M)  config=spread
+  load     req 0: pp 543 tok     42.2 t/s | tg 128 tok   34.7 t/s | load 15.22 s
+  ps: qwen2.5:14b-instruct-q4_K_M size 9.0 GiB, in VRAM 9.0 GiB
+  measured req 1: pp 543 tok   2038.1 t/s | tg 128 tok   44.3 t/s
+  measured req 2: pp 543 tok   2036.2 t/s | tg 128 tok   44.0 t/s
+  measured req 3: pp 543 tok   2033.5 t/s | tg 128 tok   44.3 t/s
+  measured req 4: pp 543 tok   2034.7 t/s | tg 128 tok   44.1 t/s
+  measured req 5: pp 543 tok   2032.0 t/s | tg 128 tok   44.0 t/s
+
+== 09:32:08  qwen3-14b (qwen3:14b)  config=gpu0
+  load     req 0: pp 543 tok     39.9 t/s | tg 128 tok   16.2 t/s | load 19.65 s
+  ps: qwen3:14b size 9.0 GiB, in VRAM 9.0 GiB
+  measured req 1: pp 543 tok   1884.0 t/s | tg 128 tok   44.0 t/s
+  measured req 2: pp 543 tok   1885.7 t/s | tg 128 tok   44.0 t/s
+  measured req 3: pp 543 tok   1879.3 t/s | tg 128 tok   44.1 t/s
+  measured req 4: pp 543 tok   1881.1 t/s | tg 128 tok   44.2 t/s
+  measured req 5: pp 543 tok   1883.4 t/s | tg 128 tok   44.0 t/s
+
+== 09:33:14  qwen3-14b (qwen3:14b)  config=gpu1
+  load     req 0: pp 543 tok     40.5 t/s | tg 128 tok   16.1 t/s | load 16.15 s
+  ps: qwen3:14b size 9.0 GiB, in VRAM 9.0 GiB
+  measured req 1: pp 543 tok   1904.8 t/s | tg 128 tok   44.1 t/s
+  measured req 2: pp 543 tok   1900.0 t/s | tg 128 tok   44.1 t/s
+  measured req 3: pp 543 tok   1899.1 t/s | tg 128 tok   44.0 t/s
+  measured req 4: pp 543 tok   1898.9 t/s | tg 128 tok   44.1 t/s
+  measured req 5: pp 543 tok   1901.1 t/s | tg 128 tok   44.1 t/s
+
+== 09:34:16  qwen3-14b (qwen3:14b)  config=spread
+  load     req 0: pp 543 tok     40.4 t/s | tg 128 tok   16.2 t/s | load 16.51 s
+  ps: qwen3:14b size 9.2 GiB, in VRAM 9.2 GiB
+  measured req 1: pp 543 tok   2017.1 t/s | tg 128 tok   44.0 t/s
+  measured req 2: pp 543 tok   2014.6 t/s | tg 128 tok   44.0 t/s
+  measured req 3: pp 543 tok   2013.5 t/s | tg 128 tok   44.1 t/s
+  measured req 4: pp 543 tok   2011.6 t/s | tg 128 tok   43.9 t/s
+  measured req 5: pp 543 tok   2013.7 t/s | tg 128 tok   44.2 t/s
+
+== 09:35:21  qwen3.8-27b (qwen3.8:27b)  config=spread
+  load     req 0: pp 543 tok     32.8 t/s | tg 128 tok   29.2 t/s | load 32.69 s
+  ps: qwen3.8:27b size 16.5 GiB, in VRAM 16.5 GiB
+  measured req 1: pp 543 tok    699.8 t/s | tg 128 tok   51.7 t/s
+  measured req 2: pp 543 tok    699.0 t/s | tg 128 tok   38.2 t/s
+  measured req 3: pp 543 tok    699.5 t/s | tg 128 tok   35.4 t/s
+  measured req 4: pp 543 tok    702.4 t/s | tg 128 tok   53.4 t/s
+  measured req 5: pp 543 tok    702.0 t/s | tg 128 tok   35.4 t/s
+
+== 09:36:45  qwen3-30b-a3b (qwen3:30b-a3b)  config=spread
+  load     req 0: pp 543 tok     33.4 t/s | tg 128 tok   78.4 t/s | load 28.08 s
+  ps: qwen3:30b-a3b size 17.7 GiB, in VRAM 17.7 GiB
+  measured req 1: pp 543 tok   3030.6 t/s | tg 128 tok  157.4 t/s
+  measured req 2: pp 543 tok   3031.1 t/s | tg 128 tok  156.6 t/s
+  measured req 3: pp 543 tok   3032.2 t/s | tg 128 tok  157.1 t/s
+  measured req 4: pp 543 tok   3034.0 t/s | tg 128 tok  157.1 t/s
+  measured req 5: pp 543 tok   3030.7 t/s | tg 128 tok  153.8 t/s
+
+== 09:37:47  qwen3-32b (qwen3:32b)  config=spread
+  load     req 0: pp 543 tok     38.7 t/s | tg 128 tok   11.2 t/s | load 21.77 s
+  ps: qwen3:32b size 19.9 GiB, in VRAM 19.9 GiB
+  measured req 1: pp 543 tok    881.0 t/s | tg 128 tok   20.1 t/s
+  measured req 2: pp 543 tok    878.9 t/s | tg 128 tok   20.1 t/s
+  measured req 3: pp 543 tok    879.1 t/s | tg 128 tok   20.1 t/s
+  measured req 4: pp 543 tok    878.7 t/s | tg 128 tok   20.1 t/s
+  measured req 5: pp 543 tok    877.4 t/s | tg 128 tok   20.1 t/s
+
+== done Sun Nov 22 09:39:20 UTC 2026

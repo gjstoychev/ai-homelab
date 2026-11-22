@@ -1,0 +1,37 @@
+Sun Nov 22 08:59:13 UTC 2026
+	Vendor: American Megatrends Inc.
+	Version: 4101
+	Release Date: 12/03/2024
+	Manufacturer: ASUSTeK COMPUTER INC.
+	Product Name: ROG MAXIMUS Z690 FORMULA
+	Version: Rev 1.xx
+	Locator: Controller0-DIMM0
+	Size: 32 GB
+	Locator: Controller0-DIMM1
+	Speed: 6000 MT/s
+	Part Number: CMH64GX5M2D6000Z40  
+	Configured Memory Speed: 6000 MT/s
+	Locator: Controller1-DIMM0
+	Size: 32 GB
+	Locator: Controller1-DIMM1
+	Speed: 6000 MT/s
+	Part Number: CMH64GX5M2D6000Z40  
+	Configured Memory Speed: 6000 MT/s
+/sys/class/powercap/intel-rapl:0/constraint_0_power_limit_uw:65000000
+/sys/class/powercap/intel-rapl:0/constraint_1_power_limit_uw:219000000
+/sys/class/powercap/intel-rapl:0/constraint_2_power_limit_uw:341000000
+powersave
+microcode	: 0x133
+    BAR1 Memory Usage
+        Total                                          : 16384 MiB
+        Used                                           : 2 MiB
+        Free                                           : 16382 MiB
+--
+    BAR1 Memory Usage
+        Total                                          : 16384 MiB
+        Used                                           : 2 MiB
+        Free                                           : 16382 MiB
+local/llama.cpp:b12464-nccl sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b [local/llama.cpp@sha256:2bef98a2f59e6920b1f00ceb17c443ee02851cc7ff53c164ce10dc4d6b9a0c1b]
+local/nvbandwidth:cuda13.0.0 sha256:fec213b5a3bf47b9abdbb68e34873be834ab88b3ccb3ea1638bc217a242923d3 [local/nvbandwidth@sha256:fec213b5a3bf47b9abdbb68e34873be834ab88b3ccb3ea1638bc217a242923d3]
+ollama/ollama:0.32.14 sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad [ollama/ollama@sha256:9d30908e41144b1f1da89b9d8e33c07e4aeb43ff41a8660241b1686e2cc330ad]
+nvidia/cuda:13.0.0-base-ubuntu24.04 sha256:6e43a6b02e5f16e4a715953be8b29c40acbe84aed11a61357ef0fc899967fbd9 [nvidia/cuda@sha256:6e43a6b02e5f16e4a715953be8b29c40acbe84aed11a61357ef0fc899967fbd9]

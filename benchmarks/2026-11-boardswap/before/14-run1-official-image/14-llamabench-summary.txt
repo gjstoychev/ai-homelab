@@ -1,0 +1,18 @@
+
+pp512 (t/s, mean of 5)
+model                 gpu0      gpu1     layer       row
+llama3-8b           4254.6    4270.2    4284.0    FAILED
+llama3.1-8b         4063.9    4028.9    4048.6    FAILED
+qwen2.5-14b         2154.5    2129.9    2151.8    FAILED
+qwen3-14b           2159.5    2141.8    2153.1    FAILED
+qwen3-8b            3953.3    3915.9    3930.3    FAILED
+gemma3-4b           FAILED    FAILED    FAILED    FAILED
+
+tg128 (t/s, mean of 5)
+model                 gpu0      gpu1     layer       row
+llama3-8b             90.4      90.0      89.9    FAILED
+llama3.1-8b           84.6      84.2      84.0    FAILED
+qwen2.5-14b           45.0      44.9      44.9    FAILED
+qwen3-14b             44.7      44.6      44.5    FAILED
+qwen3-8b              79.9      79.4      79.3    FAILED
+gemma3-4b           FAILED    FAILED    FAILED    FAILED

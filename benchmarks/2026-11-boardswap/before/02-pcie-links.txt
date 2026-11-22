@@ -1,0 +1,13 @@
+Thu Nov 19 18:12:29 UTC 2026
+00:01.0 PCI bridge: Intel Corporation Device a70d (rev 01)
+		LnkCap:	Port #2, Speed 32GT/s, Width x16, ASPM not supported
+		LnkSta:	Speed 2.5GT/s, Width x8
+01:00.0 VGA compatible controller: NVIDIA Corporation Device 2d04 (rev a1)
+		LnkCap:	Port #0, Speed 32GT/s, Width x8, ASPM L1, Exit Latency L1 unlimited
+		LnkSta:	Speed 2.5GT/s (downgraded), Width x8
+00:1b.0 PCI bridge: Intel Corporation Raptor Lake PCI Express Root Port #21 (rev 11)
+		LnkCap:	Port #21, Speed 16GT/s, Width x4, ASPM not supported
+		LnkSta:	Speed 2.5GT/s, Width x4
+02:00.0 VGA compatible controller: NVIDIA Corporation Device 2d04 (rev a1)
+		LnkCap:	Port #0, Speed 32GT/s, Width x8, ASPM L1, Exit Latency L1 unlimited
+		LnkSta:	Speed 2.5GT/s (downgraded), Width x4 (downgraded)

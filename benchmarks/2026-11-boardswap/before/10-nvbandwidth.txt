@@ -1,0 +1,215 @@
+Thu Nov 19 18:55:26 UTC 2026
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+nvbandwidth Version: v0.11.0
+Built from Git version: v0.11.0
+
+CUDA Runtime Version: 13.0 (13000)
+CUDA Driver Version (API): 13.0 (13000)
+Driver Version: 580.178.04
+
+d3c6da42162c
+Device 0: NVIDIA GeForce RTX 5060 Ti (00000000:01:00)
+Device 1: NVIDIA GeForce RTX 5060 Ti (00000000:02:00)
+
+Running host_to_device_memcpy_ce.
+memcpy CE CPU(row) -> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     20.27      7.15
+
+SUM host_to_device_memcpy_ce 27.42
+COEFFICIENT_OF_VARIATION host_to_device_memcpy_ce 0.000355
+
+Running device_to_host_memcpy_ce.
+memcpy CE CPU(row) <- GPU(column) bandwidth (GB/s)
+           0         1
+ 0     17.29      7.26
+
+SUM device_to_host_memcpy_ce 24.54
+COEFFICIENT_OF_VARIATION device_to_host_memcpy_ce 0.017725
+
+Running host_to_device_bidirectional_memcpy_ce.
+memcpy CE CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0      7.93      4.81
+
+SUM host_to_device_bidirectional_memcpy_ce 12.74
+COEFFICIENT_OF_VARIATION host_to_device_bidirectional_memcpy_ce 0.000463
+
+Running device_to_host_bidirectional_memcpy_ce.
+memcpy CE CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     15.14      6.69
+
+SUM device_to_host_bidirectional_memcpy_ce 21.82
+COEFFICIENT_OF_VARIATION device_to_host_bidirectional_memcpy_ce 0.000163
+
+Waived device_to_device_memcpy_read_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_memcpy_write_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_read_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_write_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Running all_to_host_memcpy_ce.
+memcpy CE CPU(row) <- GPU(column) bandwidth (GB/s)
+           0         1
+ 0     16.37      5.29
+
+SUM all_to_host_memcpy_ce 21.66
+COEFFICIENT_OF_VARIATION all_to_host_memcpy_ce 0.002318
+
+Running all_to_host_bidirectional_memcpy_ce.
+memcpy CE CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     14.41      4.21
+
+SUM all_to_host_bidirectional_memcpy_ce 18.63
+COEFFICIENT_OF_VARIATION all_to_host_bidirectional_memcpy_ce 0.000367
+
+Running host_to_all_memcpy_ce.
+memcpy CE CPU(row) -> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     18.96      5.76
+
+SUM host_to_all_memcpy_ce 24.72
+COEFFICIENT_OF_VARIATION host_to_all_memcpy_ce 0.000356
+
+Running host_to_all_bidirectional_memcpy_ce.
+memcpy CE CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0      7.55      3.17
+
+SUM host_to_all_bidirectional_memcpy_ce 10.73
+COEFFICIENT_OF_VARIATION host_to_all_bidirectional_memcpy_ce 0.000197
+
+Waived all_to_one_write_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived all_to_one_read_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived one_to_all_write_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived one_to_all_read_ce: no accessible peer GPU pairs (P2P not supported between any devices)
+Running host_to_device_memcpy_sm.
+memcpy SM CPU(row) -> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     14.67      6.65
+
+SUM host_to_device_memcpy_sm 21.32
+COEFFICIENT_OF_VARIATION host_to_device_memcpy_sm 0.006631
+
+Running device_to_host_memcpy_sm.
+memcpy SM CPU(row) <- GPU(column) bandwidth (GB/s)
+           0         1
+ 0     12.13      6.59
+
+SUM device_to_host_memcpy_sm 18.72
+COEFFICIENT_OF_VARIATION device_to_host_memcpy_sm 0.016650
+
+Running host_to_device_bidirectional_memcpy_sm.
+memcpy SM CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     22.39      5.62
+
+SUM host_to_device_bidirectional_memcpy_sm 28.01
+COEFFICIENT_OF_VARIATION host_to_device_bidirectional_memcpy_sm 0.001158
+
+Running device_to_host_bidirectional_memcpy_sm.
+memcpy SM CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     22.41      5.62
+
+SUM device_to_host_bidirectional_memcpy_sm 28.03
+COEFFICIENT_OF_VARIATION device_to_host_bidirectional_memcpy_sm 0.000387
+
+Waived device_to_device_memcpy_read_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_memcpy_write_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_read_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_write_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Running all_to_host_memcpy_sm.
+memcpy SM CPU(row) <- GPU(column) bandwidth (GB/s)
+           0         1
+ 0      9.92      3.45
+
+SUM all_to_host_memcpy_sm 13.37
+COEFFICIENT_OF_VARIATION all_to_host_memcpy_sm 0.005455
+
+Running all_to_host_bidirectional_memcpy_sm.
+memcpy SM CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     17.96      5.27
+
+SUM all_to_host_bidirectional_memcpy_sm 23.23
+COEFFICIENT_OF_VARIATION all_to_host_bidirectional_memcpy_sm 0.000997
+
+Running host_to_all_memcpy_sm.
+memcpy SM CPU(row) -> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     12.03      3.95
+
+SUM host_to_all_memcpy_sm 15.98
+COEFFICIENT_OF_VARIATION host_to_all_memcpy_sm 0.032298
+
+Running host_to_all_bidirectional_memcpy_sm.
+memcpy SM CPU(row) <-> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     17.95      5.26
+
+SUM host_to_all_bidirectional_memcpy_sm 23.21
+COEFFICIENT_OF_VARIATION host_to_all_bidirectional_memcpy_sm 0.000627
+
+Waived all_to_one_write_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived all_to_one_read_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived one_to_all_write_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived one_to_all_read_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Running host_device_latency_sm.
+memory latency SM CPU(row) <-> GPU(column) (ns)
+           0         1
+ 0    611.84   1191.01
+
+SUM host_device_latency_sm 1802.85
+COEFFICIENT_OF_VARIATION host_device_latency_sm 0.000838
+
+Waived device_to_device_latency_sm: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_memcpy_read_tma: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_memcpy_write_tma: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_read_tma: no accessible peer GPU pairs (P2P not supported between any devices)
+Waived device_to_device_bidirectional_memcpy_write_tma: no accessible peer GPU pairs (P2P not supported between any devices)
+Running device_local_copy.
+memcpy CE local GPU(column) bandwidth (GB/s)
+           0         1
+ 0    386.14    386.47
+
+SUM device_local_copy 772.61
+COEFFICIENT_OF_VARIATION device_local_copy 0.000841
+
+Running device_local_copy_sm.
+memcpy SM local GPU(column) bandwidth (GB/s)
+           0         1
+ 0    379.27    379.72
+
+SUM device_local_copy_sm 758.99
+COEFFICIENT_OF_VARIATION device_local_copy_sm 0.001000
+
+Running device_local_read_sm.
+memcpy SM local GPU(column) read-only bandwidth (GB/s)
+           0         1
+ 0    427.72    427.81
+
+SUM device_local_read_sm 855.53
+COEFFICIENT_OF_VARIATION device_local_read_sm 0.000700
+
+Running device_local_write_sm.
+memcpy SM local GPU(column) write-only bandwidth (GB/s)
+           0         1
+ 0    418.82    421.97
+
+SUM device_local_write_sm 840.78
+COEFFICIENT_OF_VARIATION device_local_write_sm 0.003982
+
+Waived device_to_device_latency_tma: no accessible peer GPU pairs (P2P not supported between any devices)
+Running device_local_copy_tma.
+memcpy TMA local GPU(column) bandwidth (GB/s)
+           0         1
+ 0    385.12    385.88
+
+SUM device_local_copy_tma 771.00
+COEFFICIENT_OF_VARIATION device_local_copy_tma 0.000983
+
+Waived device_to_device_latency_counted: device_to_device_latency_counted not supported on sm_120 (device 0)
+NOTE: The reported results may not reflect the full capabilities of the platform.
+Performance can vary with software drivers, hardware clocks, and system topology.
+

@@ -1,0 +1,11 @@
+Sun Nov 22 09:03:57 UTC 2026
+7.0.0-43-generic
+index, name, pci.bus_id, driver_version, vbios_version, power.limit [W], persistence_mode
+0, NVIDIA GeForce RTX 5060 Ti, 00000000:01:00.0, 580.178.04, 98.06.4E.00.8B, 180.00 W, Enabled
+1, NVIDIA GeForce RTX 5060 Ti, 00000000:02:00.0, 580.178.04, 98.06.4E.00.8B, 180.00 W, Enabled
+ollama version is 0.32.14
+Docker version 29.8.0, build 88096ef
+ii  libnvidia-container-tools                              1.20.2-1                                         amd64        NVIDIA container runtime library (command-line tools)
+ii  libnvidia-container1:amd64                             1.20.2-1                                         amd64        NVIDIA container runtime library
+ii  nvidia-container-toolkit                               1.20.2-1                                         amd64        NVIDIA Container toolkit
+ii  nvidia-container-toolkit-base                          1.20.2-1                                         amd64        NVIDIA Container Toolkit Base

@@ -1,0 +1,22 @@
+nvbandwidth Version: v0.11.0
+Built from Git version: v0.11.0
+
+CUDA Runtime Version: 13.0 (13000)
+CUDA Driver Version (API): 13.0 (13000)
+Driver Version: 580.178.04
+
+871febfd640c
+Device 0: NVIDIA GeForce RTX 5060 Ti (00000000:01:00)
+Device 1: NVIDIA GeForce RTX 5060 Ti (00000000:02:00)
+
+Running host_to_all_memcpy_ce.
+memcpy CE CPU(row) -> GPU(column) bandwidth (GB/s)
+           0         1
+ 0     16.82      8.56
+
+SUM host_to_all_memcpy_ce 25.38
+COEFFICIENT_OF_VARIATION host_to_all_memcpy_ce 0.000551
+
+NOTE: The reported results may not reflect the full capabilities of the platform.
+Performance can vary with software drivers, hardware clocks, and system topology.
+
