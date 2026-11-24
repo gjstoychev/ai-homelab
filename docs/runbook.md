@@ -154,6 +154,24 @@ sysctl kernel.apparmor_restrict_unprivileged_unconfined; aa-exec -p trinity -- u
 
 All Ansible commands run from `<repo>/ansible` (that is where `ansible.cfg` is read).
 
+The control node pulls the repo straight from the GPU node over SSH (commits only, no push to GitHub needed first). One-time setup on the control node; `formula:ai-homelab` is `~/ai-homelab` on the host from `~/.ssh/config`:
+
+```bash
+git remote add formula formula:ai-homelab
+```
+
+Before every playbook run; `--ff-only` refuses instead of merging when the checkouts have diverged. Pull only: git refuses pushes to the checked-out branch of a non-bare repository, and the GPU node stays the place where commits are made.
+
+```bash
+git pull --ff-only formula main && git log -1 --oneline
+```
+
+After a host rename: SSH asks to confirm the host key again (`known_hosts` stores it under the old name). Compare it with the old entry, then remove that:
+
+```bash
+ssh-keygen -F <old-name> -l; ssh-keygen -R <old-name>
+```
+
 Effective SSH settings for a host, without connecting:
 
 ```bash
