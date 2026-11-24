@@ -89,7 +89,63 @@ Found on the way:
 
 Download at 1 Gb/s after the server was connected directly to the router (before: 100 Mb/s through an old cable or switch).
 
-**Fit:** with `-cmoe` nearly all of the 79 GiB (the experts) goes to RAM, more than the 62 GiB there is; mmap then streams experts from the NVMe while generating. `-ncmoe N` with the GPUs filled (about 30 GiB) leaves about 50 GiB in RAM. Which one step 1 uses is decided after the load log shows the real sizes.
+**Fit (estimate, corrected in section 6):** with `-cmoe` nearly all of the 79 GiB (the experts) goes to RAM, more than the 62 GiB there is; mmap then streams experts from the NVMe while generating. `-ncmoe N` with the GPUs filled (about 30 GiB) leaves about 50 GiB in RAM. Which one step 1 uses is decided after the load log shows the real sizes.
+
+## 5. Smoke test (2026-11-24)
+
+**Why:** does v1.0.0 load and run the model, and where does `--fit` (on by default) put the weights. Not a measurement.
+
+**Command:** `llama-server -m <shard 1> --host 127.0.0.1 --port 8080 -c 4096` (all else default), one `/completion` with 64 tokens, then `free -g` and `nvidia-smi`. Log: `runs/00-smoke.log`.
+
+**Actual:** loads and answers coherently (the model starts with a `<think>` block). Prompt 14 tokens at 39.0 t/s, generation 64 tokens at **37.3 t/s**. VRAM 14782 / 14726 MiB used on GPU0 / GPU1; RAM: 3 GiB used, 59 GiB page cache. The loader warns `tensor overrides to CPU are used with mmap enabled - consider using --load-mode none`: `--fit` moved part of the weights to the CPU by itself. Server defaults visible in the log: 4 slots (`n_slots = 4`, `-np` auto), 8 threads, reasoning preserved in the chat template. Model loaded in 6.4 s, from a warm page cache (`sha256sum` had just read the files), so not a load time.
+
+**Verdict:** it works. At the default verbosity (3) the log does not show the buffer sizes per device or what `--fit` chose; the next run uses `-lv 4`. For the benchmarks: one slot (`-np 1`), so the KV cache and the scheduling do not depend on the auto value.
+
+## 6. Where the weights go (2026-11-24)
+
+**Command:** as in 5, plus `-np 1 -lv 4`; stopped once listening. Log: `runs/01-layout.log`.
+
+**Sizes** (from `--fit`'s memory breakdowns and `load_tensors`):
+
+| Part | MiB | Where |
+|---|---|---|
+| Whole model | 81015 | |
+| `per_layer_token_embd` (the n-gram embeddings) | 27465 | always CPU, mmap'd, "lazy read enabled" with prefetch: only the rows of the tokens used are read |
+| Experts (all 48 layers) | about 51000 | the part that `-cmoe`, `-ncmoe` and `--fit` move |
+| Dense weights (attention, DeltaNet, shared experts, norms) | about 2300 | GPU in every configuration |
+| KV cache at 4096 tokens | 96 + 24 (indexer) | only 12 of 48 layers have attention KV; the other 36 are recurrent (DeltaNet, 113 MiB state) |
+
+**What `--fit` chose by itself:** all 49 layers on the GPUs (13 on CUDA0, 36 on CUDA1), but the experts of 25 layers (and one gate) overflow to the CPU: CUDA0 13878 MiB, CUDA1 14210 MiB of weights, CPU 52927 MiB mapped (27465 n-gram embeddings + about 25000 of experts). About half of the experts stay on the GPUs, placed statically by layer.
+
+**Other defaults seen:** prompt cache in RAM up to 8192 MiB (`--cache-ram`), context checkpoints, warm-up run, 8 threads, flash attention auto (enabled), batch 2048 / ubatch 512, `load_mode = mmap`.
+
+**Consequences for the plan:**
+
+- **`-cmoe` fits in RAM.** All experts on the CPU are about 50 GiB, not 75; the n-gram embeddings are read lazily and need not be resident. 62 GiB is tight but enough. The earlier estimate (section 4) counted the embeddings as experts.
+- **The default is already a MoE-aware split.** `--fit` keeps about half of the experts on the GPUs (37.3 t/s in section 5). `-cmoe` moves all of them to RAM and leaves the GPUs nearly empty (about 2.3 GiB of dense weights); the MoE cache (step 2) then fills the VRAM with the most used experts instead of whole layers. The question the series answers is whether a dynamic cache beats `--fit`'s static per-layer placement.
+- **Fixed for every run:** `-np 1`, `--cache-ram 0` (no prompt cache: a repeated benchmark prompt would otherwise be served from it, and it takes up to 8 GiB of RAM), `-t 8`, `-c 4096` unless a step changes it.
+
+**Decision (2026-11-24): two baselines.** 0a naive layer offload (`-fit off`, `-ngl` as high as fits), 0b llama.cpp's default (`--fit` on). Steps 1 to 5 build on `-cmoe` and are compared with both.
+
+## 7. DeepSeek-V4-Flash quant (2026-11-24)
+
+**Repository:** `unsloth/DeepSeek-V4-Flash-0731-GGUF`, commit `fbbb5b93fb787c21338159b0af3318bb3f4d9768`. Quants and total sizes (Hugging Face API): UD-IQ1_S 76.9 GiB, UD-IQ1_M 80.9, UD-IQ2_XXS 84.6, UD-IQ2_M 84.7, UD-Q2_K_XL 90.2, UD-IQ3_XXS 97.1, UD-IQ3_S 108.1, UD-Q3_K_M 119.3, UD-Q3_K_XL 119.4, UD-IQ4_XS and UD-IQ4_NL 127.3, UD-Q4_K_XL 144.4, UD-Q8_K_XL 150.8 GiB (plus `dspark` files of about 10 GiB, not used). Q8_K_XL at 150.8 GiB for 284B parameters means the experts are about 4-bit in the original release, so the quant names are not comparable with Qwen's.
+
+**Budget:** about 29 GiB of VRAM for weights plus about 59 GiB of RAM, minus the OS, the KV cache and compute buffers: about 85 GiB. Unlike Qwen (27 GiB of its 79 GiB are lazily read n-gram embeddings), nearly all of DeepSeek's file has to be resident.
+
+**Choice: UD-IQ1_M, 80.9 GiB in 3 shards**, about 4–5 GiB to spare. IQ2_XXS and IQ2_M (84.6/84.7) leave about none: out-of-memory or constant NVMe reads. Quality at this size is clearly reduced; the series compares speed only.
+
+**Consequence (estimate until the load log):** the experts alone are well over 62 GiB, so `-cmoe` (all experts in RAM) does not fit in RAM with any of these quants. For DeepSeek, step 1 is `-ncmoe N` (experts of N layers on the CPU, the rest on the GPUs); the MoE cache works with `-ncmoe` too (`docs/moe-cache.md`).
+
+**SHA256** (expected from `/api/models/<repo>/revision/<commit>?blobs=true`; `sha256sum -c SHA256SUMS`: all three `OK`):
+
+| Shard | SHA256 |
+|---|---|
+| `DeepSeek-V4-Flash-0731-UD-IQ1_M-00001-of-00003.gguf` | `b99fa246a10808146e00a7e908c6852098a4f08394eabf8b37c9263993980a69` |
+| `DeepSeek-V4-Flash-0731-UD-IQ1_M-00002-of-00003.gguf` | `c8536187b0e5dbe71e6bbf6086e0d3b491cd31d60da6522dfef074133c0ee2ee` |
+| `DeepSeek-V4-Flash-0731-UD-IQ1_M-00003-of-00003.gguf` | `80a4eb4eebc57598d9559c2924054d40d69f51773ae873538939382e120b3e3f` |
+
+Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only the metadata. Header: `general.architecture = deepseek4` (supported by this build), size label `256x8.4B`, 43 layers, 256 experts with 6 used plus 1 shared, expert FFN 2048, one KV head (64 attention heads) plus an attention indexer, context 1048576 (original 65536), file type 31 (IQ1_M), 1328 tensors in 3 shards.
 
 ## Open points
 

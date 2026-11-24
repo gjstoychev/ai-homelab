@@ -1,0 +1,466 @@
+0.00.002.692 I srv  llama_server: initializing ...
+0.00.239.004 I ggml_cuda_init: found 2 CUDA devices (Total VRAM: 31695 MiB):
+0.00.239.010 I   Device 0: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+0.00.239.013 I   Device 1: NVIDIA GeForce RTX 5060 Ti, compute capability 12.0, VMM: yes, VRAM: 15847 MiB
+0.00.239.721 I cmn  common_param: common_params_print_info: build 12359 (b1b770d9) with GNU 13.3.0 for Linux x86_64
+0.00.239.722 I cmn  common_param: common_params_print_info: verbosity = 4 (adjust with the `-lv N` CLI arg)
+0.00.239.722 I cmn  common_param: device_info:
+0.00.317.484 I cmn  common_param:   - CUDA0   : NVIDIA GeForce RTX 5060 Ti (15847 MiB, 15710 MiB free)
+0.00.380.949 I cmn  common_param:   - CUDA1   : NVIDIA GeForce RTX 5060 Ti (15847 MiB, 15710 MiB free)
+0.00.380.958 I cmn  common_param:   - CPU     : Intel(R) Core(TM) i7-14700 (64035 MiB, 64035 MiB free)
+0.00.381.045 I cmn  common_param: system_info: n_threads = 8 (n_threads_batch = 8) / 28 | CUDA : ARCHS = 1200 | USE_GRAPHS = 1 | FA_QUANTS = q4_0-q4_0,q8_0-q8_0,f16-f16,bf16-bf16,f8_e4m3-f8_e4m3 | NATIVE_FP8 = 1 | BLACKWELL_NATIVE_FP4 = 1 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.00.381.086 I srv  init_listene: running without SSL
+0.00.381.261 I srv          init: using 27 threads for HTTP server
+0.00.381.290 W srv  server_setup: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+0.00.383.589 I srv    load_model: loading model '/home/llama/models/qwen3.8-flash-next-iq3xxs/Qwen3.8-Flash-Next-IQ3_XXS-00001-of-00002.gguf'
+0.00.383.590 I srv    load_model: local path '/home/llama/models/qwen3.8-flash-next-iq3xxs/Qwen3.8-Flash-Next-IQ3_XXS-00001-of-00002.gguf'
+0.00.383.602 I cmn  common_fit_a: fitting params to device memory ...
+0.00.383.602 I cmn  common_fit_a: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.383.614 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.541.323 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.00.541.333 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (27943 = 27542 +     119 +     281) +      -27804 |
+0.00.541.333 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (26215 = 25745 +     112 +     356) +      -26076 |
+0.00.541.333 I common_memory_breakdown_print: |   - Host                |                  27786 = 27726 +       0 +      59                |
+0.00.567.335 I common_params_fit_impl: projected memory use with initial parameters [MiB]:
+0.00.567.339 I common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 5060 Ti):  15847 total,  27943 used, -12235 free vs. target of   1024
+0.00.567.339 I common_params_fit_impl:   - CUDA1 (NVIDIA GeForce RTX 5060 Ti):  15847 total,  26215 used, -10506 free vs. target of   1024
+0.00.567.340 I common_params_fit_impl: projected to use 54159 MiB of device memory vs. 31417 MiB of free device memory
+0.00.567.340 I common_params_fit_impl: cannot meet free memory targets on all devices, need to use 24789 MiB less in total
+0.00.567.340 I common_params_fit_impl: context size set by user to 4096 -> no change
+0.00.567.344 I common_params_fit_impl: getting device memory data with all MoE tensors moved to system memory:
+0.00.723.474 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.00.723.477 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + ( 1673 =   979 +     119 +     574) +       -1534 |
+0.00.723.478 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 1528 =  1308 +     112 +     107) +       -1389 |
+0.00.723.478 I common_memory_breakdown_print: |   - Host                |                  78752 = 78726 +       0 +      26                |
+0.00.749.552 I common_params_fit_impl: with only dense weights in device memory there is a total surplus of 26166 MiB
+0.00.749.556 I common_params_fit_impl: id=0, target=14684 MiB
+0.00.749.556 I common_params_fit_impl: id=1, target=14684 MiB
+0.00.885.658 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.00.885.662 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (  575 =     0 +       0 +     575) +        -436 |
+0.00.885.662 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (    0 =     0 +       0 +       0) +         139 |
+0.00.885.662 I common_memory_breakdown_print: |   - Host                |                  81283 = 81014 +     232 +      36                |
+0.00.907.870 I common_params_fit_impl: memory for test allocation by device:
+0.00.907.875 I common_params_fit_impl: id=0, n_layer= 0, n_part= 0, overflow_type=4, mem=   575 MiB
+0.00.907.875 I common_params_fit_impl: id=1, n_layer= 0, n_part= 0, overflow_type=4, mem=     0 MiB
+0.00.907.876 I common_params_fit_impl: filling dense-only layers back-to-front:
+0.01.136.933 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.01.136.936 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (  762 =     0 +       0 +     762) +        -623 |
+0.01.136.937 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 3788 =  3350 +     232 +     205) +       -3649 |
+0.01.136.937 I common_memory_breakdown_print: |   - Host                |                  77690 = 77663 +       0 +      26                |
+0.01.159.024 I common_params_fit_impl: memory for test allocation by device:
+0.01.159.028 I common_params_fit_impl: id=0, n_layer= 0, n_part= 0, overflow_type=4, mem=   762 MiB
+0.01.159.028 I common_params_fit_impl: id=1, n_layer=49, n_part=48, overflow_type=4, mem=  3788 MiB
+0.01.159.030 I common_params_fit_impl: set ngl_per_device[1].n_layer=49
+0.01.159.030 I common_params_fit_impl:   - CUDA1 (NVIDIA GeForce RTX 5060 Ti): 49 layers,   3788 MiB used,  11920 MiB free
+0.01.159.031 I common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 5060 Ti):  0 layers,    762 MiB used,  14946 MiB free
+0.01.159.031 I common_params_fit_impl: converting dense-only layers to full layers and filling them front-to-back with overflow to next device/system memory:
+0.01.293.259 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.01.293.263 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (53383 = 52867 +     232 +     283) +      -53244 |
+0.01.293.263 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (  421 =   420 +       0 +       1) +        -282 |
+0.01.293.263 I common_memory_breakdown_print: |   - Host                |                  27786 = 27726 +       0 +      59                |
+0.01.316.213 I common_params_fit_impl: memory for test allocation by device:
+0.01.316.217 I common_params_fit_impl: id=0, n_layer=48, n_part= 0, overflow_type=4, mem= 53383 MiB
+0.01.316.217 I common_params_fit_impl: id=1, n_layer= 1, n_part= 0, overflow_type=4, mem=   421 MiB
+0.01.521.867 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.01.521.875 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (13823 = 13226 +      58 +     539) +      -13684 |
+0.01.521.875 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 3241 =  2874 +     174 +     193) +       -3102 |
+0.01.521.875 I common_memory_breakdown_print: |   - Host                |                  64940 = 64913 +       0 +      26                |
+0.01.543.063 I common_params_fit_impl: memory for test allocation by device:
+0.01.543.067 I common_params_fit_impl: id=0, n_layer=12, n_part= 0, overflow_type=4, mem= 13823 MiB
+0.01.543.068 I common_params_fit_impl: id=1, n_layer=37, n_part=36, overflow_type=4, mem=  3241 MiB
+0.01.543.069 I common_params_fit_impl: set ngl_per_device[0].(n_layer, n_part)=(12, 0), id_dense_start=1
+0.01.748.745 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.01.748.748 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14929 = 14328 +      61 +     539) +      -14790 |
+0.01.748.748 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 3198 =  2834 +     171 +     193) +       -3059 |
+0.01.748.748 I common_memory_breakdown_print: |   - Host                |                  63877 = 63851 +       0 +      26                |
+0.01.770.238 I common_params_fit_impl: memory for test allocation by device:
+0.01.770.244 I common_params_fit_impl: id=0, n_layer=13, n_part= 0, overflow_type=4, mem= 14929 MiB
+0.01.770.244 I common_params_fit_impl: id=1, n_layer=36, n_part=35, overflow_type=4, mem=  3198 MiB
+0.01.770.246 I common_params_fit_impl: set ngl_per_device_high[0].(n_layer, n_part)=(13, 0), id_dense_start_high=1
+0.01.770.251 I common_params_fit_impl: trying to fit one extra layer with overflow_type=LAYER_FRACTION_UP
+0.01.975.746 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.01.975.750 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14166 = 13565 +      61 +     539) +      -14027 |
+0.01.975.750 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 3961 =  3597 +     171 +     193) +       -3822 |
+0.01.975.750 I common_memory_breakdown_print: |   - Host                |                  63877 = 63851 +       0 +      26                |
+0.01.997.041 I common_params_fit_impl: memory for test allocation by device:
+0.01.997.046 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=2, mem= 14166 MiB
+0.01.997.046 I common_params_fit_impl: id=1, n_layer=36, n_part=35, overflow_type=4, mem=  3961 MiB
+0.01.997.048 I common_params_fit_impl: set ngl_per_device[0].(n_layer, n_part, overflow_type)=(13, 1, UP), id_dense_start=1
+0.01.997.048 I common_params_fit_impl: trying to fit one extra layer with overflow_type=LAYER_FRACTION_GATE
+0.02.202.170 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.02.202.173 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14478 = 13877 +      61 +     539) +      -14339 |
+0.02.202.173 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + ( 3649 =  3285 +     171 +     193) +       -3510 |
+0.02.202.173 I common_memory_breakdown_print: |   - Host                |                  63877 = 63851 +       0 +      26                |
+0.02.224.330 I common_params_fit_impl: memory for test allocation by device:
+0.02.224.335 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14478 MiB
+0.02.224.336 I common_params_fit_impl: id=1, n_layer=36, n_part=35, overflow_type=4, mem=  3649 MiB
+0.02.224.337 I common_params_fit_impl: set ngl_per_device[0].(n_layer, n_part, overflow_type)=(13, 1, GATE), id_dense_start=1
+0.02.224.337 I common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 5060 Ti): 13 layers ( 1 overflowing),  14478 MiB used,   1230 MiB free
+0.02.360.307 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.02.360.310 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14143 = 13877 +      61 +     204) +      -14004 |
+0.02.360.310 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (39775 = 39410 +     171 +     194) +      -39636 |
+0.02.360.310 I common_memory_breakdown_print: |   - Host                |                  27752 = 27726 +       0 +      26                |
+0.02.382.376 I common_params_fit_impl: memory for test allocation by device:
+0.02.382.381 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14143 MiB
+0.02.382.381 I common_params_fit_impl: id=1, n_layer=36, n_part= 0, overflow_type=4, mem= 39775 MiB
+0.02.568.460 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.02.568.463 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14478 = 13877 +      61 +     539) +      -14339 |
+0.02.568.463 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (14275 = 13910 +     171 +     194) +      -14136 |
+0.02.568.463 I common_memory_breakdown_print: |   - Host                |                  53252 = 53226 +       0 +      26                |
+0.02.590.459 I common_params_fit_impl: memory for test allocation by device:
+0.02.590.464 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14478 MiB
+0.02.590.464 I common_params_fit_impl: id=1, n_layer=36, n_part=25, overflow_type=4, mem= 14275 MiB
+0.02.590.466 I common_params_fit_impl: set ngl_per_device[1].(n_layer, n_part)=(36, 25), id_dense_start=1
+0.02.773.316 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.02.773.320 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14478 = 13877 +      61 +     539) +      -14339 |
+0.02.773.320 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (15338 = 14972 +     171 +     194) +      -15198 |
+0.02.773.320 I common_memory_breakdown_print: |   - Host                |                  52190 = 52163 +       0 +      26                |
+0.02.794.873 I common_params_fit_impl: memory for test allocation by device:
+0.02.794.880 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14478 MiB
+0.02.794.880 I common_params_fit_impl: id=1, n_layer=36, n_part=24, overflow_type=4, mem= 15338 MiB
+0.02.794.882 I common_params_fit_impl: set ngl_per_device_high[1].(n_layer, n_part)=(36, 24), id_dense_start_high=1
+0.02.794.882 I common_params_fit_impl: trying to fit one extra layer with overflow_type=LAYER_FRACTION_UP
+0.02.979.631 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.02.979.635 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14478 = 13877 +      61 +     539) +      -14339 |
+0.02.979.635 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (14575 = 14210 +     171 +     194) +      -14436 |
+0.02.979.635 I common_memory_breakdown_print: |   - Host                |                  52952 = 52926 +       0 +      26                |
+0.03.000.923 I common_params_fit_impl: memory for test allocation by device:
+0.03.000.928 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14478 MiB
+0.03.000.928 I common_params_fit_impl: id=1, n_layer=36, n_part=25, overflow_type=2, mem= 14575 MiB
+0.03.000.930 I common_params_fit_impl: set ngl_per_device[1].(n_layer, n_part, overflow_type)=(36, 25, UP), id_dense_start=1
+0.03.000.930 I common_params_fit_impl: trying to fit one extra layer with overflow_type=LAYER_FRACTION_GATE
+0.03.186.128 I common_memory_breakdown_print: | memory breakdown [MiB]  | total    free     self   model   context   compute    unaccounted |
+0.03.186.132 I common_memory_breakdown_print: |   - CUDA0 (RTX 5060 Ti) | 15847 = 15708 + (14478 = 13877 +      61 +     539) +      -14339 |
+0.03.186.132 I common_memory_breakdown_print: |   - CUDA1 (RTX 5060 Ti) | 15847 = 15708 + (14887 = 14521 +     171 +     194) +      -14748 |
+0.03.186.132 I common_memory_breakdown_print: |   - Host                |                  52641 = 52614 +       0 +      26                |
+0.03.208.030 I common_params_fit_impl: memory for test allocation by device:
+0.03.208.034 I common_params_fit_impl: id=0, n_layer=13, n_part= 1, overflow_type=3, mem= 14478 MiB
+0.03.208.034 I common_params_fit_impl: id=1, n_layer=36, n_part=25, overflow_type=3, mem= 14887 MiB
+0.03.208.036 I common_params_fit_impl:   - CUDA1 (NVIDIA GeForce RTX 5060 Ti): 36 layers (25 overflowing),  14575 MiB used,   1133 MiB free
+0.03.208.038 I common_fit_params: successfully fit params to free device memory
+0.03.208.040 I common_fit_params: fitting params to free memory took 2.82 seconds
+0.03.241.184 I llama_model_loader: additional 1 GGUFs metadata loaded.
+0.03.241.186 I llama_model_loader: loaded meta data with 70 key-value pairs and 1224 tensors from /home/llama/models/qwen3.8-flash-next-iq3xxs/Qwen3.8-Flash-Next-IQ3_XXS-00001-of-00002.gguf (version GGUF V3 (latest))
+0.03.241.211 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.03.241.213 I llama_model_loader: - kv   0:                       general.architecture str              = qwen4exp
+0.03.241.214 I llama_model_loader: - kv   1:                               general.type str              = model
+0.03.241.215 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.03.241.217 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.03.241.218 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.03.241.218 I llama_model_loader: - kv   5:                               general.name str              = Src
+0.03.241.218 I llama_model_loader: - kv   6:                         general.size_label str              = 512x56B
+0.03.241.218 I llama_model_loader: - kv   7:                            general.license str              = other
+0.03.241.219 I llama_model_loader: - kv   8:                       general.license.name str              = qwen-community-1.0
+0.03.241.219 I llama_model_loader: - kv   9:                       general.license.link str              = LICENSE
+0.03.241.220 I llama_model_loader: - kv  10:                               general.tags arr[str,1]       = ["image-text-to-text"]
+0.03.241.221 I llama_model_loader: - kv  11:                       qwen4exp.block_count u32              = 48
+0.03.241.221 I llama_model_loader: - kv  12:                    qwen4exp.context_length u32              = 262144
+0.03.241.221 I llama_model_loader: - kv  13:                  qwen4exp.embedding_length u32              = 2560
+0.03.241.222 I llama_model_loader: - kv  14:              qwen4exp.attention.head_count u32              = 24
+0.03.241.222 I llama_model_loader: - kv  15:           qwen4exp.attention.head_count_kv u32              = 2
+0.03.241.223 I llama_model_loader: - kv  16:           qwen4exp.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.03.241.224 I llama_model_loader: - kv  17:                    qwen4exp.rope.freq_base f32              = 10000000.000000
+0.03.241.224 I llama_model_loader: - kv  18:  qwen4exp.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.03.241.225 I llama_model_loader: - kv  19:                      qwen4exp.expert_count u32              = 512
+0.03.241.225 I llama_model_loader: - kv  20:                 qwen4exp.expert_used_count u32              = 10
+0.03.241.225 I llama_model_loader: - kv  21:              qwen4exp.attention.key_length u32              = 256
+0.03.241.225 I llama_model_loader: - kv  22:            qwen4exp.attention.value_length u32              = 256
+0.03.241.226 I llama_model_loader: - kv  23:        qwen4exp.expert_feed_forward_length u32              = 640
+0.03.241.226 I llama_model_loader: - kv  24: qwen4exp.expert_shared_feed_forward_length u32              = 640
+0.03.241.226 I llama_model_loader: - kv  25:                   qwen4exp.ssm.conv_kernel u32              = 4
+0.03.241.226 I llama_model_loader: - kv  26:                    qwen4exp.ssm.state_size u32              = 128
+0.03.241.226 I llama_model_loader: - kv  27:                   qwen4exp.ssm.group_count u32              = 16
+0.03.241.227 I llama_model_loader: - kv  28:                qwen4exp.ssm.time_step_rank u32              = 48
+0.03.241.227 I llama_model_loader: - kv  29:                    qwen4exp.ssm.inner_size u32              = 6144
+0.03.241.227 I llama_model_loader: - kv  30:           qwen4exp.full_attention_interval u32              = 4
+0.03.241.227 I llama_model_loader: - kv  31:              qwen4exp.rope.dimension_count u32              = 64
+0.03.241.227 I llama_model_loader: - kv  32:            qwen4exp.hyper_connection.count u32              = 4
+0.03.241.228 I llama_model_loader: - kv  33:         qwen4exp.hyper_connection.low_rank u32              = 320
+0.03.241.228 I llama_model_loader: - kv  34:      qwen4exp.attention.indexer.head_count u32              = 4
+0.03.241.228 I llama_model_loader: - kv  35:      qwen4exp.attention.indexer.key_length u32              = 128
+0.03.241.228 I llama_model_loader: - kv  36:           qwen4exp.attention.indexer.top_k u32              = 2048
+0.03.241.229 I llama_model_loader: - kv  37:         qwen4exp.attention.compress_ratios arr[i32,48]      = [0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 4, ...
+0.03.241.230 I llama_model_loader: - kv  38:                        qwen4exp.ple.layers arr[i32,1]       = [1]
+0.03.241.230 I llama_model_loader: - kv  39:                    qwen4exp.ple.ngram_size u32              = 3
+0.03.241.230 I llama_model_loader: - kv  40:               qwen4exp.ple.heads_per_ngram u32              = 8
+0.03.241.230 I llama_model_loader: - kv  41:                   qwen4exp.ple.conv_kernel u32              = 4
+0.03.241.231 I llama_model_loader: - kv  42:                  qwen4exp.ple.eos_token_id u32              = 248044
+0.03.241.231 I llama_model_loader: - kv  43:                qwen4exp.ple.image_token_id u32              = 248056
+0.03.241.231 I llama_model_loader: - kv  44:  qwen4exp.embedding_length_per_layer_input u32              = 160
+0.03.241.232 I llama_model_loader: - kv  45:             qwen4exp.ple.layer_multipliers arr[u64,3]       = [23703573157769, 20109073645365, 8052...
+0.03.241.233 I llama_model_loader: - kv  46:                  qwen4exp.ple.head_offsets arr[u64,16]      = [0, 20000003, 40000026, 60000059, 800...
+0.03.241.234 I llama_model_loader: - kv  47:              qwen4exp.ple.head_vocab_sizes arr[u64,16]      = [20000003, 20000023, 20000033, 200000...
+0.03.241.234 I llama_model_loader: - kv  48:                       tokenizer.ggml.model str              = gpt2
+0.03.241.234 I llama_model_loader: - kv  49:                         tokenizer.ggml.pre str              = qwen35
+0.03.241.235 I llama_model_loader: - kv  50:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.03.241.236 I llama_model_loader: - kv  51:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.03.241.237 I llama_model_loader: - kv  52:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.03.241.237 I llama_model_loader: - kv  53:                tokenizer.ggml.eos_token_id u32              = 248046
+0.03.241.237 I llama_model_loader: - kv  54:            tokenizer.ggml.padding_token_id u32              = 248044
+0.03.241.237 I llama_model_loader: - kv  55:                tokenizer.ggml.bos_token_id u32              = 248044
+0.03.241.238 I llama_model_loader: - kv  56:               tokenizer.ggml.add_bos_token bool             = false
+0.03.241.239 I llama_model_loader: - kv  57:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.03.241.239 I llama_model_loader: - kv  58:               general.quantization_version u32              = 2
+0.03.241.239 I llama_model_loader: - kv  59:                          general.file_type u32              = 23
+0.03.241.240 I llama_model_loader: - kv  60:                      quantize.imatrix.file str              = /mnt/nas/batiai-models/Qwen3.8-Flash-...
+0.03.241.240 I llama_model_loader: - kv  61:                   quantize.imatrix.dataset str              = /mnt/nas/batiai-models/Qwen3.8-Flash-...
+0.03.241.240 I llama_model_loader: - kv  62:             quantize.imatrix.entries_count u32              = 926
+0.03.241.241 I llama_model_loader: - kv  63:              quantize.imatrix.chunks_count u32              = 200
+0.03.241.241 I llama_model_loader: - kv  64:                                general.url str              = https://flow.bati.ai
+0.03.241.241 I llama_model_loader: - kv  65:                        general.description str              = Optimized GGUF quantization by BatiAI...
+0.03.241.241 I llama_model_loader: - kv  66:                             general.author str              = BatiAI
+0.03.241.242 I llama_model_loader: - kv  67:                                   split.no u16              = 0
+0.03.241.242 I llama_model_loader: - kv  68:                        split.tensors.count i32              = 1224
+0.03.241.242 I llama_model_loader: - kv  69:                                split.count u16              = 2
+0.03.241.243 I llama_model_loader: - type  f32:  388 tensors
+0.03.241.243 I llama_model_loader: - type  f16:    1 tensors
+0.03.241.243 I llama_model_loader: - type q4_K:   48 tensors
+0.03.241.243 I llama_model_loader: - type q5_K:    1 tensors
+0.03.241.243 I llama_model_loader: - type iq3_xxs:  338 tensors
+0.03.241.244 I llama_model_loader: - type iq4_nl:  387 tensors
+0.03.241.244 I llama_model_loader: - type iq3_s:   13 tensors
+0.03.241.244 I llama_model_loader: - type iq2_s:   24 tensors
+0.03.241.244 I llama_model_loader: - type bf16:   24 tensors
+0.03.241.245 I print_info: file format = GGUF V3 (latest)
+0.03.241.245 I print_info: file type   = IQ3_XXS - 3.0625 bpw
+0.03.241.246 I print_info: file size   = 79.12 GiB (3.84 BPW) 
+0.03.241.302 I llama_prepare_model_devices: using device CUDA0 (NVIDIA GeForce RTX 5060 Ti) (0000:01:00.0) - 15708 MiB free
+0.03.241.305 I llama_prepare_model_devices: using device CUDA1 (NVIDIA GeForce RTX 5060 Ti) (0000:02:00.0) - 15708 MiB free
+0.03.288.935 I load: 0 unused tokens
+0.03.305.952 I load: printing all EOG tokens:
+0.03.305.955 I load:   - 248044 ('<|endoftext|>')
+0.03.305.955 I load:   - 248046 ('<|im_end|>')
+0.03.305.955 I load:   - 248063 ('<|fim_pad|>')
+0.03.305.955 I load:   - 248064 ('<|repo_name|>')
+0.03.305.955 I load:   - 248065 ('<|file_sep|>')
+0.03.306.302 I load: special tokens cache size = 33
+0.03.324.382 I load: token to piece cache size = 1.7581 MB
+0.03.324.389 I print_info: arch                  = qwen4exp
+0.03.324.389 I print_info: vocab_only            = 0
+0.03.324.390 I print_info: no_alloc              = 0
+0.03.324.390 I print_info: n_ctx_train           = 262144
+0.03.324.390 I print_info: n_embd_inp            = 2560
+0.03.324.390 I print_info: n_embd                = 2560
+0.03.324.391 I print_info: n_embd_out            = 10240
+0.03.324.391 I print_info: n_layer               = 48
+0.03.324.391 I print_info: n_layer_all           = 48
+0.03.324.397 I print_info: n_head                = 24
+0.03.324.398 I print_info: n_head_kv             = 2
+0.03.324.398 I print_info: n_rot                 = 64
+0.03.324.398 I print_info: n_swa                 = 0
+0.03.324.399 I print_info: is_swa_any            = 0
+0.03.324.399 I print_info: non_causal_type       = 0
+0.03.324.399 I print_info: n_embd_head_k         = 256
+0.03.324.399 I print_info: n_embd_head_v         = 256
+0.03.324.400 I print_info: n_gqa                 = 12
+0.03.324.401 I print_info: n_embd_k_gqa          = 512
+0.03.324.402 I print_info: n_embd_v_gqa          = 512
+0.03.324.403 I print_info: f_norm_eps            = 0.0e+00
+0.03.324.404 I print_info: f_norm_rms_eps        = 1.0e-06
+0.03.324.404 I print_info: f_clamp_kqv           = 0.0e+00
+0.03.324.404 I print_info: f_max_alibi_bias      = 0.0e+00
+0.03.324.404 I print_info: f_logit_scale         = 0.0e+00
+0.03.324.404 I print_info: f_attn_scale          = 0.0e+00
+0.03.324.405 I print_info: f_attn_value_scale    = 0.0000
+0.03.324.430 I print_info: n_ff                  = 0
+0.03.324.430 I print_info: n_expert              = 512
+0.03.324.430 I print_info: n_expert_used         = 10
+0.03.324.430 I print_info: n_expert_groups       = 0
+0.03.324.430 I print_info: n_group_used          = 0
+0.03.324.430 I print_info: causal attn           = 1
+0.03.324.431 I print_info: pooling type          = -1
+0.03.324.431 I print_info: rope type             = 40
+0.03.324.431 I print_info: rope scaling          = linear
+0.03.324.432 I print_info: freq_base_train       = 10000000.0
+0.03.324.433 I print_info: freq_scale_train      = 1
+0.03.324.433 I print_info: n_ctx_orig_yarn       = 262144
+0.03.324.433 I print_info: rope_yarn_log_mul     = 0.0000
+0.03.324.433 I print_info: rope_finetuned        = unknown
+0.03.324.433 I print_info: mrope sections        = [11, 11, 10, 0]
+0.03.324.434 I print_info: model type            = A3B
+0.03.324.434 I print_info: model params          = 176.94 B
+0.03.324.434 I print_info: general.name          = Src
+0.03.324.436 I print_info: vocab type            = BPE
+0.03.324.436 I print_info: n_vocab               = 248320
+0.03.324.436 I print_info: n_merges              = 247587
+0.03.324.436 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.03.324.436 I print_info: EOS token             = 248046 '<|im_end|>'
+0.03.324.436 I print_info: EOT token             = 248046 '<|im_end|>'
+0.03.324.436 I print_info: PAD token             = 248044 '<|endoftext|>'
+0.03.324.436 I print_info: LF token              = 198 'Ċ'
+0.03.324.437 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.03.324.437 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.03.324.437 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.03.324.437 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.03.324.437 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.03.324.437 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.03.324.437 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.03.324.437 I print_info: EOG token             = 248046 '<|im_end|>'
+0.03.324.437 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.03.324.438 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.03.324.438 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.03.324.438 I print_info: max token length      = 256
+0.03.324.477 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.03.324.768 I add: tensor per_layer_token_embd.weight (size = 27465 MiB) lazy read enabled
+0.03.353.278 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.03.379.775 I load_tensors: enabling prefetch for 'per_layer_token_embd.weight'
+0.03.725.107 I load_tensors: offloading output layer to GPU
+0.03.725.110 I load_tensors: offloading 47 repeating layers to GPU
+0.03.725.110 I load_tensors: offloaded 49/49 layers to GPU
+0.03.725.114 I load_tensors:   CPU_Mapped model buffer size =   260.50 MiB
+0.03.725.114 I load_tensors:   CPU_Mapped model buffer size =   762.74 MiB
+0.03.725.115 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.115 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.115 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.115 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.115 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.116 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.116 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.116 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.116 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.116 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.117 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.118 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.118 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.118 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.118 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.118 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.119 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.120 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.121 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.122 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.122 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.122 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.122 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.122 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.123 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.123 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.123 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.123 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.123 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.124 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.125 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.126 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.126 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.126 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.126 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.126 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.127 I load_tensors:   CPU_Mapped model buffer size =   450.00 MiB
+0.03.725.127 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.127 I load_tensors:   CPU_Mapped model buffer size =   306.25 MiB
+0.03.725.156 I load_tensors:        CUDA0 model buffer size = 13877.68 MiB
+0.03.725.156 I load_tensors:        CUDA1 model buffer size = 14210.07 MiB
+0.03.725.157 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.05.754.899 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.05.754.909 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.05.754.910 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.05.754.910 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.05.754.910 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.05.754.996 I llama_context: constructing llama_context
+0.05.754.999 I llama_context: n_seq_max             = 1
+0.05.754.999 I llama_context: n_ctx                 = 4096
+0.05.754.999 I llama_context: n_ctx_seq             = 4096
+0.05.754.999 I llama_context: n_batch               = 2048
+0.05.754.999 I llama_context: n_ubatch              = 512
+0.05.754.999 I llama_context: causal_attn           = 1
+0.05.755.000 I llama_context: flash_attn            = auto
+0.05.755.000 I llama_context: kv_unified            = false
+0.05.755.002 I llama_context: freq_base             = 10000000.0
+0.05.755.002 I llama_context: freq_scale            = 1
+0.05.755.002 I llama_context: n_rs_seq              = 0
+0.05.755.002 I llama_context: n_outputs_max         = 1
+0.05.755.002 I llama_context: n_outputs_max_per_seq = 1
+0.05.755.003 I llama_context: n_ctx_seq (4096) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.05.755.883 I llama_context:  CUDA_Host  output buffer size =     0.95 MiB
+0.05.756.057 I llama_kv_cache:      CUDA0 KV buffer size =    24.00 MiB
+0.05.756.293 I llama_kv_cache:      CUDA1 KV buffer size =    72.00 MiB
+0.05.756.295 I llama_kv_cache: size =   96.00 MiB (  4096 cells,  12 layers,  1/1 seqs), K (f16):   48.00 MiB, V (f16):   48.00 MiB
+0.05.756.296 I llama_kv_cache: n_rot_k = 0, n_embd_head_k_all = 256
+0.05.756.296 I llama_kv_cache: n_rot_v = 0, n_embd_head_k_all = 256
+0.05.756.451 I llama_memory_recurrent:      CUDA0 RS buffer size =    31.52 MiB
+0.05.756.689 I llama_memory_recurrent:      CUDA1 RS buffer size =    81.05 MiB
+0.05.756.693 I llama_memory_recurrent: size =  112.57 MiB (     1 cells,  48 layers,  1 seqs  0 rs_seq), R (f32):    4.22 MiB, S (f32):  108.00 MiB, P (f32):    0.35 MiB
+0.05.756.696 I operator(): creating indexer KV cache, size = 4096 cells
+0.05.756.783 I llama_kv_cache:      CUDA0 KV buffer size =     6.00 MiB
+0.05.756.853 I llama_kv_cache:      CUDA1 KV buffer size =    18.00 MiB
+0.05.756.854 I llama_kv_cache: size =   24.00 MiB (  4096 cells,  12 layers,  1/1 seqs), K (f16):   24.00 MiB, V (f16):    0.00 MiB
+0.05.756.854 I llama_kv_cache: n_rot_k = 0, n_embd_head_k_all = 256
+0.05.756.854 I llama_kv_cache: n_rot_v = 0, n_embd_head_k_all = 0
+0.05.756.875 I sched_reserve: reserving ...
+0.05.759.749 I resolve_fused_ops: Flash Attention enabled
+0.05.759.750 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.05.761.050 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.05.762.422 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.05.763.607 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.05.763.608 I resolve_fused_ops: resolving fused top-k mask support:
+0.05.764.787 I resolve_fused_ops: fused top-k mask enabled
+0.05.778.199 I sched_reserve:      CUDA0 compute buffer size =   539.45 MiB
+0.05.778.202 I sched_reserve:      CUDA1 compute buffer size =   194.16 MiB
+0.05.778.202 I sched_reserve:  CUDA_Host compute buffer size =    26.19 MiB
+0.05.778.204 I sched_reserve: graph (pp bs=512, tg bs=1): nodes = 6487 / 6487, splits = 106 / 59, input objects = 6 / 6, input tensors = 18 / 18
+0.05.778.205 I sched_reserve: reserve took 21.33 ms, sched copies = 1
+0.05.778.298 I cmn          init: llama threadpool init, n_threads = 8
+0.05.778.318 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.05.938.614 I cmn  common_conte: the context does not support partial sequence removal
+0.05.940.154 I srv    load_model: speculative decoding will use checkpoints
+0.05.940.157 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+0.05.940.166 I spec common_specu: no implementations specified for speculative decoding
+0.05.940.168 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 4096
+0.05.940.185 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.05.940.186 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.05.940.186 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.05.940.186 I srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+0.05.940.198 I srv          init: idle slots will be saved to prompt cache upon starting a new task
+0.05.943.830 I srv          init: init: chat template, example_format: '<|im_start|>system
+Reasoning effort is set to xhigh. Please think carefully through the task, validate key assumptions, consider plausible alternatives, and prioritize correctness, consistency, and clarity in the final answer.
+
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+<think>
+
+</think>
+
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+<think>
+'
+0.05.944.206 I srv          init: init: chat template, thinking = 1
+0.05.944.217 I srv          init: preserve_reasoning kwarg: true
+0.05.944.218 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.05.944.250 I srv  server_run_i: model loaded
+0.05.944.253 I srv  server_on_li: listening on http://127.0.0.1:8080
+0.05.944.336 I srv  update_slots: all slots are idle
