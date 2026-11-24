@@ -65,8 +65,11 @@ GPU_SAMPLER=$!
 sudo -n scripts/cpu-power.sh "$P.cpu.csv" $$ &
 CPU_SAMPLER=$!
 SERVER=
+# set +e: under set -e the first failing command ends the function, e.g. `kill` of a server
+# that has already exited, and the samplers kept running (they once wrote into the next run).
 cleanup() {
-  [ -z "$SERVER" ] || { kill "$SERVER" 2>/dev/null; wait "$SERVER" 2>/dev/null || true; }
+  set +e
+  [ -z "$SERVER" ] || { kill "$SERVER" 2>/dev/null; wait "$SERVER" 2>/dev/null; }
   kill "$GPU_SAMPLER" "${RAM_SAMPLER:-}" 2>/dev/null || true
   sudo -n kill "$CPU_SAMPLER" 2>/dev/null || true
   sudo -n chown "$(id -u):$(id -g)" "$P.cpu.csv" 2>/dev/null || true

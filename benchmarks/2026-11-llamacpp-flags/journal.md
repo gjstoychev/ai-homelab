@@ -289,7 +289,7 @@ Load 23.8 s for both.
 
 **Verdict:** reproduces step 4 (804.3 / 58.0). Qwen's final configuration: `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio -b 4096 -ub 4096`.
 
-**Problem found on the way: a stray CPU power sampler.** The failed paste-error attempt (section 16) exited after 1 s; its cleanup sent SIGTERM to `sudo` before `sudo` had started `cpu-power.sh`, so the sampler kept running. It reopens its file by name every second: after the failed files were renamed it created a new `4-ub4096.cpu.csv`, step 4's own sampler then wrote into the same file, and after step 4 the stray one kept adding idle readings (until 21:01, found because step 4's CPU average in the summary dropped from 49 to 39 W). Only that file is affected; t/s, VRAM and GPU power come from other files. Fix: `cpu-power.sh` takes the PID of `run-step.sh` and stops as soon as that process is gone.
+**Problem found on the way: a stray CPU power sampler.** The failed paste-error attempt (section 16) exited after 1 s and its sampler kept running. (First explained as a race with `sudo`; the real cause is below, under "Correction".) It reopens its file by name every second: after the failed files were renamed it created a new `4-ub4096.cpu.csv`, step 4's own sampler then wrote into the same file, and after step 4 the stray one kept adding idle readings (until 21:01, found because step 4's CPU average in the summary dropped from 49 to 39 W). Only that file is affected; t/s, VRAM and GPU power come from other files. Fix: `cpu-power.sh` takes the PID of `run-step.sh` and stops as soon as that process is gone.
 Cleanup: the stray sampler was stopped (`sudo pkill -f cpu-power.sh`; its last line 21:02:16). `4-ub4096.cpu.csv` was cut to step 4's run window (20:52:15–20:53:42, from its `.cmd` and `.ram.csv`); within that window both samplers wrote, two valid readings per second of the same counter, both kept. The untrimmed file is kept as `4-ub4096.cpu.csv.with-stray-sampler`. Step 4's CPU average is now 56 W, the same as step 5's (the 49 W shown earlier was already mixed with idle readings).
 
 ## 18. Qwen, 5b: CPU share 0 with DirectIO (2026-11-24)
@@ -323,6 +323,10 @@ Difference over all 10 requests +2.0 t/s, Welch t = 1.98.
 - step 4: `-b/-ub 4096` on the best of step 2
 
 Baseline to beat: 0b (`--fit`), 145.7 / 14.5 t/s.
+
+**Correction (2026-11-24, 21:12): the real cause, and a second stray.** `git status` showed `4-ub4096-pasteerror.gpu.csv` still changing: the failed attempt's `nvidia-smi` sampler had been running since 20:51 as well (5013 lines; it writes through the file descriptor it was started with, so it followed the renamed file). Cause: `run-step.sh` runs with `set -e`, which also applies inside the EXIT trap's function. In a failed run the server has already exited, so the cleanup's first command, `kill "$SERVER"`, fails, and `set -e` ends the function there, before the samplers are stopped. In successful runs the server is alive, `kill` succeeds, and everything is stopped; so only the failed run left strays. Fix: `set +e` at the start of `cleanup()`; reproduced in isolation (without it the function never reaches its last line). The PID watch in `cpu-power.sh` stays as a second guard.
+
+The stray `nvidia-smi` was stopped at 21:13:08 (`pkill -f 'nvidia-smi --query-gpu'`); `4-ub4096-pasteerror.gpu.csv` was cut to the attempt's own seconds (20:51:20–20:51:22). No re-runs: the strays (an extra GPU query every 0.5 s during steps 4, 4c, 5 and 5b; an extra RAPL reading every second until 21:02) left no visible trace in the results: 4c matches step 3, which ran before them, within the spread (56.9 / 317.6 against 57.8 / 320.2 t/s), and step 5 reproduces step 4.
 
 ## Open points
 
