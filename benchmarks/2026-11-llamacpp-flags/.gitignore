@@ -1,0 +1,3 @@
+# Routing traces of scripts/moe-cache-tune.py: binary, about 2.5-10 MB each; its logs, JSON and
+# printed summary (runs/<model>/2-tune.txt) are kept.
+runs/*/2-tune/*.trace

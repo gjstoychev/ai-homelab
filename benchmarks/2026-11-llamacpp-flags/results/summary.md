@@ -11,3 +11,10 @@ Options every run shares: `--host 127.0.0.1 --port 8080 -np 1 --cache-ram 0 -t 8
 | qwen3.8-flash-next | 0a-naive-ngl26 | `-fit off -ngl 26` | 17.9 | 334.6 ± 3.0 | 16.8 ± 0.1 | 15216 / 14134 | 35853 / 53192 | 90 | 65 |
 | qwen3.8-flash-next | 0b-fit | `(none)` | 24.9 | 340.9 ± 3.0 | 38.8 ± 0.4 | 14726 / 14890 | 53731 / 53955 | 110 | 63 |
 | qwen3.8-flash-next | 1-cmoe | `-cmoe` | 16.4 | 202.7 ± 1.6 | 24.4 ± 0.4 | 1954 / 1804 | 53277 / 53322 | 90 | 61 |
+| qwen3.8-flash-next | 2-moecache-13440 | `-cmoe --moe-cache-mib 13440 --moe-cache-cpu-share 0.8` | 16.4 | 232.5 ± 2.9 | 48.1 ± 2.2 | 8754 / 8450 | 52645 / 52988 | 103 | 50 |
+| qwen3.8-flash-next | 2b-moecache-25600 | `-cmoe --moe-cache-mib 25600 --moe-cache-cpu-share 0.8` | 16.4 | 258.0 ± 3.8 | 54.4 ± 2.1 | 14902 / 14462 | 53053 / 53271 | 107 | 47 |
+| qwen3.8-flash-next | 3-dio | `-cmoe --moe-cache-mib 25600 --moe-cache-cpu-share 0.8 -lm dio` | 26.1 | 320.2 ± 2.1 | 57.8 ± 1.2 | 15004 / 14562 | 52307 / 51625 | 118 | 50 |
+| qwen3.8-flash-next | 4-ub4096 | `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio -b 4096 -ub 4096` | 23.8 | 804.3 ± 4.1 | 58.0 ± 1.4 | 14940 / 14360 | 52777 / 51889 | 140 | 56 |
+| qwen3.8-flash-next | 4c-cache23552-ub512 | `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio` | 23.8 | 317.6 ± 3.7 | 56.9 ± 1.4 | 13966 / 13548 | 52554 / 51812 | 117 | 50 |
+| qwen3.8-flash-next | 5-final | `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio -b 4096 -ub 4096` | 23.8 | 806.0 ± 3.9 | 57.6 ± 1.9 | 14940 / 14360 | 52818 / 51929 | 145 | 56 |
+| qwen3.8-flash-next | 5b-share0 | `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096` | 23.7 | 803.1 ± 4.1 | 59.5 ± 2.5 | 14936 / 14354 | 52818 / 51932 | 146 | 41 |

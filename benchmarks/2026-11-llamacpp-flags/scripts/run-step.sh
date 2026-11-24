@@ -62,7 +62,7 @@ sync; echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null
 Q=timestamp,index,pstate,power.draw,temperature.gpu,memory.used,utilization.gpu,clocks.gr,clocks.mem
 nvidia-smi --query-gpu=$Q --format=csv -lms 500 > "$P.gpu.csv" &
 GPU_SAMPLER=$!
-sudo -n scripts/cpu-power.sh "$P.cpu.csv" &
+sudo -n scripts/cpu-power.sh "$P.cpu.csv" $$ &
 CPU_SAMPLER=$!
 SERVER=
 cleanup() {

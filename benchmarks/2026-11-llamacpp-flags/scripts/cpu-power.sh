@@ -6,11 +6,14 @@
 # this shows whether the CPU ever gets near PL1 during the GPU benchmarks.
 #
 # Usage: sudo scripts/cpu-power.sh OUT.csv (started and stopped by scripts/run-step.sh)
-# Copied from benchmarks/2026-11-boardswap/scripts/; only this usage line changed.
+# Copied from benchmarks/2026-11-boardswap/scripts/; changed: this usage line and the PID to watch.
 # Output CSV: utc_time,package_w (plus the limits in a comment line)
 set -euo pipefail
 
-OUT=${1:?usage: sudo $0 OUTPUT.csv}
+OUT=${1:?usage: sudo $0 OUTPUT.csv [PID]}
+# With a PID (run-step.sh passes its own), stop as soon as that process is gone, so a
+# run that fails fast cannot leave a sampler behind (it once wrote into the next run).
+WATCH=${2:-}
 R=/sys/class/powercap/intel-rapl:0
 MAX=$(cat $R/max_energy_range_uj)
 
@@ -23,6 +26,7 @@ MAX=$(cat $R/max_energy_range_uj)
 prev_e=$(cat $R/energy_uj)
 prev_t=$(date +%s.%N)
 while sleep 1; do
+  [ -z "$WATCH" ] || kill -0 "$WATCH" 2>/dev/null || break
   e=$(cat $R/energy_uj)
   t=$(date +%s.%N)
   awk -v e="$e" -v pe="$prev_e" -v t="$t" -v pt="$prev_t" -v max="$MAX" \

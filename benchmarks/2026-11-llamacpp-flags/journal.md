@@ -203,6 +203,114 @@ Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only
 
 **Verdict:** as expected for generation: between 0a (16.8) and 0b (38.8), with about 25 GB of VRAM now free for step 2's cache. Not expected: prompt processing dropped 40 % (341 → 203 t/s). Likely cause: each micro-batch (512 tokens) copies the experts it uses, nearly all of them, to the GPUs ("large batches still upload the experts they use", `docs/moe-cache.md`); the 4260-token prompt is 9 micro-batches, so about 9 full uploads, where `--fit` kept half of the experts on the GPUs. Step 4 (`-ub`) is where that should change.
 
+## 13. Qwen, step 2: the tuner (2026-11-24)
+
+**Command:** `python3 ~/llama.cpp/v1.0.0/src/scripts/moe-cache-tune.py --out runs/qwen3.8-flash-next/2-tune --markdown -- <llama-server> -m <model> -np 1 --cache-ram 0 -t 8 -c 8192 -cmoe` (the tuner adds host, port and `-lv 4` itself). Output: `runs/qwen3.8-flash-next/2-tune.txt`, the six server logs in `2-tune/`.
+
+**Actual:**
+
+| Cache MiB | CPU share | t/s | Cache hits |
+|---:|---:|---:|---:|
+| 5056 | 0 | 29.1 | 75 % |
+| 5056 | 0.5 | 33.0 | 69 % |
+| 5056 | 0.95 | 41.8 | 67 % |
+| 13440 | 0 | 47.3 | 92 % |
+| 13440 | 0.5 | 49.4 | 92 % |
+| 13440 | 0.95 | 51.0 | 87 % |
+
+Fitted machine: uploads 12.8 GiB/s, CPU 46.7 GiB/s, 15.23 ms per token for everything else. Predicted with a warm cache: 13440 MiB at share 0 48.0 t/s, 0.8 52.9, 0.95 53.7. **Recommended: `--moe-cache-mib 13440 --moe-cache-cpu-share 0.8` (52.9 t/s predicted).**
+
+**Finding: on two GPUs the tuner caps the cache at about half of what fits.** The cache is split across the GPUs like the layers (log: CUDA0 6794 MiB, CUDA1 6643 MiB for 13440), but the tuner sizes it from the first cache device only: `room = free - used - 512` with the free memory and the buffers of CUDA0 (`device_room()` and the lines after `run_server(... small ...)` in `scripts/moe-cache-tune.py`). With `-cmoe` each GPU has about 13.5 GB free, so about 6.5 GB per GPU stay unused. `--max-mib` can only lower the cap. Candidate upstream issue.
+
+**Decision:** step 2 measures the recommendation as is; an extra step 2b measures about twice the cache (25600 MiB, about 12.8 GB per GPU) at the same share 0.8, so only the size changes. Steps 3 to 5 build on the faster of the two.
+
+## 14. Qwen, steps 2 and 2b: the MoE cache measured (2026-11-24)
+
+**Commands:**
+- `scripts/run-step.sh qwen3.8-flash-next 2-moecache-13440 5 -- -cmoe --moe-cache-mib 13440 --moe-cache-cpu-share 0.8` (the tuner's recommendation)
+- `scripts/run-step.sh qwen3.8-flash-next 2b-moecache-25600 5 -- -cmoe --moe-cache-mib 25600 --moe-cache-cpu-share 0.8` (about twice the cache, same share)
+
+**Expected:** step 2 near the tuner's 52.9 t/s; 2b faster if the cache size is what limits.
+
+**Actual:**
+
+| Step | Cache per GPU (CUDA0 / CUDA1) | Prompt t/s | Generation t/s | Hit rate (small batches) | Peak VRAM MiB |
+|---|---|---|---|---|---|
+| 2 | 6794 / 6643 MiB | 232.5 ± 2.9 | 48.1 ± 2.2 | 85.2 % | 8754 / 8450 |
+| 2b | 12943 / 12655 MiB | 258.0 ± 3.8 | **54.4 ± 2.1** | 94.2 % | 14902 / 14462 |
+
+Generation rose from request to request in both (2: 46.3 → 51.8, 2b: 53.3 → 57.4): with 256 generated tokens per request the cache was still filling. Load 16.4 s in both. CPU 50 / 47 W, GPUs 103 / 107 W. The server's cache statistics at shutdown: 2 uploaded 56.5 GB for small batches and copied 171 GB from the cache for large batches (the prompts); 2b 38.4 GB and 310 GB.
+
+**Verdict:** the MoE cache beats `--fit` (0b, 38.8 t/s): +24 % with the tuner's size, +40 % with twice the cache. The tuner's two-GPU cap (section 13) costs 12 %. Step 2 stayed below the tuner's prediction because the tuner predicts a fully warm cache and these requests are short; the larger spread (±2 instead of ±0.4) has the same cause. Prompt processing is still below 0b (258 against 341 t/s). Steps 3 to 5 build on 2b.
+
+**Before step 3:** `-lm dio` does not map the model, but lazily read tensors still are (`src/llama-model-loader.cpp:1506`: "read_lazy also requires mmap; this condition make sure it's usable even when --load-mode is not set to mmap"). With DirectIO the experts (about 50 GiB) go into pinned RAM and the n-gram embeddings (27 GiB) stay lazy: it fits. With mmap, the experts are read from the NVMe during the first requests, not during loading; with DirectIO during loading. Load times of the two are therefore compared together with the warm-up request.
+
+## 15. Qwen, step 3: `-lm dio` (2026-11-24)
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 3-dio 5 -- -cmoe --moe-cache-mib 25600 --moe-cache-cpu-share 0.8 -lm dio`.
+
+**Expected:** longer load (the experts are read during loading, not during the first request); RSS about 50 GB; generation either way (faster uploads from pinned memory, but the CPU share "often does not help then").
+
+**Actual:** both shards "opened with direct I/O (alignment: 4096 bytes)", `load_mode = dio`, the n-gram embeddings still "lazy read enabled". Load 26.1 s (2b: 16.4). Prompt **320.2 ± 2.1 t/s** (2b: 258.0), generation **57.8 ± 1.2 t/s** (2b: 54.4). Load plus the warm-up request: 26.1 + 15.5 + 5.3 = 46.9 s (2b: 16.4 + 25.6 + 6.2 = 48.2 s). Lowest MemAvailable **8.3 GB** (2b: 60.4 GB): the pinned experts are really taken, where mmap'd ones count as available page cache (`Cached` in `/proc/meminfo` includes the pinned buffer too, so RSS and page cache overlap in the summary). GPUs 118 W, CPU 50 W.
+
+**Verdict:** prompt +24 %, generation +6 % over 2b, and steadier. Pinned experts upload faster, which helps the prompt's large batches most. The first finished answer arrives at the same time as with mmap: DirectIO moves the NVMe reads from the first request into loading. The CPU share 0.8 still pays off with pinned memory here (not tested against 0 yet). The cost is RAM: 8.3 GB left. DeepSeek has about 55 GiB on the CPU and nothing read lazily; DirectIO would leave about 4 GB or fail.
+
+## 16. Qwen, step 4: `-b 4096 -ub 4096` (2026-11-24)
+
+**Compute buffer** (two probe starts with `-cmoe`, no cache; the logs were not saved: the pasted command line was split, so `tee` got no file name; the values are from the terminal output): `-ub 4096` needs CUDA0 1443 MiB, CUDA1 870 MiB, pinned host 217 MiB, against 574 / 109 / 27 at `-ub 512`: +868 / +761 MiB. Step 3 left 843 MiB on CUDA0, so the cache had to shrink by about 2 GiB: 25600 → 23552 MiB (11907 / 11642 MiB per GPU).
+
+**Because two things change, a control run (4c) uses the smaller cache with the default batches.**
+
+**Commands** (`O="-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio"`):
+- `scripts/run-step.sh qwen3.8-flash-next 4-ub4096 5 -- $O -b 4096 -ub 4096`
+- `scripts/run-step.sh qwen3.8-flash-next 4c-cache23552-ub512 5 -- $O`
+
+A first attempt at step 4 failed in 1 s: the pasted line was split, so `-ub` had no value (`error while handling argument "-ub": expected value for argument`) and `4096` ran as a command. Its files are kept as `runs/qwen3.8-flash-next/4-ub4096-pasteerror.*`; no requests ran. Long commands are given in short lines since.
+
+**Actual:**
+
+| Step | Prompt t/s | Generation t/s | Hit rate | Copied from the cache for prompts | Peak VRAM MiB | GPU W |
+|---|---|---|---|---|---|---|
+| 3 (cache 25600, ub 512) | 320.2 ± 2.1 | 57.8 ± 1.2 | 94.2 % | — | 15004 / 14562 | 118 |
+| 4c (cache 23552, ub 512) | 317.6 ± 3.7 | 56.9 ± 1.4 | 93.7 % | 286 GB | 13966 / 13548 | 117 |
+| 4 (cache 23552, ub 4096) | **804.3 ± 4.1** | **58.0 ± 1.4** | 94.0 % | 83 GB | 14940 / 14360 | 140 |
+
+Load 23.8 s for both.
+
+**Verdict:** `-ub 4096` makes prompt processing 2.5× faster: the 4260-token prompt runs as 2 micro-batches instead of 9, so the experts are copied for 2 instead of 9 (83 against 286 GB per run). Generation does not change (one token at a time never uses large batches). The 2 GiB smaller cache costs nothing measurable (4c against 3: within the spread, hit rate 93.7 against 94.2 %).
+
+**Qwen, step 4 against llama.cpp's default (0b):** prompt 804 against 341 t/s (2.4×), generation 58.0 against 38.8 t/s (+49 %), same VRAM, about the same load time.
+
+## 17. Qwen, step 5: the final configuration, timed (2026-11-24)
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 5-final 10 -- $O -b 4096 -ub 4096` (step 4's options, fresh server, 10 measured requests).
+
+**Actual:** load 23.8 s; prompt **806.0 ± 3.9 t/s**, generation **57.6 ± 1.9 t/s** (requests 7 and 10 at 54.9 and 54.7, the others 55.2–59.5). VRAM 14940 / 14360 MiB, as in step 4.
+
+**Verdict:** reproduces step 4 (804.3 / 58.0). Qwen's final configuration: `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0.8 -lm dio -b 4096 -ub 4096`.
+
+**Problem found on the way: a stray CPU power sampler.** The failed paste-error attempt (section 16) exited after 1 s; its cleanup sent SIGTERM to `sudo` before `sudo` had started `cpu-power.sh`, so the sampler kept running. It reopens its file by name every second: after the failed files were renamed it created a new `4-ub4096.cpu.csv`, step 4's own sampler then wrote into the same file, and after step 4 the stray one kept adding idle readings (until 21:01, found because step 4's CPU average in the summary dropped from 49 to 39 W). Only that file is affected; t/s, VRAM and GPU power come from other files. Fix: `cpu-power.sh` takes the PID of `run-step.sh` and stops as soon as that process is gone.
+Cleanup: the stray sampler was stopped (`sudo pkill -f cpu-power.sh`; its last line 21:02:16). `4-ub4096.cpu.csv` was cut to step 4's run window (20:52:15–20:53:42, from its `.cmd` and `.ram.csv`); within that window both samplers wrote, two valid readings per second of the same counter, both kept. The untrimmed file is kept as `4-ub4096.cpu.csv.with-stray-sampler`. Step 4's CPU average is now 56 W, the same as step 5's (the 49 W shown earlier was already mixed with idle readings).
+
+## 18. Qwen, 5b: CPU share 0 with DirectIO (2026-11-24)
+
+**Why:** `docs/moe-cache.md`: with pinned host experts (`-lm dio`) "the CPU share often does not help"; the tuner chose 0.8 in step 2, with mmap.
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 5b-share0 10 -- -cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096` (step 5 with share 0). First run with the fixed sampler; it stopped with the run.
+
+**Actual:**
+
+| | Prompt t/s | Generation, requests 1–10 | Requests 1–3 | Requests 4–10 | Hit rate | Uploaded (small batches) | CPU W |
+|---|---|---|---|---|---|---|---|
+| 5 (share 0.8) | 806.0 ± 3.9 | 57.6 ± 1.9 | 57.4 | 57.7 ± 2.0 | 94.5 % | 50.2 GB | 56 |
+| 5b (share 0) | 803.1 ± 4.1 | 59.5 ± 2.5 | 56.4 | **60.9 ± 0.9** | 96.5 % | 99.6 GB | 41 |
+
+Difference over all 10 requests +2.0 t/s, Welch t = 1.98.
+
+**Verdict:** share 0 is better once the cache is warm: +5 % and steadier from request 4, and 15 W less CPU. With share 0 every miss is copied into the cache, so it fills better (96.5 against 94.5 % hits); the price is twice the upload traffic, which pinned memory handles. With share 0.8, 80 % of the misses are computed on the CPU and never enter the cache. The tuner's 0.8 fitted mmap (step 2: slow uploads), not DirectIO: steps 2 and 3 interact, as `docs/moe-cache.md` says. Over only 10 requests the difference is borderline (t ≈ 2); over a longer-running server share 0 wins.
+
+**Qwen, best configuration:** `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096`. Against llama.cpp's default (0b, 340.9 / 38.8 t/s): prompt 803 t/s (2.4×), generation 59.5 t/s (+53 %), 60.9 t/s with a warm cache (+57 %); same VRAM, same load time.
+
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.

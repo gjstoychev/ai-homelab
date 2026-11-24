@@ -1,0 +1,8 @@
+error while handling argument "-ub": expected value for argument
+
+usage:
+-ub,   --ubatch-size N                  physical maximum batch size (default: 512)
+                                        (env: LLAMA_ARG_UBATCH)
+
+
+to show complete usage, run with -h
