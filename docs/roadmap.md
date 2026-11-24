@@ -128,7 +128,7 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 - Tuning: persistence mode; power limit 180 W vs 140 W (tok/s per watt); CPU governor; pinning to P-cores.
 - The `common` and `nvidia_*` roles codify the headless state from Prep (default target, masked display manager, `nvidia-persistenced` drop-in).
 - From Prep / Lab 0a: HWE kernel (7.0): pin the kernel or only the driver, and a security update policy; an own modprobe file `zz-homelab-nvidia.conf` (not `99-`) and removal of the hand-made `nvidia-kms.conf`; a oneshot unit for the power limit at boot (`-pl` does not survive a reboot); explicit `mode: "0755"` for scripts run as root (git does not keep group-write).
-- Network: management is now over LAN (not WiFi); `formula` shows one wired port (`lan0`, Marvell AQtion 10GbE, driver `atlantic`), so the direct link to `hero` needs a second NIC or a switch. On 2026-11-24 `lan0` linked at only 100 Mb/s: check the cable and the switch port. netplan in Ansible with the passwords in Vault.
+- Network: management is now over LAN (not WiFi); `formula` shows one wired port (`lan0`, Marvell AQtion 10GbE, driver `atlantic`), so the direct link to `hero` needs a second NIC or a switch. On 2026-11-24 `lan0` linked at only 100 Mb/s (the far end advertised only 10/100); connected directly to the router, it links at 1000 Mb/s, so the old cable or switch was the limit. netplan in Ansible with the passwords in Vault.
 - **Molecule** tests for the roles.
 - **Criterion:** `ansible-playbook site.yml` on a clean Ubuntu 24.04 → working GPUs in a container.
 

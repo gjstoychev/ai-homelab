@@ -74,6 +74,23 @@ Found on the way:
 - **Steps 2 and 3 interact.** `docs/moe-cache.md`: host experts are pinned with `-lm none`, `mlock` or `dio`, but not when mmap'd (the default); the GPUs upload pinned experts at full link speed, "so the CPU share often does not help then". The tuner's recommendation in step 2 is for mmap; with `-lm dio` in step 3 the best share may differ.
 - **The tuner loads the model 6 times.** With 62 GiB of RAM the 85 GB model cannot stay in the page cache, so every load reads from the NVMe.
 
+## 4. Models (2026-11-24)
+
+**Decision:** a second model, DeepSeek-V4-Flash-0731 (284B, 13B active, MIT), runs the same series after Qwen. "Qwen Flash" (Alibaba's Qwen3.8-Flash API) is the same model as the open-weight Qwen3.8-Flash-Next already chosen, so no second Qwen. DeepSeek V4.1-Flash (552B) does not fit 32 GB VRAM + 62 GiB RAM even at about 2 bits. This build supports `deepseek4` and `deepseek41` (`src/llama-arch.cpp`). Every benchmark reports tokens per second (prompt processing and generation) with the other measurements.
+
+**Qwen3.8-Flash-Next IQ3_XXS:** repository `batiai/Qwen3.8-Flash-Next-GGUF`, commit `1d0ec19ce9b05014c6236c2813ce77aef6fbc42a`, 2 shards, 44.71 + 34.41 = 79.12 GiB (Hugging Face API, `?blobs=true`). Downloaded with `curl -fL -C -` from `/resolve/<commit>/`, expected SHA256 from `/api/models/<repo>/revision/<commit>?blobs=true` into `SHA256SUMS`. Header of shard 1: `general.architecture = qwen4exp`, 48 layers, 512 experts, 10 used, expert FFN 640 (shared 640), context 262144, file type 23 (IQ3_XXS), imatrix with 200 chunks, 1224 tensors in 2 shards.
+
+**Verified** (`sha256sum -c SHA256SUMS`: both `OK`):
+
+| Shard | Bytes | SHA256 |
+|---|---|---|
+| `Qwen3.8-Flash-Next-IQ3_XXS-00001-of-00002.gguf` | 48009476896 | `4e461bef2ce7b528d47934a5c0414783a637809d60f0eb67ed8367f19d486bec` |
+| `Qwen3.8-Flash-Next-IQ3_XXS-00002-of-00002.gguf` | 36951306720 | `86755e0cd28ae96492a4606a03518addb6def115bdf517df806ca06ac2f9b38b` |
+
+Download at 1 Gb/s after the server was connected directly to the router (before: 100 Mb/s through an old cable or switch).
+
+**Fit:** with `-cmoe` nearly all of the 79 GiB (the experts) goes to RAM, more than the 62 GiB there is; mmap then streams experts from the NVMe while generating. `-ncmoe N` with the GPUs filled (about 30 GiB) leaves about 50 GiB in RAM. Which one step 1 uses is decided after the load log shows the real sizes.
+
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.
