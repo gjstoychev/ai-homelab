@@ -12,7 +12,8 @@
 #   .cmd       the exact server command and versions
 #   .log       the server log (-lv 4)
 #   .gpu.csv   nvidia-smi every 0.5 s: power, memory, clocks, temperature
-#   .ram.csv   every 1 s: MemAvailable, page cache, server RSS
+#   .ram.csv   every 1 s: MemAvailable, page cache, server RSS (with mmap the
+#              model's CPU part is page cache and counts as "available")
 #   .cpu.csv   CPU package power every 1 s (RAPL)
 # and one line per request in runs/<MODEL>/results.jsonl (scripts/client.py).
 set -euo pipefail
@@ -68,6 +69,7 @@ cleanup() {
   [ -z "$SERVER" ] || { kill "$SERVER" 2>/dev/null; wait "$SERVER" 2>/dev/null || true; }
   kill "$GPU_SAMPLER" "${RAM_SAMPLER:-}" 2>/dev/null || true
   sudo -n kill "$CPU_SAMPLER" 2>/dev/null || true
+  sudo -n chown "$(id -u):$(id -g)" "$P.cpu.csv" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -101,4 +103,5 @@ else
 fi
 echo "== peak VRAM per GPU (MiB):"
 awk -F', ' 'NR > 1 { split($6, m, " "); if (m[1] > max[$2]) max[$2] = m[1] } END { for (g in max) print "  GPU" g ": " max[g] }' "$P.gpu.csv"
-echo "== lowest MemAvailable (MiB): $(awk -F, 'NR > 1 && $2 != "" { if (min == "" || $2 < min) min = $2 } END { print min }' "$P.ram.csv")"
+echo "== peak server RSS / page cache (MiB): $(awk -F, 'NR > 1 { if ($4 > r) r = $4; if ($3 > c) c = $3 } END { print r " / " c }' "$P.ram.csv")"
+echo "== summary: scripts/summary.py"

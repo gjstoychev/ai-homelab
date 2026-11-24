@@ -1,6 +1,8 @@
 # llama.cpp v1.0.0: MoE models beyond VRAM, one setting at a time
 
-A side measurement outside the labs, started in November 2026 on `formula` (2× RTX 5060 Ti 16 GB, 64 GB RAM; `docs/hardware.md`). llama.cpp v1.0.0, built from source, runs MoE models larger than VRAM. From a baseline, the settings below are switched on one at a time, each step keeping the previous ones, and every step is measured before the next. The full series runs on each model, Qwen first.
+A side measurement outside the labs, started in November 2026 on `formula` (2× RTX 5060 Ti 16 GB, 64 GB RAM; `docs/hardware.md`). llama.cpp v1.0.0, built from source, runs MoE models larger than VRAM. From a baseline, the settings below are switched on one at a time, each step keeping the previous ones, and every step is measured before the next. The full series runs on each model.
+
+Order of the runs: the baselines of both models first (Qwen 0b, Qwen 0a, DeepSeek 0b, DeepSeek 0a), so a model that does not load or fit shows up before the steps; then steps 1 to 5 on Qwen, then on DeepSeek. Nothing on the machine changes between runs (each `.cmd` records the build and driver), so the order does not affect the results.
 
 ## Models
 

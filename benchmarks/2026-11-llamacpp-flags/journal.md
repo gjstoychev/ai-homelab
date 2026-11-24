@@ -147,6 +147,20 @@ Download at 1 Gb/s after the server was connected directly to the router (before
 
 Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only the metadata. Header: `general.architecture = deepseek4` (supported by this build), size label `256x8.4B`, 43 layers, 256 experts with 6 used plus 1 shared, expert FFN 2048, one KV head (64 attention heads) plus an attention indexer, context 1048576 (original 65536), file type 31 (IQ1_M), 1328 tensors in 3 shards.
 
+## 8. Qwen, 0b: llama.cpp's default (2026-11-24)
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 0b-fit 5 --` (no step options; the shared ones: `-np 1 --cache-ram 0 -t 8 -c 8192 -lv 4`). Files: `runs/qwen3.8-flash-next/0b-fit.*`.
+
+**Expected:** generation near the smoke test's 37 t/s; prompt speed unknown.
+
+**Actual:** load 24.9 s from a cold page cache. Prompt 4260 tokens at 340.9 ± 3.0 t/s, generation 256 tokens at 38.8 ± 0.4 t/s (5 requests; warm-up 343.0 / 35.7). `--fit` chose the same split as in section 6 (13 layers on CUDA0, 36 on CUDA1 with the experts of 25 overflowing). VRAM peak 14726 / 14890 MiB; server RSS 53.7 GB at the end of loading, 27.7 GB while serving; page cache 54 GB. GPUs 110 W together. CPU package power alternates: 105–114 W for about 5 s while processing the prompt (the CPU computes the experts in RAM), about 42 W while generating; 63 W on average while the requests ran.
+
+**Verdict:** as expected, and very repeatable (standard deviation about 1 %). The CPU average is just under the board's PL1 (65 W over about 28 s, Intel's default since the board swap). Steps with more CPU work (step 4, DeepSeek) may cross it; the CPU power of every run is checked for that.
+
+**Script changes after this run:** `run-step.sh` hands `<step>.cpu.csv` back to the user (sudo wrote it as root) and reports peak server RSS and page cache instead of the lowest `MemAvailable` (with mmap the model's CPU part is page cache, which counts as available). New `scripts/summary.py` writes `results/summary.md` and `.csv` from `runs/`.
+
+**Decision (2026-11-24): order of the runs.** Both models' baselines first (Qwen 0b done, Qwen 0a, DeepSeek 0b, DeepSeek 0a), then steps 1 to 5 on Qwen, then on DeepSeek. DeepSeek at IQ1_M nearly fills VRAM plus RAM; its baselines show early whether it loads and how `--fit` places it. Each run is a fresh server from a cold page cache and nothing on the machine changes between runs, so the order does not affect the results.
+
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.

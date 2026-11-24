@@ -1,0 +1,2 @@
+model,step,options,load_s,requests,pp_tps,pp_sd,tg_tps,tg_sd,vram0_mib,vram1_mib,rss_mib,cache_mib,gpu_w,cpu_w
+qwen3.8-flash-next,0b-fit,,24.95,5,340.898,2.987477196565691,38.778,0.3827139924277652,14726,14890,53731.0,53955.0,110.34237068965517,62.805217391304346
