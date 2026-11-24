@@ -13,7 +13,7 @@ Order of the runs: the baselines of both models first (Qwen 0b, Qwen 0a, DeepSee
 | GGUF | IQ3_XXS, 79.1 GiB in 2 shards, `batiai/Qwen3.8-Flash-Next-GGUF` at `1d0ec19c`, architecture `qwen4exp` | UD-IQ1_M, 80.9 GiB in 3 shards, `unsloth/DeepSeek-V4-Flash-0731-GGUF` at `fbbb5b93` (the largest that leaves room; journal, section 7) |
 | Why | — | More than twice the active parameters: twice the RAM traffic per token with the experts in RAM, so a different starting point for the same steps, and more for the MoE cache to save |
 
-Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts do not fit into RAM even at IQ1_M, so its step 1 is `-ncmoe N` instead of `-cmoe`. DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
+Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts (about 73 GiB) do not fit into RAM even at IQ1_M: it runs the same steps with mmap as three tiers (MoE cache on the GPUs, page cache, NVMe), and step 3 (`-lm dio`, pinned memory) is not possible for it (journal, section 19). DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
 
 Status: setup. Toolchain and build done (v1.0.0, build 12359); both models downloaded and verified; measurements next. Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 

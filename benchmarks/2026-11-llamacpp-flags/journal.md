@@ -135,7 +135,7 @@ Download at 1 Gb/s after the server was connected directly to the router (before
 
 **Choice: UD-IQ1_M, 80.9 GiB in 3 shards**, about 4–5 GiB to spare. IQ2_XXS and IQ2_M (84.6/84.7) leave about none: out-of-memory or constant NVMe reads. Quality at this size is clearly reduced; the series compares speed only.
 
-**Consequence (estimate until the load log):** the experts alone are well over 62 GiB, so `-cmoe` (all experts in RAM) does not fit in RAM with any of these quants. For DeepSeek, step 1 is `-ncmoe N` (experts of N layers on the CPU, the rest on the GPUs); the MoE cache works with `-ncmoe` too (`docs/moe-cache.md`).
+**Consequence (estimate until the load log; revised in section 19):** the experts alone are well over 62 GiB, so `-cmoe` (all experts in RAM) does not fit in RAM with any of these quants. For DeepSeek, step 1 is `-ncmoe N` (experts of N layers on the CPU, the rest on the GPUs); the MoE cache works with `-ncmoe` too (`docs/moe-cache.md`).
 
 **SHA256** (expected from `/api/models/<repo>/revision/<commit>?blobs=true`; `sha256sum -c SHA256SUMS`: all three `OK`):
 
@@ -310,6 +310,19 @@ Difference over all 10 requests +2.0 t/s, Welch t = 1.98.
 **Verdict:** share 0 is better once the cache is warm: +5 % and steadier from request 4, and 15 W less CPU. With share 0 every miss is copied into the cache, so it fills better (96.5 against 94.5 % hits); the price is twice the upload traffic, which pinned memory handles. With share 0.8, 80 % of the misses are computed on the CPU and never enter the cache. The tuner's 0.8 fitted mmap (step 2: slow uploads), not DirectIO: steps 2 and 3 interact, as `docs/moe-cache.md` says. Over only 10 requests the difference is borderline (t ≈ 2); over a longer-running server share 0 wins.
 
 **Qwen, best configuration:** `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096`. Against llama.cpp's default (0b, 340.9 / 38.8 t/s): prompt 803 t/s (2.4×), generation 59.5 t/s (+53 %), 60.9 t/s with a warm cache (+57 %); same VRAM, same load time.
+
+## 19. DeepSeek: the recipe adapted (2026-11-24)
+
+**Problem:** the MoE cache holds copies; every expert also stays in host memory. DeepSeek's experts are about 73 GiB, RAM is 62 GiB. With `-ncmoe N` (the plan in section 7) enough experts would have to stay on the GPUs permanently to fit the rest into RAM (at least about 18 GiB, plus 10 GiB of dense weights): VRAM full, no room for a cache. `-lm dio` cannot work at all: pinned memory cannot exceed physical RAM.
+
+**Decision:** the same recipe as Qwen, with mmap as three tiers: with `-cmoe` all 73 GiB of experts are mapped from the NVMe; the most used ones sit in the MoE cache on the GPUs (about 25 GiB), the next ones in the page cache (about 55 GiB), the rarest are read from the NVMe. Experts held in the GPU cache are not touched on the host, so the page cache evicts them; the two fast tiers together (about 80 GiB) are larger than all experts. The question for DeepSeek: does the MoE cache rescue a model whose experts do not fit in RAM?
+
+- step 1: `-cmoe` (expected slow: experts streamed from the NVMe)
+- step 2: the tuner on `-cmoe`, plus twice its cache as for Qwen
+- step 3: `-lm dio` not possible (pinned experts exceed RAM); at most one short start to record the failure
+- step 4: `-b/-ub 4096` on the best of step 2
+
+Baseline to beat: 0b (`--fit`), 145.7 / 14.5 t/s.
 
 ## Open points
 
