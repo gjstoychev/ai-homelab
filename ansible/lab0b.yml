@@ -1,6 +1,6 @@
 ---
 - name: Lab 0b demo service
-  hosts: z790
+  hosts: formula
   become: true
   roles:
     - lab0b_demo

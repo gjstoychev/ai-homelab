@@ -2,6 +2,8 @@
 
 Status: complete. Last updated: 2026-10-13. Results on this hardware: `results/lab0g.md`.
 
+> **Host names:** this guide was written when the GPU node was called `z790` (and the second node `b760`). Since 2026-11 they are `formula` and `hero`: use `formula` wherever the commands below say `z790`. See `docs/hardware.md`, "Name history".
+
 ## Overview
 
 Every configuration change in this repo becomes an Ansible role, so Ansible gets its own lab. The lab installs Ansible reproducibly, explains the concepts as they are needed, and applies real roles to Z790 the way Ansible is meant to be used: from a separate **control node** (here a MacBook) over **SSH**, with an inventory that names hosts and nothing else. Adding a node later is one more line in the inventory.

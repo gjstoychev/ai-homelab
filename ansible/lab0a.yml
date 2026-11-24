@@ -1,6 +1,6 @@
 ---
 - name: Lab 0a tools
-  hosts: z790
+  hosts: formula
   become: true
   roles:
     - lab_tools

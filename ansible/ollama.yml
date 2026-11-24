@@ -1,6 +1,6 @@
 ---
 - name: Ollama
-  hosts: z790
+  hosts: formula
   become: true
   roles:
     - ollama

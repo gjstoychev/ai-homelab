@@ -2,6 +2,8 @@
 
 Status: complete. Last updated: 2026-10-15. Results on this hardware: `results/lab0b.md`.
 
+> **Host names:** this guide was written when the GPU node was called `z790` (and the second node `b760`). Since 2026-11 they are `formula` and `hero`: use `formula` wherever the commands below say `z790`. See `docs/hardware.md`, "Name history".
+
 ## Overview
 
 Two services run under systemd with resource limits and sandboxing directives, deployed by Ansible roles: Ollama (installed with its official script, two RTX 5060 Ti cards) and a small demo service created for the lab (`python3 -m http.server` with a secret in a root-only file). `systemd-analyze security` measures each step: Ollama goes from 9.2 UNSAFE to 1.4 OK, the demo from 8.2 to 0.9 SAFE. On the way: what Ollama's memory really is (page cache, mapped weights, KV cache), which device nodes a CUDA service needs, which directives break it, regression tests after each round, and deliberate failures (kill, crash loop, OOM) to prove the restart and OOM settings. `systemd-run --scope` applies the same limits to any command.

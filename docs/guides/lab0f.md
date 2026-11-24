@@ -2,6 +2,8 @@
 
 Status: complete. Last updated: 2026-10-14. Results on this hardware: `results/lab0f.md`.
 
+> **Host names:** this guide was written when the GPU node was called `z790` (and the second node `b760`). Since 2026-11 they are `formula` and `hero`: use `formula` wherever the commands below say `z790`. See `docs/hardware.md`, "Name history".
+
 ## Overview
 
 Claude Code runs on Z790. Its built-in sandbox wraps every shell command Claude runs in bubblewrap (filesystem, PID, network namespaces) and routes network traffic through a proxy with a domain allowlist. This lab installs the sandbox's dependencies, gives `bwrap` an AppArmor exception for user namespaces (Ubuntu 24.04 restricts them), enforces the sandbox with managed settings that a repository cannot loosen, and proves it with a matrix of probes. Everything is deployed by an Ansible role, `claude_code`.

@@ -2,6 +2,8 @@
 
 Status: complete. Last updated: 2026-10-11.
 
+> **Host names:** this guide was written when the GPU node was called `z790` (and the second node `b760`). Since 2026-11 they are `formula` and `hero`: use `formula` wherever the commands below say `z790`. See `docs/hardware.md`, "Name history".
+
 ## Overview
 
 Lab 0a builds a working container by hand in about 100 lines of Bash, so that Podman, gVisor and Kubernetes stop being magic. Every layer a container runtime adds is assembled manually and verified on its own before moving on.

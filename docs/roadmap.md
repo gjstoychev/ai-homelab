@@ -1,6 +1,8 @@
 # Lab Roadmap
 
-Version 1.6 · 2026-10-15. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
+Version 1.7 · 2026-11-24. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
+
+> **2026-11 hardware change.** `z790` is now `formula` (ASUS ROG Maximus Z690 Formula; both GPUs on CPU lanes, Gen5 x8; before and after: `benchmarks/2026-11-boardswap/`). `b760` becomes `hero` (ASUS ROG Maximus Z690 Hero + i5-13400) and is being rebuilt. Completed labs below keep the old names. **The second node is out of the labs until it is built:** everything that needs `hero` (Lab 2's control plane, Lab 6's two-node comparison, Lab 7's RPC, Lab 9, Lab 10, Lab 15's game day) is re-planned then; the 1070 is no longer part of the plan.
 
 Progress: mark `[x]` in a lab's heading when it is complete.
 
@@ -31,10 +33,10 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 
 ### [x] Prep — Headless servers (Z790)
 
-- **Status (Z790, 2026-10-07):** the server turned out to be practically headless already (no display manager, 2 MiB VRAM per card), so the iGPU step was dropped as unnecessary. The real finding: `nvidia-persistenced` was running with `--no-persistence-mode`; fixed with a drop-in; `multi-user.target`; verified on a cold start. Results: `results/prep-headless.md`. B760 is pending.
+- **Status (Z790, 2026-10-07):** the server turned out to be practically headless already (no display manager, 2 MiB VRAM per card), so the iGPU step was dropped as unnecessary. The real finding: `nvidia-persistenced` was running with `--no-persistence-mode`; fixed with a drop-in; `multi-user.target`; verified on a cold start. Results: `results/prep-headless.md`. The second node (`hero`) is pending.
 - **Why before the labs:** every Lab 1 baseline (VRAM, idle power, thermals, power limit) must be measured without Xorg/gnome-shell on GPU0; it also frees VRAM for Ghostwheel right away.
 - **Z790:** in the BIOS, primary display → iGPU (UHD 770 on the i7-14700); check that the iGPU is not disabled when a discrete card is present. Console and firmware go to the motherboard's HDMI; both 5060 Ti cards stay fully for compute.
-- **B760:** the 14400F has no iGPU, so the 1070 stays the console card; headless means only no display manager.
+- **hero:** the i5-13400 has an iGPU (UHD 730), so the console goes there, as on `formula`. (Before 2026-11 the plan was B760 with a 14400F, no iGPU, and a 1070 as the console card.)
 - On both: `systemctl set-default multi-user.target`, display manager masked, `nvidia-persistenced` active (without X nobody keeps the driver initialized → slower first CUDA call, skewed TTFT).
 - **Measure before and after** in `results/prep-headless.md`: `display_active`, VRAM used, idle power, P-state, graphics processes per card.
 - **IaC:** by hand now; codified in the `common` and `nvidia_*` roles in Lab 1 (the role checks and enforces the same state).
@@ -118,22 +120,21 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 
 ### [ ] Lab 1 — Hardware audit and IaC baseline
 
-- Ansible inventory; roles: `common`, `nvidia_open` (Z790), `nvidia_legacy_580` (B760 / 1070), `container_runtime`, `tuning`.
-- The two driver roles are mutually exclusive: this is a deliberate lab on driver lifecycle.
+- Ansible inventory; roles: `common`, `nvidia_open`, `container_runtime`, `tuning`. Start on `formula`; `hero` joins when it is built (with `nvidia_open` once it has a 5060 Ti).
+- `container_runtime` takes over Docker and the NVIDIA container toolkit installed by hand for the board-swap benchmark.
 - Network: a direct 2.5GbE point-to-point link (/30, no gateway or DNS) + WiFi for management; `iperf3` baseline on both paths.
 - Thermals under 30+ minutes of continuous load: temperatures, clocks and throttle reasons separately; power limit 150 W vs 180 W. The upper card (GPU0) is worse off: it draws in the lower card's exhaust and has ~1 cm of clearance above it.
 - Measure: PCIe `LnkCap` vs `LnkSta`, `nvidia-smi topo -m`, P2P (`p2pBandwidthLatencyTest`), host↔device bandwidth.
 - Tuning: persistence mode; power limit 180 W vs 140 W (tok/s per watt); CPU governor; pinning to P-cores.
 - The `common` and `nvidia_*` roles codify the headless state from Prep (default target, masked display manager, `nvidia-persistenced` drop-in).
 - From Prep / Lab 0a: HWE kernel (7.0): pin the kernel or only the driver, and a security update policy; an own modprobe file `zz-homelab-nvidia.conf` (not `99-`) and removal of the hand-made `nvidia-kms.conf`; a oneshot unit for the power limit at boot (`-pl` does not survive a reboot); explicit `mode: "0755"` for scripts run as root (git does not keep group-write).
-- Test: GPU0 draws ~0.7 W more than GPU1 at idle: PCIe 5.0 x8 vs 4.0 x4, boot VGA or silicon (`nvidia-smi -q -d PCIE` at idle).
-- Network: management is now over LAN (not WiFi); Z790 has one wired port, so the direct link to B760 needs a second NIC or a switch. netplan in Ansible with the passwords in Vault.
+- Network: management is now over LAN (not WiFi); `formula` shows one wired port (`lan0`, Marvell AQtion 10GbE, driver `atlantic`), so the direct link to `hero` needs a second NIC or a switch. On 2026-11-24 `lan0` linked at only 100 Mb/s: check the cable and the switch port. netplan in Ansible with the passwords in Vault.
 - **Molecule** tests for the roles.
 - **Criterion:** `ansible-playbook site.yml` on a clean Ubuntu 24.04 → working GPUs in a container.
 
 ### [ ] Lab 2 — Observability
 
-- Control plane on **B760** (containers next to the 1070): Prometheus, Grafana, Loki; node_exporter on both nodes; a GPU exporter on Z790 (compare DCGM exporter and nvidia_gpu_exporter for consumer cards).
+- Control plane on **hero** once it is built (until then on `formula`): Prometheus, Grafana, Loki; node_exporter on every node; a GPU exporter on `formula` (compare DCGM exporter and nvidia_gpu_exporter for consumer cards).
 - Scrape vLLM `/metrics` and llama-server `--metrics`.
 - **Criterion:** a dashboard with TTFT, tokens/s, KV cache %, GPU util/power/temp, queue depth.
 
@@ -163,20 +164,20 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 
 ### [ ] Lab 6 — TP vs PP vs DP on 2× 5060 Ti
 
-> The last lab that needs both cards together (with Lab 7). Afterwards GPU1 moves to B760.
-> **Known asymmetry: GPU0 Gen5 x8, GPU1 Gen4 x4.** Hypothesis to test: with this topology DP beats TP more clearly than with symmetric x8/x8. Also the most publishable result of the whole plan.
+> The last lab that needs both cards together (with Lab 7). Afterwards GPU1 moves to `hero`.
+> **Starting point (board swap, 2026-11):** both cards are on CPU lanes, Gen5 x8, without P2P. On x8/x8, llama.cpp's tensor split reaches 79–88 % of the ideal 2x on dense models and is the fastest generation mode for every model tested, MoE included (`benchmarks/2026-11-boardswap/`). The old x8/x4 asymmetry hypothesis no longer applies; the question is how vLLM's TP and DP compare on this bus.
 
 - A model that fits on one card: DP (2 replicas + HAProxy) vs TP=2.
 - A model that does not fit (~30B AWQ): TP=2 vs PP=2.
 - `NCCL_DEBUG=INFO`: which transport is used.
-- **Baseline for Phase C:** record throughput and TTFT of the two replicas on one machine. After GPU1 moves to B760, the same test on two nodes answers whether one machine with two cards beats two nodes with one each: two replicas on one machine share CPU, RAM and the PCIe complex; two nodes do not.
+- **Baseline for Phase C:** record throughput and TTFT of the two replicas on one machine. After GPU1 moves to `hero`, the same test on two nodes answers whether one machine with two cards beats two nodes with one each: two replicas on one machine share CPU, RAM and the PCIe complex; two nodes do not.
 - **Expected lesson:** without P2P, TP mainly buys memory, not speed. Document the break-even point.
 
 ### [ ] Lab 7 — Fitting beyond VRAM
 
 - 70B Q4 with llama.cpp: partial `-ngl`, `--tensor-split`, threads on P-cores.
 - A large MoE: experts in RAM (`--n-cpu-moe` / `-ot`), attention in VRAM. Measure what really fits in 64 GB of RAM.
-- **llama.cpp RPC:** `rpc-server` on B760 (1070 + RAM); layers over the network. Compare WiFi vs direct 2.5GbE vs (later) 25GbE. The network as the bottleneck is the main lesson here.
+- **llama.cpp RPC (needs `hero`):** `rpc-server` on `hero` (RAM, later its 5060 Ti); layers over the network. Compare WiFi vs direct 2.5GbE vs (later) 25GbE. The network as the bottleneck is the main lesson here.
 
 ## Phase C — Gateway and platform (weeks 12–15)
 
@@ -193,15 +194,15 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 
 ### [ ] Lab 9 — RAG for Ghostwheel
 
-- Qdrant + embeddings and reranker on **B760** (the 1070 is fully sufficient for TEI / llama-server `--embedding`), so they do not interfere with inference on Z790.
+- Qdrant + embeddings and reranker on **hero**, so they do not interfere with inference on `formula`. Which GPU serves the embeddings is decided when `hero` is built.
 - Ingestion pipeline, hybrid search (dense + sparse), reranking, Langfuse traces for every step.
 - **Eval set:** 50 hand-written questions → recall@k. Also used in Lab 14.
 
 ### [ ] Lab 10 — k3s + GPU Operator (2 weeks)
 
-- k3s with **two** nodes: server on B760, agent on Z790. **No HA control plane:** etcd quorum needs 3 nodes, which is theory for a homelab.
-- GPU Operator or device plugin; labels `gpu=blackwell` (Z790) and `gpu=pascal` (B760); node affinity and taints so a vLLM pod never lands on the Pascal node.
-- Rolling upgrades and HA with real traffic become possible after GPU1 moves to B760 (start of Phase C).
+- k3s with **two** nodes: server on `hero`, agent on `formula`. **No HA control plane:** etcd quorum needs 3 nodes, which is theory for a homelab.
+- GPU Operator or device plugin; node labels, node affinity and taints for the GPU workloads (re-planned when `hero` is built: without the 1070 there is no Pascal node to keep vLLM away from).
+- Rolling upgrades and HA with real traffic become possible after GPU1 moves to `hero` (start of Phase C).
 - vLLM as a Deployment, then the vLLM production-stack Helm chart with the router.
 - Validation: `helm lint`, `kubeconform`, `trivy config`.
 - In parallel: **CKA** preparation.
@@ -250,9 +251,9 @@ The same task solved four times: Claude Code with access only to the repo, an eg
 
 ### [ ] Lab 15 — Disaster recovery game day
 
-- restic to an external disk on Z790 + offsite (B2 / Hetzner Storage Box): configs, Qdrant snapshots, LoRA, eval results, dashboards.
+- restic to an external disk on `formula` + offsite (B2 / Hetzner Storage Box): configs, Qdrant snapshots, LoRA, eval results, dashboards.
 - Base weights are not backed up, only a manifest with hashes and URLs (512 GB disks).
-- **Game day:** reinstall **B760** and time the full recovery from git + restic only. A better test than a spare machine, because the node has a real role (control plane, observability, Qdrant).
+- **Game day:** reinstall **hero** and time the full recovery from git + restic only. A better test than a spare machine, because the node has a real role (control plane, observability, Qdrant).
 - With two nodes, 3-2-1 requires at least one medium outside both.
 
 ### [ ] Lab T2 — GPU fleet control panel (React/TS)

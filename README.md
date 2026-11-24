@@ -8,10 +8,10 @@ Lab order, scope and status: `docs/roadmap.md`. Lab results live in `results/`; 
 
 ## Nodes
 
-- `z790` — GPU compute node: i7-14700, 64 GB DDR5, 2x RTX 5060 Ti 16 GB
-- `b760` — control node: i5-14400F, 32 GB DDR5, no GPU (currently powered off)
+- `formula` — GPU compute node: ASUS ROG Maximus Z690 Formula, i7-14700, 64 GB DDR5, 2x RTX 5060 Ti 16 GB (both on CPU lanes, Gen5 x8)
+- `hero` — second node: ASUS ROG Maximus Z690 Hero, i5-13400, 32 GB DDR5, no GPU (being rebuilt; not in the labs yet)
 
-One RTX 5060 Ti will later move to `b760` to compare single-node multi-GPU (scale-up) with multi-node, one GPU per node (scale-out). Full component list and GPU topology: `docs/hardware.md`.
+The nodes were called `z790` and `b760` until 2026-11; older write-ups use those names. One RTX 5060 Ti will later move to `hero` to compare single-node multi-GPU (scale-up) with multi-node, one GPU per node (scale-out). Full component list and GPU topology: `docs/hardware.md`.
 
 ## Labs
 
