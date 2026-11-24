@@ -1,0 +1,6 @@
+---
+- name: Toolchain for llama.cpp
+  hosts: formula
+  become: true
+  roles:
+    - llama_cpp

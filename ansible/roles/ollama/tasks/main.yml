@@ -21,8 +21,10 @@
     - hardening.conf
   notify: Restart Ollama
 
-- name: Keep Ollama enabled and running
+# Disabled, the role leaves the running state alone: a manual start lasts until the next
+# reboot instead of being stopped by the next playbook run.
+- name: Set whether Ollama starts at boot
   ansible.builtin.systemd_service:
     name: ollama
-    enabled: true
-    state: started
+    enabled: "{{ ollama_service_enabled }}"
+    state: "{{ 'started' if ollama_service_enabled else omit }}"

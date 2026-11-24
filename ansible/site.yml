@@ -13,3 +13,6 @@
 
 - name: Lab 0b demo service
   ansible.builtin.import_playbook: lab0b.yml
+
+- name: Toolchain for llama.cpp
+  ansible.builtin.import_playbook: llama-cpp.yml

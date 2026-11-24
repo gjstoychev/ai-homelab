@@ -7,7 +7,7 @@ systemd configuration for an Ollama installed with its official install script. 
 - Installs two drop-ins in `/etc/systemd/system/ollama.service.d/` (root:root `0644`) and restarts Ollama (with `daemon-reload`) when either changes:
   - `override.conf`: listen on all interfaces (`OLLAMA_HOST=0.0.0.0:11434`, for other clients on the server), then two `ExecStartPre=+` steps before starting. First `udevadm settle --timeout=120` waits for udev to finish loading the NVIDIA modules; it comes first because calling `nvidia-smi` while udev is still loading `nvidia-drm` can deadlock the driver at boot (the udev worker and `nvidia-smi` block each other), which hangs the console, SSH and Ollama. Then it waits up to 60 seconds for the GPU driver (`nvidia-smi -L`). Without that wait Ollama can start before both cards are visible and stay on the CPU until the next restart.
   - `hardening.conf`: restart policy, start limit, OOM policy and sandboxing directives (see below).
-- Keeps the service enabled and running.
+- Starts Ollama at boot only when `ollama_service_enabled` is `true` (`defaults/main.yml`; default `false` since 2026-11, so Ollama holds no VRAM or RAM while llama.cpp is measured). Enabled, the role also keeps it running. Disabled, it leaves the running state alone: start it by hand with `sudo systemctl start ollama`; it stays up until the next reboot, and a playbook run does not stop it. A drop-in change then only reloads systemd; the running Ollama picks it up at its next start.
 
 It does not install Ollama and does not manage its version.
 

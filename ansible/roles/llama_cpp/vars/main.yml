@@ -1,0 +1,12 @@
+---
+# NVIDIA's package names carry the CUDA version with a dash (cuda-nvcc-13-0).
+llama_cpp_cuda_pkg: "{{ llama_cpp_cuda_version | replace('.', '-') }}"
+llama_cpp_cuda_packages:
+  - "cuda-nvcc-{{ llama_cpp_cuda_pkg }}"
+  - "cuda-cudart-dev-{{ llama_cpp_cuda_pkg }}"
+  - "cuda-driver-dev-{{ llama_cpp_cuda_pkg }}"
+  - "cuda-cccl-{{ llama_cpp_cuda_pkg }}"
+  - "libcublas-dev-{{ llama_cpp_cuda_pkg }}"
+  - "cuda-cuobjdump-{{ llama_cpp_cuda_pkg }}"
+  - libnccl2
+  - libnccl-dev

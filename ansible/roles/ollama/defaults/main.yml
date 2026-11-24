@@ -1,0 +1,4 @@
+---
+# Start Ollama at boot. false: installed and configured, but started only by hand
+# (sudo systemctl start ollama), so it holds no VRAM or RAM while other engines run.
+ollama_service_enabled: false

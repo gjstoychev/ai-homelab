@@ -1,0 +1,4 @@
+---
+# CUDA version of the build toolchain. 13.0 is the newest CUDA the installed driver (580)
+# supports; a newer toolkit would run only through NVIDIA's minor version compatibility.
+llama_cpp_cuda_version: "13.0"

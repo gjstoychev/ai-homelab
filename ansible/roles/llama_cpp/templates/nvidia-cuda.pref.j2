@@ -1,0 +1,13 @@
+# Managed by Ansible (role llama_cpp).
+# Everything from NVIDIA's CUDA repository ranks below Ubuntu (500): a package that exists
+# in both, such as the driver's libraries, keeps coming from Ubuntu; packages that only
+# NVIDIA has (the CUDA toolkit) still install.
+Package: *
+Pin: origin developer.download.nvidia.com
+Pin-Priority: 100
+
+# NCCL only in the build for the toolkit's CUDA version; the repository also carries
+# builds for newer CUDA versions with higher version numbers.
+Package: libnccl2 libnccl-dev
+Pin: version *+cuda{{ llama_cpp_cuda_version }}
+Pin-Priority: 600
