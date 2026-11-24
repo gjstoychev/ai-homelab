@@ -6,4 +6,8 @@ Options every run shares: `--host 127.0.0.1 --port 8080 -np 1 --cache-ram 0 -t 8
 
 | Model | Step | Step options | Load s | Prompt t/s | Generation t/s | VRAM GPU0 / GPU1 MiB | RSS / page cache MiB | GPU W | CPU W |
 |---|---|---|---|---|---|---|---|---|---|
+| deepseek-v4-flash | 0a-naive-ngl14 | `-fit off -ngl 14` | 39.4 | 131.8 ± 2.3 | 6.4 ± 0.1 | 15236 / 12346 | 59860 / 61633 | 77 | 57 |
+| deepseek-v4-flash | 0b-fit | `(none)` | 43.4 | 145.7 ± 2.1 | 14.5 ± 0.1 | 14536 / 14718 | 61341 / 61692 | 95 | 53 |
+| qwen3.8-flash-next | 0a-naive-ngl26 | `-fit off -ngl 26` | 17.9 | 334.6 ± 3.0 | 16.8 ± 0.1 | 15216 / 14134 | 35853 / 53192 | 90 | 65 |
 | qwen3.8-flash-next | 0b-fit | `(none)` | 24.9 | 340.9 ± 3.0 | 38.8 ± 0.4 | 14726 / 14890 | 53731 / 53955 | 110 | 63 |
+| qwen3.8-flash-next | 1-cmoe | `-cmoe` | 16.4 | 202.7 ± 1.6 | 24.4 ± 0.4 | 1954 / 1804 | 53277 / 53322 | 90 | 61 |

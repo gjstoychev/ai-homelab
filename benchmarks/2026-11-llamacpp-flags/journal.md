@@ -161,6 +161,48 @@ Sizes: 5257664 + 49448084864 + 37447971424 bytes = 80.93 GiB; shard 1 holds only
 
 **Decision (2026-11-24): order of the runs.** Both models' baselines first (Qwen 0b done, Qwen 0a, DeepSeek 0b, DeepSeek 0a), then steps 1 to 5 on Qwen, then on DeepSeek. DeepSeek at IQ1_M nearly fills VRAM plus RAM; its baselines show early whether it loads and how `--fit` places it. Each run is a fresh server from a cold page cache and nothing on the machine changes between runs, so the order does not affect the results.
 
+## 9. Qwen, 0a: naive layer offload (2026-11-24)
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 0a-naive-ngl26 5 -- -fit off -ngl 26`. `-ngl 26` from the layout (section 6): a full layer is about 1.1 GiB, `--fit` found room for 13 per GPU, the output layer is about 0.4 GiB.
+
+**Expected:** it fits; generation clearly below 0b.
+
+**Actual:** fits: output layer plus 25 repeating layers on the GPUs (CUDA0 14311 MiB, CUDA1 13634 MiB of weights), 23 layers on the CPU (53069 MiB mapped, including the n-gram embeddings), with their KV cache in RAM. Peak VRAM 15216 / 14134 MiB; GPU0 had about 630 MiB left, less than one more layer, so 26 is the maximum. Load 17.9 s. Prompt 334.6 ± 3.0 t/s, generation **16.8 ± 0.1 t/s** (warm-up 236.1 / 18.0). GPUs 90 W, CPU 65 W on average while the requests ran (peaks 137 W).
+
+**Verdict:** as expected. `--fit` (0b) generates 2.3× faster with the same VRAM: 0a runs 23 complete layers, attention included, on the CPU; `--fit` keeps every layer on the GPUs and moves only experts. Prompt processing barely differs (−2 %): for large batches the CPU-side weights are copied to the GPUs and computed there either way. The CPU average reached PL1 (65 W) for the first time; generation stayed steady (±0.1 t/s), so no visible throttling.
+
+## 10. DeepSeek, 0b: llama.cpp's default (2026-11-24)
+
+**Command:** `scripts/run-step.sh deepseek-v4-flash 0b-fit 5 --`.
+
+**Expected:** it loads (or fails: a result too); slower than Qwen (13B active against 6B); page cache near full.
+
+**Actual:** loads in 43.4 s. Prompt 4188 tokens at 145.7 ± 2.1 t/s, generation 14.5 ± 0.1 t/s (warm-up 45.2 / 14.8: the first prompt read experts from the NVMe). `--fit`'s memory breakdowns: everything on the GPUs would need 41.7 + 41.8 GiB; the dense weights are about 10 GiB (Qwen: 2.3), the experts about 73 GiB. `--fit` placed all 44 layers (43 + output) on the GPUs, CUDA0 7 layers (1 overflowing), CUDA1 37 (33 overflowing): CUDA0 12594 MiB, CUDA1 14114 MiB of weights, 56163 MiB of experts mapped on the CPU. Peak VRAM 14536 / 14718 MiB; page cache 61.7 GB of 62.5 GiB; KV cache well under 100 MiB in total (compressed attention, several small caches). GPUs 95 W, CPU 53 W on average while the requests ran (peaks 145 W).
+
+**Verdict:** it fits, at the edge: the page cache is nearly all of RAM, but generation is steady (±0.1 t/s), so no experts are re-read from the NVMe while serving. The experts (about 73 GiB) confirm that `-cmoe` cannot fit in RAM; DeepSeek's step 1 stays `-ncmoe N`. Note: this log contains bytes that make `grep` treat it as binary; read it with `grep -a`.
+
+## 11. DeepSeek, 0a: naive layer offload (2026-11-24)
+
+**Command:** `scripts/run-step.sh deepseek-v4-flash 0a-naive-ngl14 5 -- -fit off -ngl 14`. `-ngl 14` from section 10: a full layer is about 2 GiB (`--fit` fitted 7 on CUDA0 in 14.2 GiB), the output layer about 1.5 GiB.
+
+**Expected:** fits; 30 whole layers (about 58 GiB) on the CPU, more than RAM next to the OS, so possibly experts re-read from the NVMe while generating: single-digit and uneven generation, a long run.
+
+**Actual:** fits: 14 of 44 layers on the GPUs (CUDA0 13560 MiB, CUDA1 11839 MiB of weights), 57470 MiB on the CPU. Load 39.4 s. Prompt 131.8 ± 2.3 t/s, generation **6.4 ± 0.1 t/s** (warm-up 45.5 / 6.5). Page cache 61.6 GB, lowest MemAvailable 60.8 GB. GPUs 77 W, CPU 57 W. The whole run took 9 minutes.
+
+**Verdict:** slower as expected, but steady (±0.1 t/s): the CPU layers stayed in the page cache, no visible re-reading from the NVMe. Not quite the maximum: the split came out uneven (peak 15236 / 12346 MiB), GPU1 had about 3.5 GiB left, so `-ngl 15` would probably have fit. One more of 30 CPU layers would change generation by a few percent at most; not re-run.
+
+**Baselines, both models:** `--fit` (0b) generates 2.3× faster than naive layer offload (0a) on both: Qwen 38.8 against 16.8 t/s, DeepSeek 14.5 against 6.4 t/s. Prompt processing differs much less (Qwen +2 %, DeepSeek +11 %). Steps 1 to 5 have to beat 0b.
+
+## 12. Qwen, step 1: `-cmoe` (2026-11-24)
+
+**Command:** `scripts/run-step.sh qwen3.8-flash-next 1-cmoe 5 -- -cmoe`.
+
+**Expected:** generation below 0b; the GPUs nearly empty (only the dense weights).
+
+**Actual:** all 49 layers on the GPUs with only their dense weights (CUDA0 980 MiB, CUDA1 1308 MiB), all experts and the n-gram embeddings mapped on the CPU (78726 MiB). Peak VRAM 1954 / 1804 MiB. Load 16.4 s (the fastest so far: only 2.3 GiB go to VRAM). Prompt **202.7 ± 1.6 t/s**, generation **24.4 ± 0.4 t/s** (warm-up 162.8 / 24.4). Page cache 53.3 GB. GPUs 90 W, CPU 61 W.
+
+**Verdict:** as expected for generation: between 0a (16.8) and 0b (38.8), with about 25 GB of VRAM now free for step 2's cache. Not expected: prompt processing dropped 40 % (341 → 203 t/s). Likely cause: each micro-batch (512 tokens) copies the experts it uses, nearly all of them, to the GPUs ("large batches still upload the experts they use", `docs/moe-cache.md`); the 4260-token prompt is 9 micro-batches, so about 9 full uploads, where `--fit` kept half of the experts on the GPUs. Step 4 (`-ub`) is where that should change.
+
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.
