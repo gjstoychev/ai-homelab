@@ -1,6 +1,13 @@
 ---
 # NVIDIA's package names carry the CUDA version with a dash (cuda-nvcc-13-0).
 llama_cpp_cuda_pkg: "{{ llama_cpp_cuda_version | replace('.', '-') }}"
+# Installed by hand (README); the role only checks that they are there.
+llama_cpp_ubuntu_packages:
+  - build-essential
+  - cmake
+  - ninja-build
+  - git
+  - libssl-dev # llama.cpp's HTTPS support (model downloads with -hf)
 llama_cpp_cuda_packages:
   - "cuda-nvcc-{{ llama_cpp_cuda_pkg }}"
   - "cuda-cudart-dev-{{ llama_cpp_cuda_pkg }}"

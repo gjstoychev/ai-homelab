@@ -4,6 +4,7 @@
 - Each lab gets `results/<lab>.md` following `results/TEMPLATE.md`. Mistakes and dead ends are recorded, not omitted.
 - Commands that proved useful go into `docs/runbook.md` under a heading for the lab.
 - Configuration changes become Ansible roles under `ansible/roles/`, not ad-hoc notes.
+- Packages, toolkits and drivers are installed by hand on the host, one command at a time, with a dry run (`apt-get -s`) first; Claude gives the commands and the expected output, the user runs them. Roles then hold the configuration (repositories, keys, pins, config files) and check the installed state; they do not install packages.
 - Never commit secrets, IP addresses of the home network, or credentials.
 - `work/` holds disposable lab working files (rootfs, downloads, scratch). It is gitignored and everything in it must be recreatable from scripts; never store models or anything expensive to rebuild there.
 - `docs/roadmap.md` is the source of truth for lab order, scope and status. Update it when a lab starts, changes scope or finishes.

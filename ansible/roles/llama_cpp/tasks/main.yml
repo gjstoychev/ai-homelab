@@ -1,15 +1,6 @@
 ---
-- name: Install the build tools from Ubuntu
-  ansible.builtin.apt:
-    name:
-      - build-essential
-      - cmake
-      - ninja-build
-      - git
-      - libssl-dev # llama.cpp's HTTPS support (model downloads with -hf)
-      - python3-venv # venv for llama.cpp's Python tools (the MoE cache tuner)
-    state: present
-
+# Configuration only. The packages are installed by hand, one command at a time (README,
+# "Installing by hand"); the role checks that they are there and never installs them.
 - name: Create the apt keyring directory
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -45,30 +36,27 @@
     mode: "0644"
   notify: Refresh the apt cache
 
-# The packages must be visible before the install tasks, not at the end of the play.
-- name: Refresh the apt cache now if the repository changed
-  ansible.builtin.meta: flush_handlers
+- name: Read the installed packages
+  ansible.builtin.package_facts:
+    manager: apt
 
-# The driver comes from Ubuntu (nvidia-driver-580-server-open). The CUDA repository also
-# carries drivers; a dependency that pulled one in would replace the running driver's
-# user-space libraries. Simulate first and stop before anything is installed.
-- name: Simulate the toolchain install
-  ansible.builtin.command: # noqa: command-instead-of-module (the apt module has no dry run that lists packages)
-    argv: "{{ ['apt-get', '--simulate', '--no-install-recommends', 'install'] + llama_cpp_cuda_packages }}"
-  register: llama_cpp_apt_simulation
-  changed_when: false
-  check_mode: false
-
-- name: Stop if the install would touch the NVIDIA driver
+- name: Check that the build toolchain is installed
   ansible.builtin.assert:
-    that: llama_cpp_apt_simulation.stdout is not search('^Inst (nvidia-|libnvidia-|xserver-xorg-video-nvidia)', multiline=True)
+    that: llama_cpp_missing | length == 0
     fail_msg: >-
-      The CUDA toolchain would install or replace NVIDIA driver packages; nothing was installed.
-      Check: apt-get -s install {{ llama_cpp_cuda_packages | join(' ') }}
+      Not installed: {{ llama_cpp_missing | join(' ') }}. The role installs nothing; install them by hand
+      (README, "Installing by hand"), dry run first:
+      sudo apt-get -s --no-install-recommends install {{ llama_cpp_missing | join(' ') }}
     quiet: true
+  vars:
+    llama_cpp_missing: "{{ (llama_cpp_ubuntu_packages + llama_cpp_cuda_packages) | reject('in', ansible_facts.packages) | list }}"
 
-- name: Install the CUDA build toolchain and NCCL (no driver)
-  ansible.builtin.apt:
-    name: "{{ llama_cpp_cuda_packages }}"
-    state: present
-    install_recommends: false
+- name: Check that NCCL is the build for the toolkit's CUDA version
+  ansible.builtin.assert:
+    that: ansible_facts.packages.libnccl2 | map(attribute='version') | select('search', llama_cpp_nccl_suffix) | list | length > 0
+    fail_msg: >-
+      libnccl2 {{ ansible_facts.packages.libnccl2 | map(attribute='version') | join(', ') }} is not a +cuda{{ llama_cpp_cuda_version }}
+      build; check /etc/apt/preferences.d/nvidia-cuda and apt-cache policy libnccl2.
+    quiet: true
+  vars:
+    llama_cpp_nccl_suffix: "{{ '\\+cuda' ~ (llama_cpp_cuda_version | regex_escape) ~ '$' }}"

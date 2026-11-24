@@ -4,13 +4,32 @@ The toolchain for building llama.cpp with CUDA on the host. The build itself is 
 
 ## What it does
 
-- Installs the build tools from Ubuntu: `build-essential`, `cmake`, `ninja-build`, `git`, `libssl-dev`, and `python3-venv` for llama.cpp's Python tools (such as the MoE cache tuner), whose dependencies go into a venv, not into system Python.
-- Adds NVIDIA's signed CUDA apt repository for Ubuntu 24.04 (key in `/etc/apt/keyrings/nvidia-cuda.asc`, source in `/etc/apt/sources.list.d/nvidia-cuda.sources`).
-- Pins it in `/etc/apt/preferences.d/nvidia-cuda` (see below) before the repository is added.
-- Simulates the install and stops if it would install or replace any NVIDIA driver package (`nvidia-*`, `libnvidia-*`).
-- Installs only what building llama.cpp needs, for CUDA `llama_cpp_cuda_version` (`defaults/main.yml`, 13.0): `nvcc`, the runtime and driver API headers and stubs, CCCL, cuBLAS, `cuobjdump` (to check which GPU architectures a binary contains), and NCCL (multi-GPU tensor split). No driver, no `cuda` or `cuda-toolkit` meta-package (Nsight and the documentation are several GB).
+Configuration only; the packages are installed by hand (below) and the role never installs them.
 
-The toolkit lands in `/usr/local/cuda-13.0/`. Nothing goes into `/usr/local/lib`: Ollama keeps its own ggml libraries in `/usr/local/lib/ollama/`, and llama.cpp runs from its build directory (the binaries find their libraries through RPATH), so the two cannot load each other's libraries.
+- Adds NVIDIA's signed CUDA apt repository for Ubuntu 24.04 (key in `/etc/apt/keyrings/nvidia-cuda.asc`, source in `/etc/apt/sources.list.d/nvidia-cuda.sources`).
+- Pins it in `/etc/apt/preferences.d/nvidia-cuda` (see below), before the repository is added.
+- Checks that the build toolchain is installed (`vars/main.yml`): from Ubuntu `build-essential`, `cmake`, `ninja-build`, `git`, `libssl-dev`; from NVIDIA, for CUDA `llama_cpp_cuda_version` (`defaults/main.yml`, 13.0), `nvcc`, the runtime and driver API headers and stubs, CCCL, cuBLAS, `cuobjdump` (to check which GPU architectures a binary contains) and NCCL (multi-GPU tensor split). A missing package fails the role with the dry-run command to start from.
+- Checks that NCCL is a `+cuda13.0` build.
+
+No driver, no `cuda` or `cuda-toolkit` meta-package (Nsight and the documentation are several GB).
+
+The toolkit lands in `/usr/local/cuda-13.0/`. llama.cpp itself runs from its build directory (the binaries find their libraries through RPATH) and nothing of it goes into `/usr/local/lib`, where Ollama keeps its own ggml libraries (`/usr/local/lib/ollama/`).
+
+## Installing by hand
+
+On the host, one command at a time; compare each output with the expectation before the next. The repository, key and preferences must be in place first (run the role once; with packages missing it fails at the check, after writing them).
+
+1. Nothing half-installed: `sudo dpkg --audit`
+2. Dry run. No line may start with `Inst nvidia-` or `Inst libnvidia-` (that would replace the driver's libraries); NCCL must be `+cuda13.0` from NVIDIA:
+
+   ```bash
+   sudo apt-get -s --no-install-recommends install build-essential cmake ninja-build git libssl-dev cuda-nvcc-13-0 cuda-cudart-dev-13-0 cuda-driver-dev-13-0 cuda-cccl-13-0 libcublas-dev-13-0 cuda-cuobjdump-13-0 libnccl2 libnccl-dev | grep -E '^Inst'
+   ```
+
+3. The same without `-s`.
+4. Run the role again: both checks `ok`.
+
+What the install changes system-wide (2026-11-24): the `cuda-toolkit-*-config-common` packages point `/usr/local/cuda` and `/usr/local/cuda-13` at `cuda-13.0` (update-alternatives) and add `/etc/ld.so.conf.d/000_cuda.conf` and `987_cuda-13.conf`, which put CUDA 13.0's `libcudart` and `libcublas` on every program's library path. Ollama is not affected: it starts its runner with its own `cuda_v13/` directory first, and that directory holds the same versions (`libcudart.so.13.0.96`, `libcublas.so.13.1.1.3`). `libcuda.so` stays the driver's; the toolkit's stub is not on the path.
 
 ## Why CUDA 13.0
 
