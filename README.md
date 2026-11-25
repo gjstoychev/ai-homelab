@@ -4,6 +4,8 @@ A two-node AI infrastructure home lab covering hardware, Linux fundamentals, inf
 
 Write-ups of these labs are published at https://gshell.dev.
 
+**Paused on 2026-11-25, before Lab 0c.** Experiments with engines, drivers and settings continue in [ai-homelab-v2](https://github.com/gjstoychev/ai-homelab-v2), including the November benchmarks of the board swap and llama.cpp's MoE settings.
+
 Lab order, scope and status: `docs/roadmap.md`. Lab results live in `results/`; reusable commands live in `docs/runbook.md`.
 
 ## Nodes

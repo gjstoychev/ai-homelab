@@ -1,8 +1,13 @@
 # Lab Roadmap
 
-Version 1.7 · 2026-11-24. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
+Version 1.8 · 2026-11-25. This file is the source of truth for lab order, scope and status. Hardware: `docs/hardware.md`. Per-lab outcomes: `results/<lab>.md`; procedures: `docs/guides/<lab>.md`.
 
-> **2026-11 hardware change.** `z790` is now `formula` (ASUS ROG Maximus Z690 Formula; both GPUs on CPU lanes, Gen5 x8; before and after: `benchmarks/2026-11-boardswap/`). `b760` becomes `hero` (ASUS ROG Maximus Z690 Hero + i5-13400) and is being rebuilt. Completed labs below keep the old names. **The second node is out of the labs until it is built:** everything that needs `hero` (Lab 2's control plane, Lab 6's two-node comparison, Lab 7's RPC, Lab 9, Lab 10, Lab 15's game day) is re-planned then; the 1070 is no longer part of the plan.
+> **Paused on 2026-11-25, before Lab 0c.** Experiments with engines, drivers and settings on the current hardware continue in [ai-homelab-v2](https://github.com/gjstoychev/ai-homelab-v2), without Ansible; the two November side measurements moved there (`benchmarks/` keeps a pointer). Before resuming:
+> - `hero` gets two GPUs of its own (TP=2 per node), so GPU1 no longer moves from `formula` to `hero`. Labs 6, 7 and Phase C, which assume one GPU per node after the move, are re-planned.
+> - `formula` has drifted from the `claude_code` role: the Claude Code sandbox was turned off by hand (`/etc/claude-code/managed-settings.json`; the role's version is kept as `managed-settings.json.v1-sandbox`). Running `site.yml` writes the role's file again and turns the sandbox back on.
+> - Driver, CUDA and engine changes made in v2 are listed in its `docs/stack.md`; Lab 1's hardware audit starts from that state.
+
+> **2026-11 hardware change.** `z790` is now `formula` (ASUS ROG Maximus Z690 Formula; both GPUs on CPU lanes, Gen5 x8; before and after: ai-homelab-v2 `experiments/2026-11-boardswap/`). `b760` becomes `hero` (ASUS ROG Maximus Z690 Hero + i5-13400) and is being rebuilt. Completed labs below keep the old names. **The second node is out of the labs until it is built:** everything that needs `hero` (Lab 2's control plane, Lab 6's two-node comparison, Lab 7's RPC, Lab 9, Lab 10, Lab 15's game day) is re-planned then; the 1070 is no longer part of the plan.
 
 Progress: mark `[x]` in a lab's heading when it is complete.
 
@@ -165,7 +170,7 @@ Labs are listed in execution order; the numbering is an identifier, not the orde
 ### [ ] Lab 6 — TP vs PP vs DP on 2× 5060 Ti
 
 > The last lab that needs both cards together (with Lab 7). Afterwards GPU1 moves to `hero`.
-> **Starting point (board swap, 2026-11):** both cards are on CPU lanes, Gen5 x8, without P2P. On x8/x8, llama.cpp's tensor split reaches 79–88 % of the ideal 2x on dense models and is the fastest generation mode for every model tested, MoE included (`benchmarks/2026-11-boardswap/`). The old x8/x4 asymmetry hypothesis no longer applies; the question is how vLLM's TP and DP compare on this bus.
+> **Starting point (board swap, 2026-11):** both cards are on CPU lanes, Gen5 x8, without P2P. On x8/x8, llama.cpp's tensor split reaches 79–88 % of the ideal 2x on dense models and is the fastest generation mode for every model tested, MoE included (ai-homelab-v2 `experiments/2026-11-boardswap/`). The old x8/x4 asymmetry hypothesis no longer applies; the question is how vLLM's TP and DP compare on this bus.
 
 - A model that fits on one card: DP (2 replicas + HAProxy) vs TP=2.
 - A model that does not fit (~30B AWQ): TP=2 vs PP=2.

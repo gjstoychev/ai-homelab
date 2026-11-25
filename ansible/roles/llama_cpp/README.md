@@ -1,6 +1,6 @@
 # llama_cpp
 
-The toolchain for building llama.cpp with CUDA on the host. The build itself is not part of the role: `scripts/build-llamacpp.sh` builds a release tag as the user into `~/llama.cpp/<tag>/`. Side benchmark `benchmarks/2026-11-llamacpp-flags/`.
+The toolchain for building llama.cpp with CUDA on the host. The build itself is not part of the role: `scripts/build-llamacpp.sh` builds a release tag as the user into `~/llama.cpp/<tag>/`. Side benchmark: ai-homelab-v2 `experiments/2026-11-llamacpp-flags/` (moved there on 2026-11-25).
 
 ## What it does
 

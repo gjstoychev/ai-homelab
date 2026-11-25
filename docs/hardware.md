@@ -56,5 +56,5 @@ Older results, guides and the board-swap benchmark use the old host names.
 
 | Now | Before | Change |
 |---|---|---|
-| `formula` | `z790` | 2026-11: NZXT N7 Z790 replaced by ASUS ROG Maximus Z690 Formula; GPU1 moved from a chipset Gen4 x4 slot to CPU lanes, Gen5 x8. Measured before and after: `benchmarks/2026-11-boardswap/`. |
+| `formula` | `z790` | 2026-11: NZXT N7 Z790 replaced by ASUS ROG Maximus Z690 Formula; GPU1 moved from a chipset Gen4 x4 slot to CPU lanes, Gen5 x8. Measured before and after: ai-homelab-v2 `experiments/2026-11-boardswap/`. |
 | `hero` | `b760` | 2026-11: ASRock B760 Pro RS + i5-14400F to be replaced by ASUS ROG Maximus Z690 Hero + i5-13400. |
