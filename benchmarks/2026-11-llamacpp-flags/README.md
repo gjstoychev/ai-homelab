@@ -15,7 +15,34 @@ Order of the runs: the baselines of both models first (Qwen 0b, Qwen 0a, DeepSee
 
 Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts (about 73 GiB) do not fit into RAM even at IQ1_M: it runs the same steps with mmap as three tiers (MoE cache on the GPUs, page cache, NVMe), and step 3 (`-lm dio`, pinned memory) is not possible for it (journal, section 19). DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
 
-Status: setup. Toolchain and build done (v1.0.0, build 12359); both models downloaded and verified; measurements next. Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+Status: measurements complete for both models (2026-11-25); write-up pending. Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
+
+## Results
+
+Prompt about 4260 tokens, 256 generated; mean ± standard deviation of 5 (steps 0–4) or 10 (step 5) measured requests. Every run: `results/summary.md`; every step with its reasoning: `journal.md`.
+
+| Configuration | Qwen3.8-Flash-Next prompt / generation t/s | DeepSeek-V4-Flash prompt / generation t/s |
+|---|---|---|
+| 0a naive layer offload (`-fit off -ngl N`) | 334.6 / 16.8 | 131.8 / 6.4 |
+| 0b llama.cpp's default (`--fit`) | 340.9 / 38.8 | 145.7 / 14.5 |
+| 1 `-cmoe` | 202.7 / 24.4 | 93.7 / 10.7 |
+| 2 + MoE cache, the tuner's recommendation | 232.5 / 48.1 | 112.6 / 18.7 |
+| 2b + twice the tuner's cache | 258.0 / 54.4 | 126.4 / 21.4 |
+| 3 + `-lm dio` | 320.2 / 57.8 | not possible (pinned experts exceed RAM) |
+| 4 + `-b 4096 -ub 4096` | 804.3 / 58.0 | 230.5 / 19.9 |
+| **best** | **803.1 / 59.5** (5b: CPU share 0) | **244.4 / 20.4** (step 5) |
+| **best against 0b** | **prompt 2.4×, generation +53 %** | **prompt +68 %, generation +41 %** |
+
+Best configurations:
+- Qwen: `-cmoe --moe-cache-mib 23552 --moe-cache-cpu-share 0 -lm dio -b 4096 -ub 4096`
+- DeepSeek: `-cmoe --moe-cache-mib 17664 --moe-cache-cpu-share 0.9 -b 4096 -ub 4096`
+
+What the series found:
+- llama.cpp's `--fit` (the default) is already 2.3× faster at generation than naive layer offload, on both models.
+- The MoE cache is the largest single gain for generation. `scripts/moe-cache-tune.py` sizes it from the first GPU only, so on two GPUs it recommends about half of what fits; twice its size was 12–14 % faster.
+- `-b/-ub 4096` is the largest gain for prompts (Qwen 2.5×, DeepSeek 1.8×), at the price of a smaller cache to fit the compute buffer.
+- `-lm dio` helps when the experts fit in RAM (Qwen: prompt +24 %, generation +6 %), and then the CPU share should be 0, not the tuner's mmap-based choice.
+- A model whose experts do not fit in RAM (DeepSeek, 76 GB of experts, 62 GiB of RAM) still gains with the cache over mmap (GPU cache, page cache, NVMe), but reads about 10 GB per request from the NVMe: there, RAM is the limit.
 
 ## Steps
 

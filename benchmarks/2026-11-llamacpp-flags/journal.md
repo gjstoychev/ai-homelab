@@ -328,6 +328,99 @@ Baseline to beat: 0b (`--fit`), 145.7 / 14.5 t/s.
 
 The stray `nvidia-smi` was stopped at 21:13:08 (`pkill -f 'nvidia-smi --query-gpu'`); `4-ub4096-pasteerror.gpu.csv` was cut to the attempt's own seconds (20:51:20–20:51:22). No re-runs: the strays (an extra GPU query every 0.5 s during steps 4, 4c, 5 and 5b; an extra RAPL reading every second until 21:02) left no visible trace in the results: 4c matches step 3, which ran before them, within the spread (56.9 / 317.6 against 57.8 / 320.2 t/s), and step 5 reproduces step 4.
 
+## 20. DeepSeek, step 1: `-cmoe` (2026-11-24)
+
+**Command:** `scripts/run-step.sh deepseek-v4-flash 1-cmoe 5 -- -cmoe`.
+
+**Expected:** slow, experts streamed from the NVMe; possibly below 0a (6.4 t/s); uneven.
+
+**Actual:** 44/44 layers on the GPUs with only their dense weights (CUDA0 3104 MiB, CUDA1 3275 MiB; compute buffers 1637 / 197 MiB), 76492 MiB (74.7 GiB) of experts mapped on the CPU, against about 60 GiB of page cache (peak 61.8 GB). Load 34.2 s. Prompt **93.7 ± 2.5 t/s**, generation **10.7 ± 0.4 t/s** (warm-up 28.2 / 11.2). Peak VRAM 5110 / 3760 MiB. GPUs 78 W, CPU 49 W. All sampler files stopped with the run (21:24:41): the cleanup fix works.
+
+**Verdict:** better than expected: between 0a (6.4) and 0b (14.5), and fairly steady, although about 15 GiB of the experts cannot be in the page cache. Only 6 of 256 experts are active per token and the page cache keeps the often used ones, so the NVMe serves only rare ones. Prompt processing −36 % against 0b, the same pattern as Qwen (each micro-batch uploads the experts it uses). About 10 GB of VRAM per GPU is free for the cache.
+
+## 21. DeepSeek, step 2: the tuner (2026-11-24)
+
+**Command:** `python3 $T --out runs/deepseek-v4-flash/2-tune --markdown -- <llama-server> -m <model> -np 1 --cache-ram 0 -t 8 -c 8192 -cmoe` (about 30 minutes). Output: `runs/deepseek-v4-flash/2-tune.txt`.
+
+**Actual:**
+
+| Cache MiB | CPU share | t/s | Cache hits |
+|---:|---:|---:|---:|
+| 7616 | 0 | 9.7 | 58 % |
+| 7616 | 0.5 | 12.7 | 64 % |
+| 7616 | 0.95 | 14.7 | 54 % |
+| 10368 | 0 | 11.1 | 71 % |
+| 10368 | 0.5 | 14.0 | 71 % |
+| 10368 | 0.95 | 15.9 | 64 % |
+
+Fitted machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, 51.39 ms per token for everything else (fit within 2.0 %). 76208 MiB of experts; "cache up to 10411 MiB" (again sized from CUDA0 alone; the cache is split 5214 / 5134 MiB). **Recommended: `--moe-cache-mib 10368 --moe-cache-cpu-share 0.9` (15.6 t/s predicted, 11.3 with share 0).**
+
+**Verdict:** the tuner predicts only +8 % over `--fit` (0b, 14.5 t/s), against +36 % for Qwen. The CPU share matters far more than for Qwen (share 0 → 0.95: 11.1 → 15.9 t/s): with mmap and part of the experts on the NVMe, uploading a missed expert is expensive and the CPU reads host experts at 60 GiB/s against 13.8 GiB/s of uploads. Hit rates are much lower (64–71 % against 92 %): the cache holds 14 % of DeepSeek's experts against 26 % of Qwen's.
+
+**2b:** CUDA0 limits (step 1 peak 5110 MiB, about half of the cache): about 10 GB of cache per GPU with a 0.7 GB margin, 19968 MiB in total, same share 0.9.
+
+## 22. DeepSeek, steps 2 and 2b: the MoE cache measured (2026-11-24)
+
+**Commands:**
+- `scripts/run-step.sh deepseek-v4-flash 2-moecache-10368 5 -- -cmoe --moe-cache-mib 10368 --moe-cache-cpu-share 0.9`
+- `scripts/run-step.sh deepseek-v4-flash 2b-moecache-19968 5 -- -cmoe --moe-cache-mib 19968 --moe-cache-cpu-share 0.9`
+
+**Actual:**
+
+| Step | Cache per GPU | Prompt t/s | Generation t/s | Hit rate | Peak VRAM MiB |
+|---|---|---|---|---|---|
+| 2 | 5214 / 5134 MiB | 112.6 ± 5.1 | 18.7 ± 0.5 | 63.8 % | 10330 / 8900 |
+| 2b | 10049 / 9901 MiB | 126.4 ± 8.3 | 21.4 ± 2.7 | 77.5 % | 15164 / 13666 |
+
+2b's generation per request: 17.8, 22.6, 23.1, 24.2, 19.3 t/s; its prompt speed rose from 116.5 to 137.1 t/s over the five requests. Load 33.3 / 32.7 s. Page cache 61.9 / 61.8 GB.
+
+**Verdict:** the three tiers work: +29 % over `--fit` with the tuner's size (above its own prediction of 15.6 t/s), +48 % with twice the cache. A model whose experts do not fit into RAM runs 1.5× faster than llama.cpp's default. 2b is unsteady, and its prompt speed was still rising: the page cache keeps shifting and requests that need experts from the NVMe slow down (Qwen had no NVMe tier). Prompt processing is still below `--fit` (126 against 146 t/s).
+
+**Step 3 (`-lm dio`): not run.** It would have to pin 76 GB of experts in 62 GiB of RAM; the likely result is the OOM killer or heavy swapping that hits other processes. Recorded as not possible from the arithmetic rather than tested on the live machine.
+
+## 23. DeepSeek, step 4: `-b 4096 -ub 4096` (2026-11-24)
+
+**Probe** (`scripts/run-step.sh deepseek-v4-flash 4-probe-ub4096 0 -- -cmoe -b 4096 -ub 4096`: through the run script with 0 measured requests, so the log is saved and the cleanup runs): compute buffers CUDA0 2149 MiB, CUDA1 1603 MiB, pinned host 196 MiB (ub 512: 1637 / 197 / 21); peak VRAM 6224 / 5356 MiB (step 1: 5110 / 3760). Cache for step 4: CUDA0 has 15847 − 6224 − 700 (margin) ≈ 8.9 GB, and takes about 50.3 % of the cache: 17664 MiB in total.
+
+**Commands** (`O="-cmoe --moe-cache-mib 17664 --moe-cache-cpu-share 0.9"`):
+- `scripts/run-step.sh deepseek-v4-flash 4-ub4096 5 -- $O -b 4096 -ub 4096`
+- `scripts/run-step.sh deepseek-v4-flash 4c-cache17664-ub512 5 -- $O` (control: the smaller cache with the default batches)
+
+**Actual:**
+
+| Step | Prompt t/s | Generation t/s | Hit rate | Copied from the cache for prompts | Peak VRAM MiB |
+|---|---|---|---|---|---|
+| 2b (cache 19968, ub 512) | 126.4 ± 8.3 | 21.4 ± 2.7 | 77.5 % | 412 GB | 15164 / 13666 |
+| 4c (cache 17664, ub 512) | 126.1 ± 7.9 | 22.3 ± 1.0 | 77.3 % | 383 GB | 14002 / 12530 |
+| 4 (cache 17664, ub 4096) | **230.5 ± 20.8** | 19.9 ± 1.6 | 75.4 % | 79 GB | 15114 / 14136 |
+
+Step 4 per request: prompt 211.8, 212.1, 261.7, 238.7, 228.1 t/s; generation 17.8, 19.7, 22.3, 19.7, 20.0 t/s.
+
+**Verdict:** `-ub 4096` makes prompts 1.8× faster, and DeepSeek's prompt processing beats `--fit` for the first time (+58 %). The 2.3 GB smaller cache costs nothing (4c matches 2b, and is steadier). Unlike Qwen, generation drops with `-ub 4096`: 19.9 against 22.3 t/s (−11 %, Welch t ≈ 2.8 over 5 requests each, probably real). Hypothesis: the NVMe tier. A large batch reads nearly all 76 GB of experts from the mapped file, which pushes the warm experts out of the page cache; generation then fetches more of them from the NVMe. Qwen had no NVMe tier. Not verified: the runs do not record disk reads.
+
+**DeepSeek has no single best configuration:** for long prompts step 4 (prompt 1.6×, generation 1.37× of `--fit`), for generation 4c (generation +54 %, prompt −13 %).
+
+## 24. DeepSeek, step 5: both candidates, 10 requests, with NVMe reads (2026-11-25)
+
+**Why:** step 4 left a trade-off and a hypothesis (large batches push warm experts out of the page cache). `run-step.sh` now records the MiB read from the models' NVMe (`nvme0n1`, `/proc/diskstats`) in `.ram.csv`; `summary.py` reports the GB read while the requests ran.
+
+**Commands** (`O="-cmoe --moe-cache-mib 17664 --moe-cache-cpu-share 0.9"`):
+- `scripts/run-step.sh deepseek-v4-flash 5-final-ub4096 10 -- $O -b 4096 -ub 4096`
+- `scripts/run-step.sh deepseek-v4-flash 5c-final-ub512 10 -- $O`
+
+**Actual:**
+
+| Run | Prompt t/s | Generation t/s | NVMe read during the requests | Hit rate | Copied from the cache for prompts |
+|---|---|---|---|---|---|
+| 5 (ub 4096) | 244.4 ± 32.9 | 20.4 ± 1.7 | 111.9 GB | 76.8 % | 157 GB |
+| 5c (ub 512) | 124.8 ± 10.3 | 21.7 ± 1.8 | 97.2 GB | 76.7 % | 739 GB |
+
+Prompt per request in 5: 193, 206, 231, 249, 220, 237, 262, 278, 275, 293 t/s (still rising). Generation difference −1.3 t/s, Welch t ≈ 1.7.
+
+**Verdict:** the generation penalty of `-ub 4096` shrinks to −6 % and is not clearly real over 10 requests; step 4's −11 % over 5 requests was partly noise. The hypothesis is half right: `-ub 4096` reads 15 % more from the NVMe, but both configurations read about 10 GB per request from it. The NVMe tier is busy all the time; DeepSeek on this machine is limited by RAM (64 GB), not by the batch size. The prompt speed with `-ub 4096` was still rising after 10 requests: the page cache was still settling.
+
+**DeepSeek, final configuration:** `-cmoe --moe-cache-mib 17664 --moe-cache-cpu-share 0.9 -b 4096 -ub 4096` (mmap). Against llama.cpp's default (0b, 145.7 / 14.5 t/s): prompt 244.4 t/s (+68 %), generation 20.4 t/s (+41 %).
+
 ## Open points
 
 - **NCCL 2.28.9 is untested on these cards.** The newest `+cuda13.0` NCCL build in NVIDIA's repository is 2.28.9 (2026-11-24). In the board-swap benchmark 2.25.1 crashed llama.cpp's tensor split and 2.32.6 (a `+cuda12.9` build) worked. NCCL matters only for tensor split, which none of the five steps use (the experts sit in RAM); test it before tensor split is used with this build.

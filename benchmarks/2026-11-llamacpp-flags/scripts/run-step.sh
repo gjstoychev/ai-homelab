@@ -13,7 +13,8 @@
 #   .log       the server log (-lv 4)
 #   .gpu.csv   nvidia-smi every 0.5 s: power, memory, clocks, temperature
 #   .ram.csv   every 1 s: MemAvailable, page cache, server RSS (with mmap the
-#              model's CPU part is page cache and counts as "available")
+#              model's CPU part is page cache and counts as "available"), MiB read
+#              from the NVMe since the start
 #   .cpu.csv   CPU package power every 1 s (RAPL)
 # and one line per request in runs/<MODEL>/results.jsonl (scripts/client.py).
 set -euo pipefail
@@ -80,11 +81,17 @@ t0=$(date +%s.%N)
 "$BIN" -m "$M" "${BASE[@]}" "${STEP_OPTS[@]}" > "$P.log" 2>&1 < /dev/null &
 SERVER=$!
 
-echo "utc_time,mem_available_mib,cached_mib,server_rss_mib" > "$P.ram.csv"
+# nvme_read_mib: read from the NVMe that holds the models since the run started (with mmap,
+# experts that are not in the page cache are read from it while serving).
+DISK=nvme0n1
+sectors() { awk -v d=$DISK '$3 == d { print $6 }' /proc/diskstats; }
+S0=$(sectors)
+echo "utc_time,mem_available_mib,cached_mib,server_rss_mib,nvme_read_mib" > "$P.ram.csv"
 while kill -0 "$SERVER" 2>/dev/null; do
   awk -v t="$(date -u +%T)" -v rss="$(awk '/^VmRSS/ { print int($2 / 1024) }' /proc/$SERVER/status 2>/dev/null)" \
+      -v rd="$(( ($(sectors) - S0) / 2048 ))" \
     '/^MemAvailable/ { a = int($2 / 1024) } /^Cached/ { c = int($2 / 1024) }
-     END { print t "," a "," c "," rss }' /proc/meminfo >> "$P.ram.csv"
+     END { print t "," a "," c "," rss "," rd }' /proc/meminfo >> "$P.ram.csv"
   sleep 1
 done &
 RAM_SAMPLER=$!

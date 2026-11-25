@@ -1,0 +1,27 @@
+1/6 7616 MiB, share 0: 9.7 t/s
+2/6 7616 MiB, share 0.5: 12.7 t/s
+3/6 7616 MiB, share 0.95: 14.7 t/s
+4/6 10368 MiB, share 0: 11.1 t/s
+5/6 10368 MiB, share 0.5: 14.0 t/s
+6/6 10368 MiB, share 0.95: 15.9 t/s
+`DeepSeek-V4-Flash-0731-UD-IQ1_M-00001-of-00003.gguf`: 76208 MiB of experts, CUDA0 15708 MiB free, cache up to 10411 MiB
+
+| cache MiB | share | t/s | hits |
+|---:|---:|---:|---:|
+| 7616 | 0 | 9.7 | 58% |
+| 7616 | 0.5 | 12.7 | 64% |
+| 7616 | 0.95 | 14.7 | 54% |
+| 10368 | 0 | 11.1 | 71% |
+| 10368 | 0.5 | 14.0 | 71% |
+| 10368 | 0.95 | 15.9 | 64% |
+
+machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, CPU part 0.00 ms, overlap -8.2 ms/GiB, rest 51.39 ms per token, fit within 2.0%
+
+predicted t/s, warm cache:
+| cache MiB | 0 | 0.5 | 0.8 | 0.9 | 0.95 | 0.98 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 3776 | 8.5 | 11.2 | 13.0 | **13.8** | 14.2 | 14.3 |
+| 7616 | 10.3 | 12.8 | 14.4 | **15.0** | 15.3 | 15.4 |
+| 10368 | 11.3 | 13.7 | 15.1 | **15.6** | 15.9 | 15.9 |
+
+recommended: `--moe-cache-mib 10368 --moe-cache-cpu-share 0.9` (15.6 t/s, 11.3 with share 0)
