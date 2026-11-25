@@ -239,7 +239,7 @@ Fitted machine: uploads 12.8 GiB/s, CPU 46.7 GiB/s, 15.23 ms per token for every
 | 2 | 6794 / 6643 MiB | 232.5 ± 2.9 | 48.1 ± 2.2 | 85.2 % | 8754 / 8450 |
 | 2b | 12943 / 12655 MiB | 258.0 ± 3.8 | **54.4 ± 2.1** | 94.2 % | 14902 / 14462 |
 
-Generation rose from request to request in both (2: 46.3 → 51.8, 2b: 53.3 → 57.4): with 256 generated tokens per request the cache was still filling. Load 16.4 s in both. CPU 50 / 47 W, GPUs 103 / 107 W. The server's cache statistics at shutdown: 2 uploaded 56.5 GB for small batches and copied 171 GB from the cache for large batches (the prompts); 2b 38.4 GB and 310 GB.
+Generation rose from request to request in both (2: 46.3 → 51.8, 2b: 53.3 → 57.4): with 256 generated tokens per request the cache was still filling. Load 16.4 s in both. CPU 50 / 47 W, GPUs 103 / 107 W. The server's cache statistics at shutdown: 2 uploaded 55.2 GiB for small batches and copied 166.8 GiB from the cache for large batches (the prompts); 2b 37.5 GiB and 303.1 GiB.
 
 **Verdict:** the MoE cache beats `--fit` (0b, 38.8 t/s): +24 % with the tuner's size, +40 % with twice the cache. The tuner's two-GPU cap (section 13) costs 12 %. Step 2 stayed below the tuner's prediction because the tuner predicts a fully warm cache and these requests are short; the larger spread (±2 instead of ±0.4) has the same cause. Prompt processing is still below 0b (258 against 341 t/s). Steps 3 to 5 build on 2b.
 
@@ -272,12 +272,12 @@ A first attempt at step 4 failed in 1 s: the pasted line was split, so `-ub` had
 | Step | Prompt t/s | Generation t/s | Hit rate | Copied from the cache for prompts | Peak VRAM MiB | GPU W |
 |---|---|---|---|---|---|---|
 | 3 (cache 25600, ub 512) | 320.2 ± 2.1 | 57.8 ± 1.2 | 94.2 % | — | 15004 / 14562 | 118 |
-| 4c (cache 23552, ub 512) | 317.6 ± 3.7 | 56.9 ± 1.4 | 93.7 % | 286 GB | 13966 / 13548 | 117 |
-| 4 (cache 23552, ub 4096) | **804.3 ± 4.1** | **58.0 ± 1.4** | 94.0 % | 83 GB | 14940 / 14360 | 140 |
+| 4c (cache 23552, ub 512) | 317.6 ± 3.7 | 56.9 ± 1.4 | 93.7 % | 279.6 GiB | 13966 / 13548 | 117 |
+| 4 (cache 23552, ub 4096) | **804.3 ± 4.1** | **58.0 ± 1.4** | 94.0 % | 81.1 GiB | 14940 / 14360 | 140 |
 
 Load 23.8 s for both.
 
-**Verdict:** `-ub 4096` makes prompt processing 2.5× faster: the 4260-token prompt runs as 2 micro-batches instead of 9, so the experts are copied for 2 instead of 9 (83 against 286 GB per run). Generation does not change (one token at a time never uses large batches). The 2 GiB smaller cache costs nothing measurable (4c against 3: within the spread, hit rate 93.7 against 94.2 %).
+**Verdict:** `-ub 4096` makes prompt processing 2.5× faster: the 4260-token prompt runs as 2 micro-batches instead of 9, so the experts are copied for 2 instead of 9 (81.1 against 279.6 GiB per run). Generation does not change (one token at a time never uses large batches). The 2 GiB smaller cache costs nothing measurable (4c against 3: within the spread, hit rate 93.7 against 94.2 %).
 
 **Qwen, step 4 against llama.cpp's default (0b):** prompt 804 against 341 t/s (2.4×), generation 58.0 against 38.8 t/s (+49 %), same VRAM, about the same load time.
 
@@ -302,8 +302,8 @@ Cleanup: the stray sampler was stopped (`sudo pkill -f cpu-power.sh`; its last l
 
 | | Prompt t/s | Generation, requests 1–10 | Requests 1–3 | Requests 4–10 | Hit rate | Uploaded (small batches) | CPU W |
 |---|---|---|---|---|---|---|---|
-| 5 (share 0.8) | 806.0 ± 3.9 | 57.6 ± 1.9 | 57.4 | 57.7 ± 2.0 | 94.5 % | 50.2 GB | 56 |
-| 5b (share 0) | 803.1 ± 4.1 | 59.5 ± 2.5 | 56.4 | **60.9 ± 0.9** | 96.5 % | 99.6 GB | 41 |
+| 5 (share 0.8) | 806.0 ± 3.9 | 57.6 ± 1.9 | 57.4 | 57.7 ± 2.0 | 94.5 % | 49.0 GiB | 56 |
+| 5b (share 0) | 803.1 ± 4.1 | 59.5 ± 2.5 | 56.4 | **60.9 ± 0.9** | 96.5 % | 97.3 GiB | 41 |
 
 Difference over all 10 requests +2.0 t/s, Welch t = 1.98.
 
@@ -376,7 +376,7 @@ Fitted machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, 51.39 ms per token for every
 
 **Verdict:** the three tiers work: +29 % over `--fit` with the tuner's size (above its own prediction of 15.6 t/s), +48 % with twice the cache. A model whose experts do not fit into RAM runs 1.5× faster than llama.cpp's default. 2b is unsteady, and its prompt speed was still rising: the page cache keeps shifting and requests that need experts from the NVMe slow down (Qwen had no NVMe tier). Prompt processing is still below `--fit` (126 against 146 t/s).
 
-**Step 3 (`-lm dio`): not run.** It would have to pin 76 GB of experts in 62 GiB of RAM; the likely result is the OOM killer or heavy swapping that hits other processes. Recorded as not possible from the arithmetic rather than tested on the live machine.
+**Step 3 (`-lm dio`): not run.** It would have to pin 74 GiB of experts in 62 GiB of RAM; the likely result is the OOM killer or heavy swapping that hits other processes. Recorded as not possible from the arithmetic rather than tested on the live machine.
 
 ## 23. DeepSeek, step 4: `-b 4096 -ub 4096` (2026-11-24)
 
@@ -390,13 +390,13 @@ Fitted machine: uploads 13.8 GiB/s, CPU 60.1 GiB/s, 51.39 ms per token for every
 
 | Step | Prompt t/s | Generation t/s | Hit rate | Copied from the cache for prompts | Peak VRAM MiB |
 |---|---|---|---|---|---|
-| 2b (cache 19968, ub 512) | 126.4 ± 8.3 | 21.4 ± 2.7 | 77.5 % | 412 GB | 15164 / 13666 |
-| 4c (cache 17664, ub 512) | 126.1 ± 7.9 | 22.3 ± 1.0 | 77.3 % | 383 GB | 14002 / 12530 |
-| 4 (cache 17664, ub 4096) | **230.5 ± 20.8** | 19.9 ± 1.6 | 75.4 % | 79 GB | 15114 / 14136 |
+| 2b (cache 19968, ub 512) | 126.4 ± 8.3 | 21.4 ± 2.7 | 77.5 % | 402.2 GiB | 15164 / 13666 |
+| 4c (cache 17664, ub 512) | 126.1 ± 7.9 | 22.3 ± 1.0 | 77.3 % | 374.3 GiB | 14002 / 12530 |
+| 4 (cache 17664, ub 4096) | **230.5 ± 20.8** | 19.9 ± 1.6 | 75.4 % | 76.9 GiB | 15114 / 14136 |
 
 Step 4 per request: prompt 211.8, 212.1, 261.7, 238.7, 228.1 t/s; generation 17.8, 19.7, 22.3, 19.7, 20.0 t/s.
 
-**Verdict:** `-ub 4096` makes prompts 1.8× faster, and DeepSeek's prompt processing beats `--fit` for the first time (+58 %). The 2.3 GB smaller cache costs nothing (4c matches 2b, and is steadier). Unlike Qwen, generation drops with `-ub 4096`: 19.9 against 22.3 t/s (−11 %, Welch t ≈ 2.8 over 5 requests each, probably real). Hypothesis: the NVMe tier. A large batch reads nearly all 76 GB of experts from the mapped file, which pushes the warm experts out of the page cache; generation then fetches more of them from the NVMe. Qwen had no NVMe tier. Not verified: the runs do not record disk reads.
+**Verdict:** `-ub 4096` makes prompts 1.8× faster, and DeepSeek's prompt processing beats `--fit` for the first time (+58 %). The 2.3 GB smaller cache costs nothing (4c matches 2b, and is steadier). Unlike Qwen, generation drops with `-ub 4096`: 19.9 against 22.3 t/s (−11 %, Welch t ≈ 2.8 over 5 requests each, probably real). Hypothesis: the NVMe tier. A large batch reads nearly all 74 GiB of experts from the mapped file, which pushes the warm experts out of the page cache; generation then fetches more of them from the NVMe. Qwen had no NVMe tier. Not verified: the runs do not record disk reads.
 
 **DeepSeek has no single best configuration:** for long prompts step 4 (prompt 1.6×, generation 1.37× of `--fit`), for generation 4c (generation +54 %, prompt −13 %).
 
@@ -412,14 +412,16 @@ Step 4 per request: prompt 211.8, 212.1, 261.7, 238.7, 228.1 t/s; generation 17.
 
 | Run | Prompt t/s | Generation t/s | NVMe read during the requests | Hit rate | Copied from the cache for prompts |
 |---|---|---|---|---|---|
-| 5 (ub 4096) | 244.4 ± 32.9 | 20.4 ± 1.7 | 111.9 GB | 76.8 % | 157 GB |
-| 5c (ub 512) | 124.8 ± 10.3 | 21.7 ± 1.8 | 97.2 GB | 76.7 % | 739 GB |
+| 5 (ub 4096) | 244.4 ± 32.9 | 20.4 ± 1.7 | 111.9 GiB | 76.8 % | 153.5 GiB |
+| 5c (ub 512) | 124.8 ± 10.3 | 21.7 ± 1.8 | 97.2 GiB | 76.7 % | 722.0 GiB |
 
 Prompt per request in 5: 193, 206, 231, 249, 220, 237, 262, 278, 275, 293 t/s (still rising). Generation difference −1.3 t/s, Welch t ≈ 1.7.
 
-**Verdict:** the generation penalty of `-ub 4096` shrinks to −6 % and is not clearly real over 10 requests; step 4's −11 % over 5 requests was partly noise. The hypothesis is half right: `-ub 4096` reads 15 % more from the NVMe, but both configurations read about 10 GB per request from it. The NVMe tier is busy all the time; DeepSeek on this machine is limited by RAM (64 GB), not by the batch size. The prompt speed with `-ub 4096` was still rising after 10 requests: the page cache was still settling.
+**Verdict:** the generation penalty of `-ub 4096` shrinks to −6 % and is not clearly real over 10 requests; step 4's −11 % over 5 requests was partly noise. The hypothesis is half right: `-ub 4096` reads 15 % more from the NVMe, but both configurations read about 10 GiB per request from it. The NVMe tier is busy all the time; DeepSeek on this machine is limited by RAM (64 GB), not by the batch size. The prompt speed with `-ub 4096` was still rising after 10 requests: the page cache was still settling.
 
 **DeepSeek, final configuration:** `-cmoe --moe-cache-mib 17664 --moe-cache-cpu-share 0.9 -b 4096 -ub 4096` (mmap). Against llama.cpp's default (0b, 145.7 / 14.5 t/s): prompt 244.4 t/s (+68 %), generation 20.4 t/s (+41 %).
+
+**Correction (2026-11-25, while writing the blog post):** several sizes above were MiB values written as GB: the server's cache statistics (sections 14, 16, 18, 23, 24, now in GiB), the NVMe reads (`summary.py` divides MiB by 1024: GiB, column renamed) and DeepSeek's experts (the tuner's 76208 MiB are 74.4 GiB, not "76 GB"). The conclusions do not change.
 
 ## Open points
 

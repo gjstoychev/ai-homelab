@@ -13,7 +13,7 @@ Order of the runs: the baselines of both models first (Qwen 0b, Qwen 0a, DeepSee
 | GGUF | IQ3_XXS, 79.1 GiB in 2 shards, `batiai/Qwen3.8-Flash-Next-GGUF` at `1d0ec19c`, architecture `qwen4exp` | UD-IQ1_M, 80.9 GiB in 3 shards, `unsloth/DeepSeek-V4-Flash-0731-GGUF` at `fbbb5b93` (the largest that leaves room; journal, section 7) |
 | Why | — | More than twice the active parameters: twice the RAM traffic per token with the experts in RAM, so a different starting point for the same steps, and more for the MoE cache to save |
 
-Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts (about 73 GiB) do not fit into RAM even at IQ1_M: it runs the same steps with mmap as three tiers (MoE cache on the GPUs, page cache, NVMe), and step 3 (`-lm dio`, pinned memory) is not possible for it (journal, section 19). DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
+Not compared: quality. DeepSeek at IQ1_M against Qwen at IQ3_XXS is a speed comparison only. DeepSeek's experts (about 74 GiB) do not fit into RAM even at IQ1_M: it runs the same steps with mmap as three tiers (MoE cache on the GPUs, page cache, NVMe), and step 3 (`-lm dio`, pinned memory) is not possible for it (journal, section 19). DeepSeek V4.1-Flash (552B) does not fit 32 GB of VRAM plus 64 GB of RAM even at 2 bits.
 
 Status: measurements complete for both models (2026-11-25); write-up pending. Every step with the exact command, expected vs actual: [`journal.md`](journal.md).
 
@@ -39,10 +39,10 @@ Best configurations:
 
 What the series found:
 - llama.cpp's `--fit` (the default) is already 2.3× faster at generation than naive layer offload, on both models.
-- The MoE cache is the largest single gain for generation. `scripts/moe-cache-tune.py` sizes it from the first GPU only, so on two GPUs it recommends about half of what fits; twice its size was 12–14 % faster.
+- The MoE cache is the largest single gain for generation. `scripts/moe-cache-tune.py` sizes it from the first GPU only, so on two GPUs it recommends about half of what fits; twice its size was 13–14 % faster.
 - `-b/-ub 4096` is the largest gain for prompts (Qwen 2.5×, DeepSeek 1.8×), at the price of a smaller cache to fit the compute buffer.
 - `-lm dio` helps when the experts fit in RAM (Qwen: prompt +24 %, generation +6 %), and then the CPU share should be 0, not the tuner's mmap-based choice.
-- A model whose experts do not fit in RAM (DeepSeek, 76 GB of experts, 62 GiB of RAM) still gains with the cache over mmap (GPU cache, page cache, NVMe), but reads about 10 GB per request from the NVMe: there, RAM is the limit.
+- A model whose experts do not fit in RAM (DeepSeek, 74 GiB of experts, 62 GiB of RAM) still gains with the cache over mmap (GPU cache, page cache, NVMe), but reads about 10 GiB per request from the NVMe: there, RAM is the limit.
 
 ## Steps
 
